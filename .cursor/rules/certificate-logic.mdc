@@ -1,0 +1,19 @@
+---
+description: Certificate template and generation rules
+globs: "**/*.ts"
+alwaysApply: false
+---
+
+# Certificate Templates
+
+- Templates must be **JSON-based** — no HTML hardcoding
+- Template variables must follow the `{{variable}}` format
+- Always validate CSV headers against template variables before processing
+
+```typescript
+// ❌ BAD — hardcoded HTML
+const cert = `<div style="...">${name}</div>`;
+
+// ✅ GOOD — JSON template with variable placeholders
+const template = { fields: [{ text: "{{name}}", x: 100, y: 200 }] };
+```

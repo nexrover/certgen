@@ -1,0 +1,23 @@
+---
+description: Code quality, security, and forbidden patterns
+alwaysApply: true
+---
+
+# Code Quality
+
+- Keep functions small and reusable
+- Add comments only for non-obvious logic
+- Prefer clarity over cleverness
+
+# Security
+
+- Validate all user input (Zod on the server)
+- Never trust client-side data
+- Use Supabase RLS policies for row-level access control
+- No hardcoded secrets — use environment variables
+
+# Forbidden
+
+- ❌ Direct DB queries in UI components
+- ❌ Large logic blocks inside API handlers
+- ❌ Hardcoded secrets or credentials

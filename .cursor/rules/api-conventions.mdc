@@ -1,0 +1,27 @@
+---
+description: API route handler conventions and input validation
+globs: app/api/**/*.ts
+alwaysApply: false
+---
+
+# API Routes
+
+- Use route handlers in `/app/api/*`
+- Validate **all** input using Zod
+- Return a consistent JSON structure:
+
+```typescript
+// ✅ GOOD
+return NextResponse.json({ success: true, data: result });
+return NextResponse.json({ success: false, error: "Validation failed" }, { status: 400 });
+
+// ❌ BAD
+return NextResponse.json(result);
+return NextResponse.json({ message: "error" });
+```
+
+# Performance
+
+- Never process bulk jobs inside an API request directly
+- Offload heavy tasks (PDF generation) to async flows
+- Avoid blocking loops in API routes

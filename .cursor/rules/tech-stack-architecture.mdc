@@ -1,0 +1,24 @@
+---
+description: Tech stack and project architecture conventions
+alwaysApply: true
+---
+
+# Tech Stack
+
+- Use **Next.js App Router** only — no Pages Router
+- Use **Supabase** for DB, Auth, and Storage
+- Use **TypeScript** strictly — no `any` unless justified with a comment
+
+# Architecture
+
+Separate concerns strictly:
+
+| Directory | Responsibility |
+|-----------|---------------|
+| `/app` | UI components and pages only |
+| `/lib` | Business logic, utilities, helpers |
+| `/services` | External integrations (Supabase, storage) |
+
+- Never mix UI and backend logic
+- No direct DB queries in UI components
+- No large logic blocks inside API handlers — delegate to `/lib` or `/services`
