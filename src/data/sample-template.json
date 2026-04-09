@@ -1,0 +1,59 @@
+{
+  "name": "Course Completion Certificate",
+  "width": 1920,
+  "height": 1080,
+  "backgroundUrl": null,
+  "fields": [
+    {
+      "type": "text",
+      "value": "Certificate of Completion",
+      "x": 960,
+      "y": 180,
+      "fontSize": 56,
+      "color": "#1a1a2e",
+      "fontWeight": "bold"
+    },
+    {
+      "type": "text",
+      "value": "This is to certify that",
+      "x": 960,
+      "y": 340,
+      "fontSize": 20,
+      "color": "#6b7280"
+    },
+    {
+      "type": "text",
+      "value": "{{name}}",
+      "x": 960,
+      "y": 420,
+      "fontSize": 42,
+      "color": "#16213e",
+      "fontWeight": "bold"
+    },
+    {
+      "type": "text",
+      "value": "has successfully completed the course",
+      "x": 960,
+      "y": 510,
+      "fontSize": 20,
+      "color": "#6b7280"
+    },
+    {
+      "type": "text",
+      "value": "{{course}}",
+      "x": 960,
+      "y": 580,
+      "fontSize": 32,
+      "color": "#0f3460",
+      "fontWeight": "bold"
+    },
+    {
+      "type": "text",
+      "value": "Issued on {{date}}",
+      "x": 960,
+      "y": 700,
+      "fontSize": 18,
+      "color": "#533483"
+    }
+  ]
+}
