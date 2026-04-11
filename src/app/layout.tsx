@@ -38,8 +38,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Nav />
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        {/* <Nav /> */}
+        <main className="">{children}</main>
       </body>
     </html>
   );
