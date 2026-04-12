@@ -23,9 +23,7 @@ export function addRect(canvas: Canvas, filled: boolean) {
     top: canvas.height! / 2 - 40,
     width: 100,
     height: 80,
-    fill: filled ? "#4f46e5" : "transparent",
-    stroke: "#4f46e5",
-    strokeWidth: 2,
+    fill: filled ? "#4f46e5" : "#c7d2fe",
     rx: 4,
     ry: 4,
   });
@@ -39,9 +37,7 @@ export function addCircle(canvas: Canvas, filled: boolean) {
     left: canvas.width! / 2 - 30,
     top: canvas.height! / 2 - 30,
     radius: 30,
-    fill: filled ? "#4f46e5" : "transparent",
-    stroke: "#4f46e5",
-    strokeWidth: 2,
+    fill: filled ? "#4f46e5" : "#c7d2fe",
   });
   canvas.add(c);
   canvas.setActiveObject(c);
@@ -54,9 +50,7 @@ export function addTriangle(canvas: Canvas, filled: boolean) {
     top: canvas.height! / 2 - 30,
     width: 60,
     height: 60,
-    fill: filled ? "#4f46e5" : "transparent",
-    stroke: "#4f46e5",
-    strokeWidth: 2,
+    fill: filled ? "#4f46e5" : "#c7d2fe",
   });
   canvas.add(t);
   canvas.setActiveObject(t);
