@@ -194,7 +194,6 @@ export function FormatToolbar({ canvas, onUndo, onRedo }: FormatToolbarProps) {
   return (
     <div
       className="flex h-11 items-center gap-1 border-b border-gray-200 bg-white px-3"
-      style={{ animation: "toolbar-slide-in 0.18s ease-out" }}
     >
       {/* ─ Font Family ─ */}
       {isText && (

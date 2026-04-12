@@ -76,16 +76,18 @@ export function FloatingContextMenu({
     setShowMore(false);
   }, [bounds.left, bounds.top, bounds.width, bounds.height]);
 
-  /* Calculate dropdown position using button's screen rect.
-     We pre-compute the final left so the dropdown opens in place
-     without any CSS-transform shift.  224 = w-56 = 14rem ≈ 224px */
-  const DROPDOWN_W = 224;
+  /* Calculate dropdown position: the dialog's left edge aligns with
+     the floating toolbar's right edge, opening to the right of the
+     3-dot button — matching the reference design exactly. */
   const openDropdown = useCallback(() => {
     if (moreRef.current) {
-      const rect = moreRef.current.getBoundingClientRect();
+      const toolbarEl = moreRef.current.closest('[class*="rounded-lg"]') as HTMLElement | null;
+      const anchor = toolbarEl || moreRef.current;
+      const rect = anchor.getBoundingClientRect();
+      const btnRect = moreRef.current.getBoundingClientRect();
       setDropdownPos({
-        left: rect.right - DROPDOWN_W,
-        top: rect.bottom + 4,
+        left: rect.right - 30,
+        top: btnRect.top + 36,
       });
     }
     setShowMore((v) => !v);
@@ -170,11 +172,10 @@ export function FloatingContextMenu({
             id="ctx-more"
             ref={moreRef}
             onClick={openDropdown}
-            className={`flex h-7 w-7 items-center justify-center rounded transition-colors ${
-              showMore
-                ? "bg-indigo-100 text-indigo-700"
-                : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-            }`}
+            className={`flex h-7 w-7 items-center justify-center rounded transition-colors ${showMore
+              ? "bg-indigo-100 text-indigo-700"
+              : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+              }`}
             title="More options"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -340,24 +341,22 @@ function DropdownItem({
       id={id}
       onClick={onClick}
       disabled={disabled}
-      className={`flex w-full items-center justify-between px-3 py-[7px] text-[13px] transition-colors ${
-        disabled
-          ? "cursor-not-allowed text-gray-300"
-          : accent
+      className={`flex w-full items-center justify-between px-3 py-[7px] text-[13px] transition-colors ${disabled
+        ? "cursor-not-allowed text-gray-300"
+        : accent
           ? "text-amber-600 hover:bg-amber-50"
           : "text-gray-700 hover:bg-gray-50"
-      }`}
+        }`}
     >
       <span className="flex items-center gap-2.5">
         <span className={disabled ? "opacity-40" : "opacity-70"}>{icon}</span>
         {label}
       </span>
       <kbd
-        className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
-          disabled
-            ? "bg-gray-50 text-gray-300"
-            : "bg-gray-100 text-gray-400"
-        }`}
+        className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${disabled
+          ? "bg-gray-50 text-gray-300"
+          : "bg-gray-100 text-gray-400"
+          }`}
       >
         {shortcut}
       </kbd>

@@ -143,14 +143,12 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
         dirty={dirty}
       />
 
-      {/* Format toolbar — visible only when an element is selected */}
-      {hasSelection && (
-        <FormatToolbar
-          canvas={getCanvas()}
-          onUndo={() => canvasRef.current?.undo()}
-          onRedo={() => canvasRef.current?.redo()}
-        />
-      )}
+      {/* Format toolbar — always visible */}
+      <FormatToolbar
+        canvas={getCanvas()}
+        onUndo={() => canvasRef.current?.undo()}
+        onRedo={() => canvasRef.current?.redo()}
+      />
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar canvas={getCanvas()} onLoadTemplate={handleLoadTemplate} />
