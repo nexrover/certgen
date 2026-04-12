@@ -422,7 +422,7 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
     /* ── Render ────────────────────────────────────────── */
 
     return (
-      <div ref={containerRef} className="relative flex flex-1 items-center justify-center overflow-auto bg-gray-100">
+      <div ref={containerRef} className="relative flex flex-1 items-center justify-center overflow-y-scroll overflow-x-auto bg-gray-100">
         <div
           style={{
             width: width * scale,
