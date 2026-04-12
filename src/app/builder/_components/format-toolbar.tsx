@@ -50,6 +50,7 @@ interface FormatToolbarProps {
   bgColor?: string;
   onBgColorChange?: (color: string) => void;
   onBgImageUpload?: () => void;
+  onBgImageRemove?: () => void;
 }
 
 /* ── Component ────────────────────────────────────────── */
@@ -62,6 +63,7 @@ export function FormatToolbar({
   bgColor = "#ffffff",
   onBgColorChange,
   onBgImageUpload,
+  onBgImageRemove,
 }: FormatToolbarProps) {
   const [fontFamily, setFontFamily] = useState("Georgia");
   const [fontWeight, setFontWeight] = useState("normal");
@@ -238,6 +240,19 @@ export function FormatToolbar({
               <polyline points="21 15 16 10 5 21" />
             </svg>
             Replace Background
+          </button>
+
+          {/* Remove Background button */}
+          <button
+            onClick={onBgImageRemove}
+            className="flex h-7 items-center gap-1.5 rounded border border-gray-300 px-2.5 text-xs text-gray-600 transition-colors hover:border-red-400 hover:bg-red-50 hover:text-red-600"
+            title="Remove background image"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+            Remove
           </button>
 
           {/* Spacer */}

@@ -174,8 +174,7 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
         const fabricImg = new FabricImage(imgEl, { left: 0, top: 0, originX: "left", originY: "top" });
         const sx = fc.width! / imgEl.width;
         const sy = fc.height! / imgEl.height;
-        const s = Math.max(sx, sy);
-        fabricImg.set({ scaleX: s, scaleY: s });
+        fabricImg.set({ scaleX: sx, scaleY: sy });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (fabricImg as any).__isBackground = true;
         fabricImg.set({ selectable: false, evented: false, lockMovementX: true, lockMovementY: true, hasControls: false, hasBorders: false });
@@ -187,6 +186,18 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
     };
     reader.readAsDataURL(file);
     e.target.value = "";
+  }, []);
+
+  const handleBgImageRemove = useCallback(() => {
+    const fc = canvasRef.current?.getCanvas();
+    if (!fc) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bgObj = fc.getObjects().find((o: any) => o.__isBackground);
+    if (bgObj) {
+      fc.remove(bgObj);
+      fc.requestRenderAll();
+      fc.fire("object:modified", {} as { target: FabricObject });
+    }
   }, []);
 
   return (
@@ -212,6 +223,7 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
         bgColor={bgColor}
         onBgColorChange={handleBgColorChange}
         onBgImageUpload={handleBgImageUpload}
+        onBgImageRemove={handleBgImageRemove}
       />
 
       {/* Hidden file input for bg image */}
