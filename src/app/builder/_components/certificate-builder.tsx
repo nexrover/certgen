@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import { Toolbar } from "./toolbar";
+import { FormatToolbar } from "./format-toolbar";
 import { CanvasEditor, type CanvasEditorHandle } from "./canvas-editor";
 import { Sidebar } from "./sidebar/sidebar";
 import { PreviewModal } from "./preview-modal";
@@ -22,6 +23,7 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [hasSelection, setHasSelection] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
 
   const dims = PAPER_DIMENSIONS[paperSize];
@@ -72,8 +74,9 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
     loadNow();
   }, [paperSize]);
 
-  const handleSelectionChange = useCallback(() => {
+  const handleSelectionChange = useCallback((selected: boolean) => {
     setCanvasReady(true);
+    setHasSelection(selected);
   }, []);
 
   const initialLoaded = useRef(false);
@@ -139,6 +142,15 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
         saving={saving}
         dirty={dirty}
       />
+
+      {/* Format toolbar — visible only when an element is selected */}
+      {hasSelection && (
+        <FormatToolbar
+          canvas={getCanvas()}
+          onUndo={() => canvasRef.current?.undo()}
+          onRedo={() => canvasRef.current?.redo()}
+        />
+      )}
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar canvas={getCanvas()} onLoadTemplate={handleLoadTemplate} />
