@@ -112,9 +112,10 @@ interface SidebarProps {
     width?: number;
     height?: number;
   }) => void;
+  onBgSelected?: (selected: boolean) => void;
 }
 
-export function Sidebar({ canvas, onLoadTemplate }: SidebarProps) {
+export function Sidebar({ canvas, onLoadTemplate, onBgSelected }: SidebarProps) {
   const [activeTab, setActiveTab] = useState<TabId>("templates");
 
   return (
@@ -124,11 +125,10 @@ export function Sidebar({ canvas, onLoadTemplate }: SidebarProps) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as TabId)}
-            className={`group flex flex-col items-center gap-0.5 px-1 py-2.5 text-[10px] transition-all ${
-              activeTab === tab.id
+            className={`group flex flex-col items-center gap-0.5 px-1 py-2.5 text-[10px] transition-all ${activeTab === tab.id
                 ? "bg-white text-indigo-600 font-semibold shadow-sm"
                 : "text-gray-400 hover:text-gray-600 hover:bg-white/60"
-            }`}
+              }`}
             title={tab.label}
           >
             <span className={`transition-transform ${activeTab === tab.id ? "scale-110" : "group-hover:scale-105"}`}>
@@ -146,7 +146,7 @@ export function Sidebar({ canvas, onLoadTemplate }: SidebarProps) {
         {activeTab === "text" && <TextPanel canvas={canvas} />}
         {activeTab === "attributes" && <AttributesPanel canvas={canvas} />}
         {activeTab === "qrcodes" && <QrCodesPanel canvas={canvas} />}
-        {activeTab === "layers" && <LayersPanel canvas={canvas} />}
+        {activeTab === "layers" && <LayersPanel canvas={canvas} onBgSelected={onBgSelected} />}
       </div>
     </div>
   );

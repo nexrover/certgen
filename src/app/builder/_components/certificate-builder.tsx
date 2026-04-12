@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
+import { FabricImage, type FabricObject } from "fabric";
 import { Toolbar } from "./toolbar";
 import { FormatToolbar } from "./format-toolbar";
 import { CanvasEditor, type CanvasEditorHandle } from "./canvas-editor";
@@ -25,6 +26,9 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
   const [showPreview, setShowPreview] = useState(false);
   const [hasSelection, setHasSelection] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
+  const [bgSelected, setBgSelected] = useState(false);
+  const [bgColor, setBgColor] = useState("#ffffff");
+  const bgFileRef = useRef<HTMLInputElement>(null);
 
   const dims = PAPER_DIMENSIONS[paperSize];
 
@@ -129,6 +133,62 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
 
   const getCanvas = useCallback(() => canvasRef.current?.getCanvas() ?? null, []);
 
+  /* ── Background handlers ────────────────────────────── */
+
+  const handleBgSelected = useCallback((selected: boolean) => {
+    setBgSelected(selected);
+    const fc = canvasRef.current?.getCanvas();
+    if (fc) {
+      const c = fc.backgroundColor;
+      if (typeof c === "string") setBgColor(c);
+    }
+  }, []);
+
+  const handleBgColorChange = useCallback((color: string) => {
+    setBgColor(color);
+    const fc = canvasRef.current?.getCanvas();
+    if (!fc) return;
+    fc.backgroundColor = color;
+    fc.requestRenderAll();
+    fc.fire("object:modified", {} as { target: FabricObject });
+  }, []);
+
+  const handleBgImageUpload = useCallback(() => {
+    bgFileRef.current?.click();
+  }, []);
+
+  const handleBgFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const fc = canvasRef.current?.getCanvas();
+    if (!fc || !e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = reader.result as string;
+      // Remove existing bg image object if any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const existing = fc.getObjects().find((o: any) => o.__isBackground);
+      if (existing) fc.remove(existing);
+
+      const imgEl = new Image();
+      imgEl.onload = () => {
+        const fabricImg = new FabricImage(imgEl, { left: 0, top: 0, originX: "left", originY: "top" });
+        const sx = fc.width! / imgEl.width;
+        const sy = fc.height! / imgEl.height;
+        const s = Math.max(sx, sy);
+        fabricImg.set({ scaleX: s, scaleY: s });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (fabricImg as any).__isBackground = true;
+        fabricImg.set({ selectable: false, evented: false, lockMovementX: true, lockMovementY: true, hasControls: false, hasBorders: false });
+        fc.insertAt(0, fabricImg);
+        fc.requestRenderAll();
+        fc.fire("object:modified", { target: fabricImg });
+      };
+      imgEl.src = url;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }, []);
+
   return (
     <div className="flex h-screen flex-col">
       <Toolbar
@@ -148,10 +208,23 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
         canvas={getCanvas()}
         onUndo={() => canvasRef.current?.undo()}
         onRedo={() => canvasRef.current?.redo()}
+        bgSelected={bgSelected}
+        bgColor={bgColor}
+        onBgColorChange={handleBgColorChange}
+        onBgImageUpload={handleBgImageUpload}
+      />
+
+      {/* Hidden file input for bg image */}
+      <input
+        ref={bgFileRef}
+        type="file"
+        accept="image/*"
+        onChange={handleBgFileChange}
+        className="hidden"
       />
 
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar canvas={getCanvas()} onLoadTemplate={handleLoadTemplate} />
+        <Sidebar canvas={getCanvas()} onLoadTemplate={handleLoadTemplate} onBgSelected={handleBgSelected} />
         <CanvasEditor
           ref={canvasRef}
           width={dims.width}

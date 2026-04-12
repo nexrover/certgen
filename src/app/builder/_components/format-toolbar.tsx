@@ -46,11 +46,23 @@ interface FormatToolbarProps {
   canvas: Canvas | null;
   onUndo: () => void;
   onRedo: () => void;
+  bgSelected?: boolean;
+  bgColor?: string;
+  onBgColorChange?: (color: string) => void;
+  onBgImageUpload?: () => void;
 }
 
 /* ── Component ────────────────────────────────────────── */
 
-export function FormatToolbar({ canvas, onUndo, onRedo }: FormatToolbarProps) {
+export function FormatToolbar({
+  canvas,
+  onUndo,
+  onRedo,
+  bgSelected,
+  bgColor = "#ffffff",
+  onBgColorChange,
+  onBgImageUpload,
+}: FormatToolbarProps) {
   const [fontFamily, setFontFamily] = useState("Georgia");
   const [fontWeight, setFontWeight] = useState("normal");
   const [fontSize, setFontSize] = useState(24);
@@ -195,6 +207,67 @@ export function FormatToolbar({ canvas, onUndo, onRedo }: FormatToolbarProps) {
     <div
       className="flex h-11 items-center gap-1 border-b border-gray-200 bg-white px-3"
     >
+      {bgSelected ? (
+        <>
+          {/* Background color swatch */}
+          <div className="relative" title="Background color">
+            <div
+              className="h-7 w-7 rounded border-2 border-gray-200 cursor-pointer transition-all hover:border-indigo-300"
+              style={{ backgroundColor: bgColor }}
+            />
+            <input
+              type="color"
+              value={bgColor}
+              onChange={(e) => onBgColorChange?.(e.target.value)}
+              className="absolute inset-0 cursor-pointer opacity-0"
+              title="Choose background color"
+            />
+          </div>
+
+          <div className="mx-1 h-5 w-px bg-gray-200" />
+
+          {/* Replace Background button */}
+          <button
+            onClick={onBgImageUpload}
+            className="flex h-7 items-center gap-1.5 rounded border border-gray-300 px-2.5 text-xs text-gray-600 transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700"
+            title="Replace background image"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+            Replace Background
+          </button>
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Undo */}
+          <button
+            onClick={onUndo}
+            className="flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            title="Undo (Ctrl+Z)"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 7v6h6" />
+              <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6.69 3L3 13" />
+            </svg>
+          </button>
+          {/* Redo */}
+          <button
+            onClick={onRedo}
+            className="flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            title="Redo (Ctrl+Y)"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 7v6h-6" />
+              <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6.69 3L21 13" />
+            </svg>
+          </button>
+        </>
+      ) : (
+        <>
       {/* ─ Font Family ─ */}
       {isText && (
         <select
@@ -309,11 +382,10 @@ export function FormatToolbar({ canvas, onUndo, onRedo }: FormatToolbarProps) {
         <button
           id="format-bold"
           onClick={handleBoldToggle}
-          className={`flex h-7 w-7 items-center justify-center rounded text-sm font-bold transition-colors ${
-            isBoldActive
+          className={`flex h-7 w-7 items-center justify-center rounded text-sm font-bold transition-colors ${isBoldActive
               ? "bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200"
               : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          }`}
+            }`}
           title="Bold"
         >
           B
@@ -325,11 +397,10 @@ export function FormatToolbar({ canvas, onUndo, onRedo }: FormatToolbarProps) {
         <button
           id="format-italic"
           onClick={handleItalicToggle}
-          className={`flex h-7 w-7 items-center justify-center rounded text-sm italic transition-colors ${
-            isItalic
+          className={`flex h-7 w-7 items-center justify-center rounded text-sm italic transition-colors ${isItalic
               ? "bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200"
               : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          }`}
+            }`}
           title="Italic"
         >
           I
@@ -341,11 +412,10 @@ export function FormatToolbar({ canvas, onUndo, onRedo }: FormatToolbarProps) {
         <button
           id="format-underline"
           onClick={handleUnderlineToggle}
-          className={`flex h-7 w-7 items-center justify-center rounded text-sm underline transition-colors ${
-            isUnderline
+          className={`flex h-7 w-7 items-center justify-center rounded text-sm underline transition-colors ${isUnderline
               ? "bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200"
               : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-          }`}
+            }`}
           title="Underline"
         >
           U
@@ -362,11 +432,10 @@ export function FormatToolbar({ canvas, onUndo, onRedo }: FormatToolbarProps) {
           <button
             id="format-align-left"
             onClick={() => handleTextAlignChange("left")}
-            className={`flex h-7 w-7 items-center justify-center rounded transition-colors ${
-              textAlign === "left"
+            className={`flex h-7 w-7 items-center justify-center rounded transition-colors ${textAlign === "left"
                 ? "bg-indigo-100 text-indigo-700"
                 : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-            }`}
+              }`}
             title="Align left"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -380,11 +449,10 @@ export function FormatToolbar({ canvas, onUndo, onRedo }: FormatToolbarProps) {
           <button
             id="format-align-center"
             onClick={() => handleTextAlignChange("center")}
-            className={`flex h-7 w-7 items-center justify-center rounded transition-colors ${
-              textAlign === "center"
+            className={`flex h-7 w-7 items-center justify-center rounded transition-colors ${textAlign === "center"
                 ? "bg-indigo-100 text-indigo-700"
                 : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-            }`}
+              }`}
             title="Align center"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -398,11 +466,10 @@ export function FormatToolbar({ canvas, onUndo, onRedo }: FormatToolbarProps) {
           <button
             id="format-align-right"
             onClick={() => handleTextAlignChange("right")}
-            className={`flex h-7 w-7 items-center justify-center rounded transition-colors ${
-              textAlign === "right"
+            className={`flex h-7 w-7 items-center justify-center rounded transition-colors ${textAlign === "right"
                 ? "bg-indigo-100 text-indigo-700"
                 : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-            }`}
+              }`}
             title="Align right"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -443,6 +510,8 @@ export function FormatToolbar({ canvas, onUndo, onRedo }: FormatToolbarProps) {
           <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6.69 3L21 13" />
         </svg>
       </button>
+        </>
+      )}
     </div>
   );
 }
