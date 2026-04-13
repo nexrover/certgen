@@ -1,6 +1,6 @@
 "use client";
 
-import { addTextbox } from "@/lib/builder/fabric-utils";
+import { addTextbox, addTextComboGroup } from "@/lib/builder/fabric-utils";
 import type { Canvas } from "fabric";
 
 interface TextPanelProps {
@@ -185,17 +185,7 @@ export function TextPanel({ canvas }: TextPanelProps) {
   if (!canvas) return <p className="text-xs text-gray-400">Loading canvas…</p>;
 
   const handleAddCombo = (combo: TextCombo) => {
-    let offsetY = canvas.height! / 2 - (combo.items.length * 30) / 2;
-    for (const item of combo.items) {
-      addTextbox(canvas, item.text, {
-        fontSize: item.fontSize,
-        fontWeight: item.fontWeight,
-        fontFamily: item.fontFamily,
-        fill: item.fill ?? "#000000",
-        top: offsetY,
-      });
-      offsetY += item.fontSize + 16;
-    }
+    addTextComboGroup(canvas, combo.items);
   };
 
   return (
@@ -213,7 +203,7 @@ export function TextPanel({ canvas }: TextPanelProps) {
                   fontWeight: s.fontWeight,
                 })
               }
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-left transition-colors hover:border-indigo-300 hover:bg-indigo-50"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 transition-colors text-center hover:border-indigo-300 hover:bg-indigo-50"
             >
               <span
                 style={{

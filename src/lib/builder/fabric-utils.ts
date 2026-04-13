@@ -1,4 +1,4 @@
-import { Canvas, Textbox, Rect, Circle, Triangle, Line, FabricImage, Path, type FabricObject } from "fabric";
+import { Canvas, Textbox, Rect, Circle, Triangle, Line, FabricImage, Path, Group, type FabricObject } from "fabric";
 
 export function addTextbox(canvas: Canvas, text: string, opts: Partial<{ fontSize: number; fontWeight: string; fill: string; fontFamily: string; left: number; top: number }> = {}) {
   const tb = new Textbox(text, {
@@ -14,6 +14,55 @@ export function addTextbox(canvas: Canvas, text: string, opts: Partial<{ fontSiz
   });
   canvas.add(tb);
   canvas.setActiveObject(tb);
+  canvas.requestRenderAll();
+}
+
+export interface ComboItemOpts {
+  text: string;
+  fontSize: number;
+  fontWeight: string;
+  fontFamily?: string;
+  fontStyle?: string;
+  fill?: string;
+  textAlign?: string;
+}
+
+/**
+ * Creates multiple Textbox objects from combo items, stacks them vertically,
+ * wraps them in a Fabric Group, and adds the group to the canvas.
+ * The group moves, scales, rotates, and deletes as a single unit.
+ * Double-click enters the group to edit individual text items.
+ */
+export function addTextComboGroup(canvas: Canvas, items: ComboItemOpts[]) {
+  const groupWidth = 300;
+  let currentTop = 0;
+
+  const textObjects: Textbox[] = items.map((item) => {
+    const tb = new Textbox(item.text, {
+      left: 0,
+      top: currentTop,
+      width: groupWidth,
+      fontSize: item.fontSize,
+      fontWeight: item.fontWeight as string,
+      fontFamily: item.fontFamily ?? "Georgia",
+      fontStyle: (item.fontStyle as "normal" | "italic" | "oblique") ?? "normal",
+      fill: item.fill ?? "#000000",
+      textAlign: (item.textAlign ?? "center") as "left" | "center" | "right" | "justify",
+      editable: true,
+    });
+    currentTop += item.fontSize + 16;
+    return tb;
+  });
+
+  const group = new Group(textObjects, {
+    left: canvas.width! / 2 - groupWidth / 2,
+    top: canvas.height! / 2 - currentTop / 2,
+    interactive: true,
+    subTargetCheck: true,
+  });
+
+  canvas.add(group);
+  canvas.setActiveObject(group);
   canvas.requestRenderAll();
 }
 
