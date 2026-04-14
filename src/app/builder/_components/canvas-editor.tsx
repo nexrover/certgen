@@ -11,6 +11,7 @@ export interface CanvasEditorHandle {
   getCanvas: () => Canvas | null;
   setCanvasSize: (width: number, height: number) => void;
   toJSON: () => Record<string, unknown>;
+  toDataURL: (opts?: { multiplier?: number; format?: string }) => string;
   loadFromJSON: (json: Record<string, unknown>) => Promise<void>;
   loadPreset: (json: Record<string, unknown>) => void;
   undo: () => void;
@@ -481,6 +482,10 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
         setScale(calcFitScale());
       },
       toJSON: () => fabricRef.current ? (fabricRef.current.toJSON() as Record<string, unknown>) : {},
+      toDataURL: (opts) => {
+        if (!fabricRef.current) return "";
+        return fabricRef.current.toDataURL({ multiplier: opts?.multiplier ?? 0.15, format: opts?.format ?? "png" });
+      },
       loadFromJSON: async (json: Record<string, unknown>) => {
         const fc = fabricRef.current;
         if (!fc) return;

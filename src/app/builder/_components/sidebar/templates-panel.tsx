@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, type ReactNode } from "react";
+import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
+import type { CustomTemplate } from "@/lib/custom-templates-store";
 
 interface TemplatesPanelProps {
   onLoadTemplate: (payload: {
@@ -9,6 +10,8 @@ interface TemplatesPanelProps {
     width?: number;
     height?: number;
   }) => void;
+  customTemplates?: CustomTemplate[];
+  onDeleteCustomTemplate?: (id: string) => void;
 }
 
 type Orientation = "landscape" | "portrait";
@@ -410,8 +413,13 @@ const TEMPLATES: TemplatePreview[] = [
 
 type FilterType = "category" | "style" | "color";
 
-export function TemplatesPanel({ onLoadTemplate }: TemplatesPanelProps) {
+export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteCustomTemplate }: TemplatesPanelProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const customScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollCustomRight = useCallback(() => {
+    customScrollRef.current?.scrollBy({ left: 120, behavior: "smooth" });
+  }, []);
   const [orientation, setOrientation] = useState<Orientation>("landscape");
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedStyles, setSelectedStyles] = useState<Style[]>([]);
@@ -460,21 +468,19 @@ export function TemplatesPanel({ onLoadTemplate }: TemplatesPanelProps) {
       <div className="flex border-b border-gray-200">
         <button
           onClick={() => setOrientation("landscape")}
-          className={`flex-1 py-2.5 text-xs font-medium transition-colors ${
-            orientation === "landscape"
+          className={`flex-1 py-2.5 text-xs font-medium transition-colors ${orientation === "landscape"
               ? "border-b-2 border-blue-500 text-blue-600"
               : "text-gray-500 hover:text-gray-700"
-          }`}
+            }`}
         >
           Landscape
         </button>
         <button
           onClick={() => setOrientation("portrait")}
-          className={`flex-1 py-2.5 text-xs font-medium transition-colors ${
-            orientation === "portrait"
+          className={`flex-1 py-2.5 text-xs font-medium transition-colors ${orientation === "portrait"
               ? "border-b-2 border-blue-500 text-blue-600"
               : "text-gray-500 hover:text-gray-700"
-          }`}
+            }`}
         >
           Portrait
         </button>
@@ -532,6 +538,71 @@ export function TemplatesPanel({ onLoadTemplate }: TemplatesPanelProps) {
             Clear All
           </button>
         )}
+      </div>
+
+      {/* ── Custom Templates — horizontal scroll ────────── */}
+      {customTemplates.length > 0 && (
+        <div className="px-3 pb-2">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-gray-700">Recently Used</span>
+            <button
+              onClick={scrollCustomRight}
+              className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600"
+              title="Scroll right"
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+          <div
+            ref={customScrollRef}
+            className="flex gap-2 overflow-x-auto pb-1.5"
+            style={{ scrollbarWidth: "none" }}
+          >
+            {customTemplates.map((ct) => (
+              <div key={ct.id} className="group relative shrink-0">
+                <button
+                  onClick={() => {
+                    onLoadTemplate({
+                      canvasJson: ct.canvasJson,
+                      paperSize: ct.paperSize,
+                      width: ct.width,
+                      height: ct.height,
+                    });
+                  }}
+                  className="block overflow-hidden rounded-md border border-gray-200 bg-white transition-all hover:border-blue-400 hover:shadow-md"
+                  title="Load custom template"
+                >
+                  <img
+                    src={ct.thumbnail}
+                    alt="Custom template"
+                    className="h-[62px] w-[88px] object-cover"
+                    draggable={false}
+                  />
+                </button>
+                {/* Delete button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteCustomTemplate?.(ct.id);
+                  }}
+                  className="absolute -right-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white shadow transition-colors hover:bg-red-600 group-hover:flex"
+                  title="Remove"
+                >
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── All Results label ──────────────────────────────── */}
+      <div className="px-3 pb-1.5">
+        <span className="text-[11px] font-semibold text-gray-700">All Results</span>
       </div>
 
       {/* Templates grid */}
@@ -594,11 +665,10 @@ function FilterChip<T extends string>({
     <div className="relative" ref={ref}>
       <button
         onClick={onToggle}
-        className={`flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-medium transition-colors ${
-          active
+        className={`flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-medium transition-colors ${active
             ? "border-blue-400 bg-blue-50 text-blue-600"
             : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-        }`}
+          }`}
       >
         <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
           <circle cx="12" cy="12" r="10" />
@@ -623,9 +693,8 @@ function FilterChip<T extends string>({
                 onClick={() => onSelect(opt)}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-gray-700 hover:bg-gray-50"
               >
-                <div className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border transition-colors ${
-                  selected.includes(opt) ? "border-blue-500 bg-blue-500" : "border-gray-300"
-                }`}>
+                <div className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border transition-colors ${selected.includes(opt) ? "border-blue-500 bg-blue-500" : "border-gray-300"
+                  }`}>
                   {selected.includes(opt) && (
                     <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}><path d="M20 6 9 17l-5-5" /></svg>
                   )}
@@ -635,7 +704,7 @@ function FilterChip<T extends string>({
             ))}
           </div>
           <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-3 py-2">
-            <button onClick={() => { selected.forEach(() => {}); options.forEach((o) => { if (selected.includes(o)) onSelect(o); }); }} className="text-[10px] text-gray-400 hover:text-gray-600">Clear</button>
+            <button onClick={() => { selected.forEach(() => { }); options.forEach((o) => { if (selected.includes(o)) onSelect(o); }); }} className="text-[10px] text-gray-400 hover:text-gray-600">Clear</button>
           </div>
         </div>
       )}

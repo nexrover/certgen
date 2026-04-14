@@ -9,6 +9,7 @@ import { AttributesPanel } from "./attributes-panel";
 import { QrCodesPanel } from "./qrcodes-panel";
 import { LayersPanel } from "./layers-panel";
 import type { Canvas } from "fabric";
+import type { CustomTemplate } from "@/lib/custom-templates-store";
 
 function Icon({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
@@ -113,9 +114,11 @@ interface SidebarProps {
     height?: number;
   }) => void;
   onBgSelected?: (selected: boolean) => void;
+  customTemplates?: CustomTemplate[];
+  onDeleteCustomTemplate?: (id: string) => void;
 }
 
-export function Sidebar({ canvas, onLoadTemplate, onBgSelected }: SidebarProps) {
+export function Sidebar({ canvas, onLoadTemplate, onBgSelected, customTemplates, onDeleteCustomTemplate }: SidebarProps) {
   const [activeTab, setActiveTab] = useState<TabId>("templates");
 
   return (
@@ -140,7 +143,7 @@ export function Sidebar({ canvas, onLoadTemplate, onBgSelected }: SidebarProps) 
       </div>
 
       <div className="flex-1 overflow-y-auto p-3">
-        {activeTab === "templates" && <TemplatesPanel onLoadTemplate={onLoadTemplate} />}
+        {activeTab === "templates" && <TemplatesPanel onLoadTemplate={onLoadTemplate} customTemplates={customTemplates} onDeleteCustomTemplate={onDeleteCustomTemplate} />}
         {activeTab === "uploads" && <UploadsPanel canvas={canvas} />}
         {activeTab === "elements" && <ElementsPanel canvas={canvas} />}
         {activeTab === "text" && <TextPanel canvas={canvas} />}

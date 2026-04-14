@@ -10,6 +10,13 @@ import { PreviewModal } from "./preview-modal";
 import type { CertificateTemplate, PaperSize } from "@/lib/types";
 import { PAPER_DIMENSIONS } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import {
+  getCustomTemplates,
+  saveCustomTemplate,
+  deleteCustomTemplate,
+  newCustomTemplateId,
+  type CustomTemplate,
+} from "@/lib/custom-templates-store";
 
 interface CertificateBuilderProps {
   initialTemplate?: CertificateTemplate;
@@ -30,6 +37,16 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
   const [bgColor, setBgColor] = useState("#ffffff");
   const bgFileRef = useRef<HTMLInputElement>(null);
 
+  /* ── Custom Templates (auto-save) ──────────────────── */
+  const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
+  const customIdRef = useRef<string>(newCustomTemplateId());
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load custom templates from localStorage on mount
+  useEffect(() => {
+    setCustomTemplates(getCustomTemplates());
+  }, []);
+
   const dims = PAPER_DIMENSIONS[paperSize];
 
   const handlePaperSizeChange = useCallback((size: PaperSize) => {
@@ -37,7 +54,43 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
     setDirty(true);
   }, []);
 
-  const handleCanvasModified = useCallback(() => setDirty(true), []);
+  /** Auto-save a thumbnail + canvas JSON to localStorage (debounced 2s) */
+  const scheduleAutoSave = useCallback(() => {
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(() => {
+      const cr = canvasRef.current;
+      if (!cr) return;
+      const fc = cr.getCanvas();
+      // Only auto-save when there is actual content on the canvas
+      if (!fc || fc.getObjects().length === 0) return;
+
+      const thumbnail = cr.toDataURL({ multiplier: 0.15, format: "png" });
+      const canvasJson = cr.toJSON();
+      const currentDims = PAPER_DIMENSIONS[paperSize];
+
+      const entry: CustomTemplate = {
+        id: customIdRef.current,
+        thumbnail,
+        canvasJson,
+        paperSize,
+        width: currentDims.width,
+        height: currentDims.height,
+        updatedAt: new Date().toISOString(),
+      };
+      saveCustomTemplate(entry);
+      setCustomTemplates(getCustomTemplates());
+    }, 2000);
+  }, [paperSize]);
+
+  const handleCanvasModified = useCallback(() => {
+    setDirty(true);
+    scheduleAutoSave();
+  }, [scheduleAutoSave]);
+
+  const handleDeleteCustomTemplate = useCallback((id: string) => {
+    deleteCustomTemplate(id);
+    setCustomTemplates(getCustomTemplates());
+  }, []);
 
   const handleLoadTemplate = useCallback((payload: {
     canvasJson: Record<string, unknown>;
@@ -225,7 +278,13 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar — full height from header to footer */}
-        <Sidebar canvas={getCanvas()} onLoadTemplate={handleLoadTemplate} onBgSelected={handleBgSelected} />
+        <Sidebar
+          canvas={getCanvas()}
+          onLoadTemplate={handleLoadTemplate}
+          onBgSelected={handleBgSelected}
+          customTemplates={customTemplates}
+          onDeleteCustomTemplate={handleDeleteCustomTemplate}
+        />
 
         {/* Right column: format toolbar + canvas */}
         <div className="flex flex-1 flex-col overflow-hidden">
