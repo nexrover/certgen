@@ -45,6 +45,7 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
   function CanvasEditor({ width, height, onSelectionChange, onCanvasModified }, ref) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasElRef = useRef<HTMLCanvasElement>(null);
+    const canvasWrapperRef = useRef<HTMLDivElement>(null);
     const fabricRef = useRef<Canvas | null>(null);
     const historyRef = useRef<string[]>([]);
     const historyIndexRef = useRef(-1);
@@ -116,6 +117,81 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
       fc.on("selection:created", () => onSelectionChange?.(true));
       fc.on("selection:updated", () => onSelectionChange?.(true));
       fc.on("selection:cleared", () => onSelectionChange?.(false));
+
+      /* ── Boundary constraint ──────────────────────────── */
+      //
+      // Jitter-proof strategy:
+      //  1. Snapshot bounding-rect geometry ONCE at drag start
+      //  2. Compute valid left/top range from cached values (no Fabric API per frame)
+      //  3. Math.round() to avoid sub-pixel oscillation
+      //  4. Direct property write (obj.left = v) — avoids Fabric's set() side-effects
+      //  5. setCoords() only when clamped position ACTUALLY changed
+
+      let _bc: {
+        dL: number; dT: number;   // offset: obj.left/top → bounding-rect left/top
+        bW: number; bH: number;   // bounding-rect dimensions
+        pL: number; pT: number;   // previous clamped left/top (to skip redundant setCoords)
+      } | null = null;
+
+      fc.on("mouse:down", () => { _bc = null; });
+
+      fc.on("object:moving", (e) => {
+        const obj = e.target;
+        if (!obj) return;
+
+        const cW = fc.width!;
+        const cH = fc.height!;
+
+        // ── First frame: snapshot geometry ──
+        if (!_bc) {
+          const br = obj.getBoundingRect();
+          const l = obj.left ?? 0;
+          const t = obj.top ?? 0;
+          _bc = {
+            dL: l - br.left,
+            dT: t - br.top,
+            bW: br.width,
+            bH: br.height,
+            pL: l,
+            pT: t,
+          };
+        }
+
+        const { dL, dT, bW, bH } = _bc;
+
+        // ── Valid range ──
+        const minL = dL;
+        const maxL = cW - bW + dL;
+        const minT = dT;
+        const maxT = cH - bH + dT;
+
+        // ── Clamp + round to whole pixels ──
+        const clL = Math.round(Math.max(minL, Math.min(obj.left ?? 0, maxL)));
+        const clT = Math.round(Math.max(minT, Math.min(obj.top ?? 0, maxT)));
+
+        // ── Apply: direct property write, setCoords only when value changed ──
+        obj.left = clL;
+        obj.top = clT;
+
+        if (clL !== _bc.pL || clT !== _bc.pT) {
+          obj.setCoords();
+          _bc.pL = clL;
+          _bc.pT = clT;
+        }
+
+        // ── Red border when AT any edge (2px tolerance) ──
+        const E = 2;
+        const touching =
+          clL <= minL + E || clL >= maxL - E ||
+          clT <= minT + E || clT >= maxT - E;
+
+        canvasWrapperRef.current?.classList.toggle("boundary-hit", touching);
+      });
+
+      fc.on("mouse:up", () => {
+        _bc = null;
+        canvasWrapperRef.current?.classList.remove("boundary-hit");
+      });
 
       saveHistory();
       setScale(calcFitScale());
@@ -432,15 +508,30 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
           }}
         >
           <div
+            ref={canvasWrapperRef}
             style={{
               width,
               height,
               transform: `scale(${scale})`,
               transformOrigin: "top left",
+              position: "relative",
             }}
             className="shadow-xl"
           >
             <canvas ref={canvasElRef} />
+            {/* Boundary-hit overlay — rendered once, toggled via CSS class on parent */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                border: "2.5px solid #ef4444",
+                opacity: 0,
+                pointerEvents: "none",
+                transition: "opacity 0.12s ease",
+                zIndex: 9999,
+              }}
+              className="boundary-overlay"
+            />
           </div>
 
           {/* Floating context menu — positioned within the scaled wrapper */}
@@ -467,6 +558,13 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
           <button onClick={() => setScale(calcFitScale())} className="hover:text-gray-900">Fit</button>
           <span>{Math.round(scale * 100)}%</span>
         </div>
+
+        {/* Boundary warning styles — toggled via direct DOM classList */}
+        <style>{`
+          .boundary-hit > .boundary-overlay {
+            opacity: 1 !important;
+          }
+        `}</style>
       </div>
     );
   }
