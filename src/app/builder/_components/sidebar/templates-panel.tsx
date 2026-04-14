@@ -420,6 +420,10 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
   const scrollCustomRight = useCallback(() => {
     customScrollRef.current?.scrollBy({ left: 120, behavior: "smooth" });
   }, []);
+  
+  const scrollCustomLeft = useCallback(() => {
+    customScrollRef.current?.scrollBy({ left: -120, behavior: "smooth" });
+  }, []);
   const [orientation, setOrientation] = useState<Orientation>("landscape");
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedStyles, setSelectedStyles] = useState<Style[]>([]);
@@ -469,8 +473,8 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
         <button
           onClick={() => setOrientation("landscape")}
           className={`flex-1 py-2.5 text-xs font-medium transition-colors ${orientation === "landscape"
-              ? "border-b-2 border-blue-500 text-blue-600"
-              : "text-gray-500 hover:text-gray-700"
+            ? "border-b-2 border-blue-500 text-blue-600"
+            : "text-gray-500 hover:text-gray-700"
             }`}
         >
           Landscape
@@ -478,8 +482,8 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
         <button
           onClick={() => setOrientation("portrait")}
           className={`flex-1 py-2.5 text-xs font-medium transition-colors ${orientation === "portrait"
-              ? "border-b-2 border-blue-500 text-blue-600"
-              : "text-gray-500 hover:text-gray-700"
+            ? "border-b-2 border-blue-500 text-blue-600"
+            : "text-gray-500 hover:text-gray-700"
             }`}
         >
           Portrait
@@ -545,15 +549,26 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
         <div className="px-3 pb-2">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-[11px] font-semibold text-gray-700">Recently Used</span>
-            <button
-              onClick={scrollCustomRight}
-              className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600"
-              title="Scroll right"
-            >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
+            <div className="flex gap-1">
+              <button
+                onClick={scrollCustomLeft}
+                className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600"
+                title="Scroll left"
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              <button
+                onClick={scrollCustomRight}
+                className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600"
+                title="Scroll right"
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
           </div>
           <div
             ref={customScrollRef}
@@ -666,8 +681,8 @@ function FilterChip<T extends string>({
       <button
         onClick={onToggle}
         className={`flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-medium transition-colors ${active
-            ? "border-blue-400 bg-blue-50 text-blue-600"
-            : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+          ? "border-blue-400 bg-blue-50 text-blue-600"
+          : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
           }`}
       >
         <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
