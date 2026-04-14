@@ -3,6 +3,7 @@
 import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle, useState } from "react";
 import { Canvas, type FabricObject } from "fabric";
 import { FloatingContextMenu } from "./floating-context-menu";
+import { SmartGuideManager } from "./smart-guides";
 
 /* ── Public handle for parent components ──────────────── */
 
@@ -53,6 +54,7 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
     const [scale, setScale] = useState(1);
     const scaleRef = useRef(1);
     scaleRef.current = scale;
+    const guidesRef = useRef<SmartGuideManager | null>(null);
 
     /* Selection-bounds state for the floating context menu */
     const [selectionBounds, setSelectionBounds] = useState<SelectionBounds | null>(null);
@@ -111,6 +113,11 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
       });
       fabricRef.current = fc;
 
+      // Smart guide manager — SVG overlay for snap guides & distance indicators
+      if (canvasWrapperRef.current) {
+        guidesRef.current = new SmartGuideManager(canvasWrapperRef.current, width, height);
+      }
+
       fc.on("object:modified", () => { saveHistory(); onCanvasModified?.(); });
       fc.on("object:added", () => { saveHistory(); onCanvasModified?.(); });
       fc.on("object:removed", () => { saveHistory(); onCanvasModified?.(); });
@@ -157,6 +164,13 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
           };
         }
 
+        // ── Smart guides: snap to alignment ──
+        if (guidesRef.current) {
+          const snap = guidesRef.current.calculate(obj, fc);
+          obj.left = (obj.left ?? 0) + snap.dx;
+          obj.top = (obj.top ?? 0) + snap.dy;
+        }
+
         const { dL, dT, bW, bH } = _bc;
 
         // ── Valid range ──
@@ -190,13 +204,14 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
 
       fc.on("mouse:up", () => {
         _bc = null;
+        guidesRef.current?.clear();
         canvasWrapperRef.current?.classList.remove("boundary-hit");
       });
 
       saveHistory();
       setScale(calcFitScale());
 
-      return () => { fc.dispose(); fabricRef.current = null; };
+      return () => { guidesRef.current?.destroy(); guidesRef.current = null; fc.dispose(); fabricRef.current = null; };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -238,6 +253,7 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
       if (!fc) return;
       fc.setDimensions({ width, height });
       fc.renderAll();
+      guidesRef.current?.resize(width, height);
       setScale(calcFitScale());
       saveHistory();
     }, [width, height, saveHistory, calcFitScale]);
