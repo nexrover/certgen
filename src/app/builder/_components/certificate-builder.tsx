@@ -214,18 +214,6 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
         dirty={dirty}
       />
 
-      {/* Format toolbar — always visible */}
-      <FormatToolbar
-        canvas={getCanvas()}
-        onUndo={() => canvasRef.current?.undo()}
-        onRedo={() => canvasRef.current?.redo()}
-        bgSelected={bgSelected}
-        bgColor={bgColor}
-        onBgColorChange={handleBgColorChange}
-        onBgImageUpload={handleBgImageUpload}
-        onBgImageRemove={handleBgImageRemove}
-      />
-
       {/* Hidden file input for bg image */}
       <input
         ref={bgFileRef}
@@ -236,14 +224,31 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
       />
 
       <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar — full height from header to footer */}
         <Sidebar canvas={getCanvas()} onLoadTemplate={handleLoadTemplate} onBgSelected={handleBgSelected} />
-        <CanvasEditor
-          ref={canvasRef}
-          width={dims.width}
-          height={dims.height}
-          onSelectionChange={handleSelectionChange}
-          onCanvasModified={handleCanvasModified}
-        />
+
+        {/* Right column: format toolbar + canvas */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {/* Format toolbar — positioned above canvas only */}
+          <FormatToolbar
+            canvas={getCanvas()}
+            onUndo={() => canvasRef.current?.undo()}
+            onRedo={() => canvasRef.current?.redo()}
+            bgSelected={bgSelected}
+            bgColor={bgColor}
+            onBgColorChange={handleBgColorChange}
+            onBgImageUpload={handleBgImageUpload}
+            onBgImageRemove={handleBgImageRemove}
+          />
+
+          <CanvasEditor
+            ref={canvasRef}
+            width={dims.width}
+            height={dims.height}
+            onSelectionChange={handleSelectionChange}
+            onCanvasModified={handleCanvasModified}
+          />
+        </div>
       </div>
 
       {showPreview && canvasRef.current && (
