@@ -83,3 +83,10 @@ export async function listTemplates(): Promise<CertificateTemplate[]> {
   if (error) throw new Error(`Failed to list templates: ${error.message}`);
   return (data ?? []) as CertificateTemplate[];
 }
+
+export async function deleteTemplateById(id: string): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await supabase.from(TABLE).delete().eq("id", id);
+
+  if (error) throw new Error(`Failed to delete template: ${error.message}`);
+}

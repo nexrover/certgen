@@ -30,7 +30,9 @@ export function Toolbar({
   return (
     <div className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4">
       <div className="flex items-center gap-4">
-        <Link href="/" className="text-lg font-bold text-indigo-600">CertGen</Link>
+        <Link href="/dashboard?view=templates" className="text-lg font-bold text-indigo-600">
+          CertGen
+        </Link>
         <div className="h-6 w-px bg-gray-200" />
         <input
           type="text"
@@ -43,6 +45,12 @@ export function Toolbar({
       </div>
 
       <div className="flex items-center gap-3">
+        <Link
+          href="/dashboard?view=templates"
+          className="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Back to Dashboard
+        </Link>
         <select
           value={paperSize}
           onChange={(e) => onPaperSizeChange(e.target.value as PaperSize)}

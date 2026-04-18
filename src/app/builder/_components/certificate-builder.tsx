@@ -153,12 +153,18 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
     setSaving(true);
     try {
       const canvasJson = canvasRef.current.toJSON();
+      const thumbnailDataUrl = canvasRef.current.toDataURL({
+        // Keep thumbnail crisp enough for dashboard card previews.
+        multiplier: 1,
+        format: "png",
+      });
       const body = {
         name: templateName,
         width: dims.width,
         height: dims.height,
         paperSize,
         canvasJson,
+        backgroundUrl: thumbnailDataUrl,
       };
 
       const url = templateId ? `/api/templates/${templateId}` : "/api/templates";
@@ -169,7 +175,7 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
       if (data.success && data.data?.id) {
         setTemplateId(data.data.id);
         setDirty(false);
-        if (!templateId) router.replace(`/builder/${data.data.id}`);
+        router.push("/dashboard?view=templates");
       }
     } finally {
       setSaving(false);
