@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { StaticCanvas } from "fabric";
 import type { CustomTemplate } from "@/lib/custom-templates-store";
+import { PRESET_TEMPLATES } from "@/lib/builder/preset-templates";
 
 interface TemplatesPanelProps {
   onLoadTemplate: (payload: {
@@ -26,19 +28,120 @@ interface TemplatePreview {
   style: Style;
   colorTheme: ColorTheme;
   orientation: Orientation;
-  thumbnail: ReactNode;
+  thumbnailSrc: string;
 }
 
 const ALL_CATEGORIES: Category[] = ["Course", "Completion", "Achievement", "Training", "Recognition", "Participation", "Webinar", "Appreciation", "Employee of the Month"];
 const ALL_STYLES: Style[] = ["Classic", "Modern", "Minimal", "Bold"];
 const ALL_COLORS: ColorTheme[] = ["Navy", "Dark", "Green", "Red", "Warm", "Cool", "Neutral"];
 
-function LandscapeThumb({ children, bg = "#fff" }: { children: ReactNode; bg?: string }) {
-  return <div className="relative h-[72px] w-full overflow-hidden rounded" style={{ background: bg }}>{children}</div>;
+function escapeSvgText(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
-function PortraitThumb({ children, bg = "#fff" }: { children: ReactNode; bg?: string }) {
-  return <div className="relative h-[100px] w-full overflow-hidden rounded" style={{ background: bg }}>{children}</div>;
+function createTemplateThumbnailSrc({
+  label,
+  style,
+  colorTheme,
+  orientation,
+}: Pick<TemplatePreview, "label" | "style" | "colorTheme" | "orientation">): string {
+  const width = orientation === "portrait" ? 200 : 300;
+  const height = orientation === "portrait" ? 260 : 170;
+  const palette: Record<ColorTheme, { bg: string; fg: string; accent: string; muted: string }> = {
+    Navy: { bg: "#f8fafc", fg: "#1e3a5f", accent: "#c9a84c", muted: "#94a3b8" },
+    Dark: { bg: "#0f172a", fg: "#f8fafc", accent: "#f59e0b", muted: "#94a3b8" },
+    Green: { bg: "#f0fdf4", fg: "#065f46", accent: "#10b981", muted: "#94a3b8" },
+    Red: { bg: "#fff1f2", fg: "#9f1239", accent: "#ef4444", muted: "#94a3b8" },
+    Warm: { bg: "#fffbeb", fg: "#92400e", accent: "#f59e0b", muted: "#a8a29e" },
+    Cool: { bg: "#eff6ff", fg: "#1e3a8a", accent: "#0ea5e9", muted: "#94a3b8" },
+    Neutral: { bg: "#f8fafc", fg: "#374151", accent: "#9ca3af", muted: "#9ca3af" },
+  };
+  const colors = palette[colorTheme];
+  const borderRadius = 12;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <defs>
+    <linearGradient id="a" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="${colors.bg}" />
+      <stop offset="100%" stop-color="#ffffff" />
+    </linearGradient>
+  </defs>
+  <rect width="${width}" height="${height}" rx="${borderRadius}" fill="url(#a)" />
+  <rect x="6" y="6" width="${width - 12}" height="${height - 12}" rx="${borderRadius - 4}" fill="none" stroke="${colors.accent}" stroke-width="2" />
+  <text x="16" y="24" fill="${colors.accent}" font-size="11" font-weight="700" letter-spacing="1.1">CERTIFICATE TEMPLATE</text>
+  <text x="16" y="48" fill="${colors.fg}" font-size="17" font-weight="800">${escapeSvgText(label.toUpperCase())}</text>
+  <text x="16" y="67" fill="${colors.muted}" font-size="10">[recipient.name]</text>
+  <line x1="16" x2="${width - 16}" y1="80" y2="80" stroke="${colors.muted}" stroke-width="1" opacity="0.55" />
+  <line x1="16" x2="${width - 90}" y1="95" y2="95" stroke="${colors.muted}" stroke-width="1" opacity="0.45" />
+  <line x1="16" x2="${width - 110}" y1="108" y2="108" stroke="${colors.muted}" stroke-width="1" opacity="0.45" />
+  <rect x="16" y="${height - 34}" width="82" height="18" rx="9" fill="${colors.accent}" fill-opacity="0.15" />
+  <text x="57" y="${height - 22}" fill="${colors.fg}" font-size="9" text-anchor="middle">${escapeSvgText(style)}</text>
+  <rect x="${width - 102}" y="${height - 34}" width="86" height="18" rx="9" fill="${colors.fg}" fill-opacity="0.08" />
+  <text x="${width - 59}" y="${height - 22}" fill="${colors.fg}" font-size="9" text-anchor="middle">${escapeSvgText(orientation.toUpperCase())}</text>
+</svg>`;
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function normalizePresetCanvasJson(input: Record<string, unknown>): Record<string, unknown> {
+  const clone = JSON.parse(JSON.stringify(input)) as Record<string, unknown>;
+  const objects = Array.isArray(clone.objects) ? (clone.objects as Record<string, unknown>[]) : [];
+
+  for (const obj of objects) {
+    const type = typeof obj.type === "string" ? obj.type.toLowerCase() : "";
+    obj.originX = "left";
+    obj.originY = "top";
+    if (type === "textbox" || type === "text") {
+      const cs = obj.charSpacing;
+      if (typeof cs === "number" && cs > 80) {
+        obj.charSpacing = 80;
+      }
+    }
+  }
+
+  return clone;
+}
+
+async function renderPresetThumbnail(id: string, orientation: Orientation): Promise<string | null> {
+  const preset = PRESET_TEMPLATES[id];
+  if (!preset || typeof window === "undefined") return null;
+
+  const targetHeight = orientation === "portrait" ? 220 : 144;
+  const targetWidth = Math.max(1, Math.round((preset.width / preset.height) * targetHeight));
+  const scale = targetWidth / preset.width;
+
+  const canvasEl = document.createElement("canvas");
+  const staticCanvas = new StaticCanvas(canvasEl, {
+    width: targetWidth,
+    height: targetHeight,
+    renderOnAddRemove: false,
+  });
+
+  try {
+    await staticCanvas.loadFromJSON(normalizePresetCanvasJson(preset.canvasJson));
+    staticCanvas.setViewportTransform([scale, 0, 0, scale, 0, 0]);
+    staticCanvas.renderAll();
+    return staticCanvas.toDataURL({ format: "png", quality: 1, multiplier: 1 });
+  } catch {
+    return null;
+  } finally {
+    staticCanvas.dispose();
+  }
+}
+
+function getTemplateDimensions(id: string, orientation: Orientation): { width: number; height: number } {
+  const preset = PRESET_TEMPLATES[id];
+  if (preset && preset.width > 0 && preset.height > 0) {
+    return { width: preset.width, height: preset.height };
+  }
+  return orientation === "portrait"
+    ? { width: 595, height: 842 }
+    : { width: 842, height: 595 };
 }
 
 const TEMPLATES: TemplatePreview[] = [
@@ -49,25 +152,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Navy",
     orientation: "landscape",
-    thumbnail: (
-      <LandscapeThumb>
-        <div className="absolute inset-[3px] rounded-sm border-2 border-[#1e3a5f]">
-          <div className="absolute inset-[3px] rounded-sm border border-[#c9a84c]" />
-        </div>
-        <div className="relative flex h-full flex-col items-center justify-center px-2">
-          <span className="text-[5px] font-normal tracking-[3px] text-[#c9a84c]">CERTIFICATE</span>
-          <span className="text-[8px] font-bold text-[#1e3a5f]">OF COMPLETION</span>
-          <span className="mt-1 text-[4px] text-gray-500">This is to certify that</span>
-          <span className="text-[7px] font-bold text-[#1e3a5f]">[recipient.name]</span>
-          <div className="my-0.5 h-px w-12 bg-[#c9a84c]" />
-          <span className="text-[3.5px] leading-tight text-gray-400 text-center px-2">has successfully completed the course requirements</span>
-          <div className="mt-2 flex w-full justify-around px-4">
-            <div className="text-center"><div className="mb-px h-px w-8 bg-gray-300" /><span className="text-[3px] text-gray-400">Instructor</span></div>
-            <div className="text-center"><div className="mb-px h-px w-8 bg-gray-300" /><span className="text-[3px] text-gray-400">Director</span></div>
-          </div>
-        </div>
-      </LandscapeThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Course Completion", style: "Classic", colorTheme: "Navy", orientation: "landscape" }),
   },
   {
     id: "achievement-award",
@@ -76,22 +161,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Dark",
     orientation: "landscape",
-    thumbnail: (
-      <LandscapeThumb bg="#0f172a">
-        <div className="absolute inset-[4px] border border-[#f59e0b]" />
-        <div className="relative flex h-full flex-col items-center justify-center">
-          <span className="text-[6px] font-bold tracking-wider text-[#f59e0b]">&#9733; AWARD OF ACHIEVEMENT &#9733;</span>
-          <div className="my-0.5 h-px w-10 bg-[#f59e0b]" />
-          <span className="text-[4px] text-slate-400">Presented to</span>
-          <span className="text-[9px] font-bold text-white">[recipient.name]</span>
-          <span className="mt-0.5 px-3 text-center text-[3.5px] text-slate-400">In recognition of outstanding achievement</span>
-          <div className="mt-2 flex w-full justify-around px-6">
-            <div className="text-center"><div className="mb-px h-px w-7 bg-slate-600" /><span className="text-[3px] text-slate-500">Signature</span></div>
-            <div className="text-center"><div className="mb-px h-px w-7 bg-slate-600" /><span className="text-[3px] text-slate-500">Organization</span></div>
-          </div>
-        </div>
-      </LandscapeThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Achievement Award", style: "Bold", colorTheme: "Dark", orientation: "landscape" }),
   },
   {
     id: "professional-cert",
@@ -100,23 +170,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Green",
     orientation: "landscape",
-    thumbnail: (
-      <LandscapeThumb>
-        <div className="absolute bottom-0 left-0 top-0 w-[8px] bg-[#059669]" />
-        <div className="absolute bottom-0 left-[9px] top-0 w-[2px] bg-[#10b981]" />
-        <div className="relative flex h-full flex-col justify-center pl-[16px] pr-2">
-          <span className="text-[4px] font-bold tracking-[2px] text-[#059669]">PROFESSIONAL CERTIFICATE</span>
-          <div className="my-0.5 h-px w-full bg-gray-200" />
-          <span className="text-[3.5px] text-gray-500">This is to certify that</span>
-          <span className="text-[8px] font-bold text-gray-900">[recipient.name]</span>
-          <span className="mt-0.5 text-[3.5px] leading-tight text-gray-400">has demonstrated professional competency</span>
-          <div className="mt-1.5 flex gap-4">
-            <div><span className="text-[3px] font-bold tracking-wider text-gray-400">DATE ISSUED</span><br /><span className="text-[4px] text-gray-800">[issued_date]</span></div>
-            <div><span className="text-[3px] font-bold tracking-wider text-gray-400">CERT ID</span><br /><span className="text-[4px] text-gray-800">[certificate_id]</span></div>
-          </div>
-        </div>
-      </LandscapeThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Professional Certificate", style: "Modern", colorTheme: "Green", orientation: "landscape" }),
   },
   {
     id: "communication-skills",
@@ -125,23 +179,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Red",
     orientation: "landscape",
-    thumbnail: (
-      <LandscapeThumb>
-        <div className="absolute bottom-0 left-0 right-0 h-[8px] bg-gradient-to-r from-red-500 via-red-600 to-red-500" />
-        <div className="relative flex h-full flex-col items-center justify-center px-2 pb-2">
-          <span className="text-[5px] font-bold tracking-wider text-gray-500">CERTIFICATE OF COMPLETION</span>
-          <span className="text-[4px] text-gray-400">COMMUNICATION SKILLS COURSE</span>
-          <div className="my-0.5 h-px w-16 bg-gray-200" />
-          <span className="text-[3.5px] text-gray-400">AWARDED TO</span>
-          <span className="text-[8px] font-bold text-gray-800">[recipient.name]</span>
-          <span className="mt-0.5 px-2 text-center text-[3px] text-gray-400">has meritoriously completed the course</span>
-          <div className="mt-1.5 flex w-full justify-around px-4">
-            <div className="text-center"><div className="mb-px h-px w-7 bg-gray-300" /><span className="text-[3px] text-gray-400">Instructor</span></div>
-            <div className="text-center"><div className="mb-px h-px w-7 bg-gray-300" /><span className="text-[3px] text-gray-400">Director</span></div>
-          </div>
-        </div>
-      </LandscapeThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Communication Skills", style: "Modern", colorTheme: "Red", orientation: "landscape" }),
   },
   {
     id: "digital-marketing",
@@ -150,23 +188,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Warm",
     orientation: "landscape",
-    thumbnail: (
-      <LandscapeThumb bg="#fefbf4">
-        <div className="absolute right-0 top-0 h-full w-[22px]">
-          <div className="h-[12px] w-[12px] rounded-sm bg-amber-300 ml-1 mt-1" />
-          <div className="h-[8px] w-[8px] rounded-sm bg-amber-200 ml-3 mt-0.5" />
-          <div className="h-[6px] w-[6px] rounded bg-amber-400 ml-0.5 mt-1" />
-        </div>
-        <div className="relative flex h-full flex-col justify-center pl-3 pr-6">
-          <span className="text-[4px] text-gray-500">Certificate of Course</span>
-          <span className="text-[6px] font-bold text-gray-800">Completion</span>
-          <span className="mt-0.5 text-[3.5px] text-gray-400">is awarded to</span>
-          <span className="text-[7px] font-bold text-gray-800">[recipient.name]</span>
-          <span className="mt-0.5 text-[3px] text-gray-400">for successfully completing the</span>
-          <span className="text-[4px] font-semibold italic text-amber-700">Digital Marketing Strategies</span>
-        </div>
-      </LandscapeThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Digital Marketing", style: "Modern", colorTheme: "Warm", orientation: "landscape" }),
   },
   {
     id: "financial-accounting",
@@ -175,21 +197,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Minimal",
     colorTheme: "Neutral",
     orientation: "landscape",
-    thumbnail: (
-      <LandscapeThumb bg="#fafafa">
-        <div className="absolute left-0 right-0 top-0 h-[3px] bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300" />
-        <div className="relative flex h-full flex-col items-center justify-center px-3">
-          <span className="text-[5px] font-bold tracking-[2px] text-gray-600">COURSE COMPLETION CERTIFICATE</span>
-          <div className="my-0.5 h-px w-20 bg-gray-300" />
-          <span className="text-[8px] font-bold text-gray-800">[recipient.name]</span>
-          <span className="mt-0.5 text-center text-[3.5px] italic text-gray-500">Financial Accounting Fundamentals</span>
-          <div className="mt-1.5 flex gap-2 text-center">
-            <div className="rounded bg-gray-100 px-1.5 py-0.5"><span className="text-[3px] text-gray-400">270</span><br /><span className="text-[2.5px] text-gray-400">POINTS</span></div>
-            <div className="rounded bg-gray-100 px-1.5 py-0.5"><span className="text-[3px] text-gray-400">4/5</span><br /><span className="text-[2.5px] text-gray-400">GRADE</span></div>
-          </div>
-        </div>
-      </LandscapeThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Financial Accounting", style: "Minimal", colorTheme: "Neutral", orientation: "landscape" }),
   },
   {
     id: "seo-strategies",
@@ -198,17 +206,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Cool",
     orientation: "landscape",
-    thumbnail: (
-      <LandscapeThumb>
-        <div className="absolute bottom-0 left-0 right-0 h-[10px] bg-gradient-to-r from-blue-500 to-teal-500" />
-        <div className="relative flex h-full flex-col items-center justify-center px-3 pb-2">
-          <span className="text-[6px] font-extrabold tracking-wider text-blue-600">CERTIFICATE</span>
-          <span className="text-[4px] font-bold text-gray-500">OF COMPLETION</span>
-          <span className="mt-1 text-[8px] font-bold text-gray-800">[recipient.name]</span>
-          <span className="text-[4px] font-semibold text-teal-600">ADVANCED SEO STRATEGIES COURSE</span>
-        </div>
-      </LandscapeThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "SEO Strategies", style: "Bold", colorTheme: "Cool", orientation: "landscape" }),
   },
   {
     id: "training-course",
@@ -217,24 +215,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Red",
     orientation: "landscape",
-    thumbnail: (
-      <LandscapeThumb>
-        <div className="absolute left-0 top-0 h-[28px] w-full bg-gradient-to-br from-red-500 to-red-700" />
-        <div className="relative flex h-full flex-col items-center pt-1">
-          <span className="text-[5px] font-extrabold tracking-wider text-white">TRAINING COURSE</span>
-          <span className="text-[3.5px] font-bold text-red-200">CERTIFICATE</span>
-          <div className="mt-2 flex flex-col items-center">
-            <span className="text-[3.5px] text-gray-400">IS PROUDLY PRESENTED TO</span>
-            <span className="text-[7px] font-bold text-gray-800">[recipient.name]</span>
-          </div>
-          <div className="mt-1 flex gap-1">
-            <div className="rounded bg-red-100 px-1 py-px"><span className="text-[2.5px] font-bold text-red-600">DATE</span></div>
-            <div className="rounded bg-red-100 px-1 py-px"><span className="text-[2.5px] font-bold text-red-600">SCORE</span></div>
-            <div className="rounded bg-green-100 px-1 py-px"><span className="text-[2.5px] font-bold text-green-600">PASSED</span></div>
-          </div>
-        </div>
-      </LandscapeThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Training Course", style: "Bold", colorTheme: "Red", orientation: "landscape" }),
   },
   {
     id: "webinar-participation",
@@ -243,19 +224,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Cool",
     orientation: "landscape",
-    thumbnail: (
-      <LandscapeThumb bg="#f0f7ff">
-        <div className="absolute left-0 top-0 h-full w-[6px] bg-blue-400" />
-        <div className="absolute bottom-0 right-0 h-full w-[6px] bg-blue-400" />
-        <div className="relative flex h-full flex-col items-center justify-center px-3">
-          <span className="text-[5px] font-bold text-blue-600">CERTIFICATE OF PARTICIPATION</span>
-          <span className="text-[3.5px] text-blue-400">WEBINAR SERIES</span>
-          <div className="my-0.5 h-px w-12 bg-blue-300" />
-          <span className="text-[7px] font-bold text-gray-800">[recipient.name]</span>
-          <span className="mt-0.5 text-center text-[3px] text-gray-500">has participated in the webinar series</span>
-        </div>
-      </LandscapeThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Webinar Participation", style: "Modern", colorTheme: "Cool", orientation: "landscape" }),
   },
   {
     id: "appreciation",
@@ -264,18 +233,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Warm",
     orientation: "landscape",
-    thumbnail: (
-      <LandscapeThumb bg="#fffbf0">
-        <div className="absolute inset-[3px] rounded border-2 border-double border-amber-400" />
-        <div className="relative flex h-full flex-col items-center justify-center px-3">
-          <span className="text-[4px] tracking-[2px] text-amber-500">&#10047; &#10047; &#10047;</span>
-          <span className="text-[6px] font-bold text-amber-800">Certificate of Appreciation</span>
-          <span className="text-[3.5px] text-amber-600">is presented to</span>
-          <span className="text-[7px] font-bold text-gray-800">[recipient.name]</span>
-          <span className="mt-0.5 text-[3px] text-gray-500">for outstanding dedication and service</span>
-        </div>
-      </LandscapeThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Appreciation", style: "Classic", colorTheme: "Warm", orientation: "landscape" }),
   },
   // --- Portrait templates ---
   {
@@ -285,25 +243,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Navy",
     orientation: "portrait",
-    thumbnail: (
-      <PortraitThumb>
-        <div className="absolute inset-[3px] rounded-sm border-2 border-[#1e3a5f]">
-          <div className="absolute inset-[2px] rounded-sm border border-[#c9a84c]" />
-        </div>
-        <div className="relative flex h-full flex-col items-center justify-center px-2">
-          <span className="text-[4px] tracking-[2px] text-[#c9a84c]">CERTIFICATE</span>
-          <span className="text-[7px] font-bold text-[#1e3a5f]">OF COMPLETION</span>
-          <span className="mt-1 text-[3.5px] text-gray-500">This is to certify that</span>
-          <span className="text-[7px] font-bold text-[#1e3a5f]">[recipient.name]</span>
-          <div className="my-0.5 h-px w-10 bg-[#c9a84c]" />
-          <span className="text-center text-[3px] text-gray-400 px-1">has successfully completed all course requirements</span>
-          <div className="mt-2 flex gap-4">
-            <div className="text-center"><div className="h-px w-6 bg-gray-300" /><span className="text-[2.5px] text-gray-400">Instructor</span></div>
-            <div className="text-center"><div className="h-px w-6 bg-gray-300" /><span className="text-[2.5px] text-gray-400">Director</span></div>
-          </div>
-        </div>
-      </PortraitThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Course Completion", style: "Classic", colorTheme: "Navy", orientation: "portrait" }),
   },
   {
     id: "creative-writing",
@@ -312,22 +252,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Warm",
     orientation: "portrait",
-    thumbnail: (
-      <PortraitThumb bg="#fdf2e9">
-        <div className="absolute left-0 right-0 top-0 h-[12px] bg-gradient-to-r from-orange-400 to-amber-500" />
-        <div className="relative flex h-full flex-col items-center pt-[16px] px-2">
-          <span className="text-[4px] font-bold tracking-wider text-white" style={{ marginTop: "-4px" }}>ONLINE COURSE CERTIFICATE</span>
-          <span className="mt-1 text-[5px] font-bold text-orange-800">CREATIVE WRITING</span>
-          <span className="text-[3.5px] text-orange-600">WORKSHOP</span>
-          <span className="mt-0.5 text-[3px] text-gray-400">AWARDED TO</span>
-          <span className="text-[7px] font-bold text-gray-800">[recipient.name]</span>
-          <span className="mt-0.5 text-[3px] text-center text-gray-400">for developing essential writing skills</span>
-          <div className="mt-1 rounded bg-amber-400 px-2 py-px">
-            <span className="text-[3px] font-bold text-white">ACHIEVING A SCORE OF 94%</span>
-          </div>
-        </div>
-      </PortraitThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Creative Writing", style: "Bold", colorTheme: "Warm", orientation: "portrait" }),
   },
   {
     id: "design-academy",
@@ -336,30 +261,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Cool",
     orientation: "portrait",
-    thumbnail: (
-      <PortraitThumb>
-        <div className="absolute right-0 top-0">
-          <div className="flex gap-px">
-            <div className="h-[8px] w-[4px] rounded-bl bg-indigo-300" />
-            <div className="h-[14px] w-[4px] bg-indigo-400" />
-            <div className="h-[10px] w-[4px] bg-indigo-500" />
-          </div>
-          <div className="ml-2 mt-px h-[3px] w-[3px] rounded-full bg-indigo-600" />
-        </div>
-        <div className="relative flex h-full flex-col items-center justify-center px-3">
-          <span className="text-[5px] font-bold tracking-wider text-gray-500">CERTIFICATE</span>
-          <span className="text-[4px] text-gray-400">OF COURSE COMPLETION</span>
-          <span className="mt-0.5 text-[3.5px] text-gray-400">PROUDLY PRESENTED TO</span>
-          <span className="text-[8px] font-bold text-gray-800">[recipient.name]</span>
-          <span className="mt-0.5 text-[3px] text-gray-400">has demonstrated professional competence</span>
-          <span className="text-[3.5px] font-semibold text-indigo-600">THE DESIGN BASICS</span>
-          <div className="mt-2 flex gap-2">
-            <div className="rounded bg-red-100 px-1 py-px"><span className="text-[2.5px] text-red-600">80/100 POINTS</span></div>
-            <div className="rounded bg-blue-100 px-1 py-px"><span className="text-[2.5px] text-blue-600">40 HOURS</span></div>
-          </div>
-        </div>
-      </PortraitThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Design Academy", style: "Modern", colorTheme: "Cool", orientation: "portrait" }),
   },
   {
     id: "employee-month",
@@ -368,20 +270,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Warm",
     orientation: "portrait",
-    thumbnail: (
-      <PortraitThumb bg="#fffef5">
-        <div className="absolute inset-[3px] border border-amber-300" />
-        <div className="relative flex h-full flex-col items-center justify-center px-2">
-          <span className="text-[5px] text-amber-400">&#9733;</span>
-          <span className="text-[5px] font-bold tracking-wider text-amber-700">EMPLOYEE</span>
-          <span className="text-[4px] font-semibold text-amber-600">OF THE MONTH</span>
-          <div className="my-0.5 h-px w-10 bg-amber-300" />
-          <span className="text-[7px] font-bold text-gray-800">[recipient.name]</span>
-          <span className="mt-0.5 text-center text-[3px] text-gray-400">for exceptional performance and dedication</span>
-          <span className="mt-1 text-[3.5px] font-medium text-amber-600">[issued_date]</span>
-        </div>
-      </PortraitThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Employee of the Month", style: "Classic", colorTheme: "Warm", orientation: "portrait" }),
   },
   {
     id: "completion-portrait",
@@ -390,24 +279,7 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Minimal",
     colorTheme: "Neutral",
     orientation: "portrait",
-    thumbnail: (
-      <PortraitThumb>
-        <div className="relative flex h-full flex-col items-center justify-center px-3">
-          <span className="text-[6px] font-light text-gray-700">Certificate of Completion</span>
-          <span className="mt-0.5 text-[3px] text-gray-400">This certificate is granted to</span>
-          <span className="mt-0.5 text-[7px] font-bold text-gray-800">[recipient.name]</span>
-          <span className="mt-0.5 text-center text-[3px] text-gray-400">for completing the course at Code Academy over a period of 6 weeks</span>
-          <div className="mt-1.5 flex gap-2 text-center">
-            <div className="rounded bg-gray-100 px-1 py-0.5"><span className="text-[2.5px] text-gray-500">270</span><br /><span className="text-[2px] text-gray-400">Points</span></div>
-            <div className="rounded bg-gray-100 px-1 py-0.5"><span className="text-[2.5px] text-gray-500">3</span><br /><span className="text-[2px] text-gray-400">Badges</span></div>
-          </div>
-          <div className="mt-1.5 flex gap-3">
-            <div className="text-center"><div className="h-px w-6 bg-gray-300" /><span className="text-[2.5px] text-gray-400">Robert Wilson</span></div>
-            <div className="text-center"><div className="h-px w-6 bg-gray-300" /><span className="text-[2.5px] text-gray-400">Linda Harris</span></div>
-          </div>
-        </div>
-      </PortraitThumb>
-    ),
+    thumbnailSrc: createTemplateThumbnailSrc({ label: "Completion Certificate", style: "Minimal", colorTheme: "Neutral", orientation: "portrait" }),
   },
 ];
 
@@ -415,6 +287,7 @@ type FilterType = "category" | "style" | "color";
 
 export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteCustomTemplate }: TemplatesPanelProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const [presetThumbnails, setPresetThumbnails] = useState<Record<string, string>>({});
   const customScrollRef = useRef<HTMLDivElement>(null);
 
   const scrollCustomRight = useCallback(() => {
@@ -429,6 +302,26 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
   const [selectedStyles, setSelectedStyles] = useState<Style[]>([]);
   const [selectedColors, setSelectedColors] = useState<ColorTheme[]>([]);
   const [openFilter, setOpenFilter] = useState<FilterType | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function hydratePresetThumbnails() {
+      const results = await Promise.all(
+        TEMPLATES.map(async (template) => {
+          const src = await renderPresetThumbnail(template.id, template.orientation);
+          return src ? ([template.id, src] as const) : null;
+        }),
+      );
+      if (cancelled) return;
+      setPresetThumbnails(Object.fromEntries(results.filter((entry): entry is readonly [string, string] => entry !== null)));
+    }
+
+    void hydratePresetThumbnails();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filtered = TEMPLATES.filter((t) => {
     if (t.orientation !== orientation) return false;
@@ -623,30 +516,48 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
       {/* Templates grid */}
       <div className="grid grid-cols-2 gap-2 px-3 pb-3">
         {/* Blank template */}
+        {(() => {
+          const blankDims = orientation === "portrait"
+            ? { width: 595, height: 842 }
+            : { width: 842, height: 595 };
+          return (
         <button
           onClick={handleBlank}
           className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
-          style={{ height: orientation === "landscape" ? 72 : 100 }}
+          style={{ aspectRatio: `${blankDims.width} / ${blankDims.height}` }}
         >
           <svg className="h-6 w-6 text-gray-300 transition-colors group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
         </button>
+          );
+        })()}
 
         {filtered.map((t) => (
+          (() => {
+            const dims = getTemplateDimensions(t.id, t.orientation);
+            return (
           <button
             key={t.id}
             onClick={() => handleLoad(t.id)}
             disabled={loading === t.id}
             className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md disabled:opacity-50"
+            style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
           >
-            {t.thumbnail}
+            <img
+              src={presetThumbnails[t.id] ?? t.thumbnailSrc}
+              alt={`${t.label} preview`}
+              className="h-full w-full bg-white object-contain"
+              draggable={false}
+            />
             {loading === t.id && (
               <div className="absolute inset-0 flex items-center justify-center bg-white/80">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
               </div>
             )}
           </button>
+            );
+          })()
         ))}
       </div>
 
