@@ -3,6 +3,7 @@ import { CsvUploadPanel } from "@/app/dashboard/_components/csv-upload-panel";
 import { TemplateCard } from "@/app/dashboard/_components/template-card";
 import type { Certificate, CertificateTemplate } from "@/lib/types";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 type DashboardView = "templates" | "csvs" | "history";
 
@@ -30,38 +31,42 @@ export default async function DashboardPage({
   searchParams: Promise<{ view?: string }>;
 }) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userId = user?.id;
+  if (!userId) {
+    redirect("/login");
+  }
+
   const { view: rawView } = await searchParams;
   const activeView: DashboardView =
     rawView === "csvs" || rawView === "history" ? rawView : "templates";
 
-  const [templatesResult, certificatesResult, userResult] = await Promise.all([
+  const [templatesResult, certificatesResult] = await Promise.all([
     supabase
       .from("certificate_templates")
       .select("id, name, paper_size, created_at, updated_at, background_url")
+      .eq("user_id", userId)
       .not("canvas_json", "is", null)
       .order("created_at", { ascending: false })
       .limit(20),
     supabase
       .from("certificates")
       .select("id, template_id, file_url, storage_path, created_at")
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(20),
-    supabase.auth.getUser(),
   ]);
-
-  const userId = userResult.data.user?.id;
   let csvUploads: CsvUploadItem[] = [];
+  const { data: storageItems } = await supabase.storage
+    .from("certificates")
+    .list(`csv-uploads/${userId}`, {
+      sortBy: { column: "created_at", order: "desc" },
+      limit: 20,
+    });
 
-  if (userId) {
-    const { data: storageItems } = await supabase.storage
-      .from("certificates")
-      .list(`csv-uploads/${userId}`, {
-        sortBy: { column: "created_at", order: "desc" },
-        limit: 20,
-      });
-
-    csvUploads = (storageItems ?? []) as CsvUploadItem[];
-  }
+  csvUploads = (storageItems ?? []) as CsvUploadItem[];
 
   const templates = (templatesResult.data ?? []) as Pick<
     CertificateTemplate,

@@ -15,6 +15,7 @@ const CONCURRENCY = 5;
 
 async function generateAndTrack(
   jobId: string,
+  userId: string,
   template: CertificateTemplate,
   rowData: Record<string, string>,
   index: number
@@ -48,6 +49,7 @@ async function generateAndTrack(
     } = supabase.storage.from("certificates").getPublicUrl(storagePath);
 
     await supabase.from("certificates").insert({
+      user_id: userId,
       job_id: jobId,
       template_id: template.id,
       row_data: rowData,
@@ -65,6 +67,7 @@ async function generateAndTrack(
 
 export async function processJobAsync(
   jobId: string,
+  userId: string,
   template: CertificateTemplate,
   rows: Record<string, string>[]
 ): Promise<void> {
@@ -78,7 +81,7 @@ export async function processJobAsync(
     const limit = pLimit(CONCURRENCY);
     await Promise.all(
       rows.map((row, i) =>
-        limit(() => generateAndTrack(jobId, template, row, i))
+        limit(() => generateAndTrack(jobId, userId, template, row, i))
       )
     );
 

@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { listTemplates } from "@/lib/services/template-service";
 import { GenerateForm } from "./_components/generate-form";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -9,8 +11,16 @@ export default async function GeneratePage({
 }: {
   searchParams: Promise<{ templateId?: string }>;
 }) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
   const { templateId } = await searchParams;
-  const templates = await listTemplates();
+  const templates = await listTemplates(user.id);
 
   return (
     <div>

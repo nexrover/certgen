@@ -6,13 +6,15 @@ import type { CreateTemplateInput, SaveBuilderTemplateInput } from "@/lib/schema
 const TABLE = "certificate_templates";
 
 export async function createTemplate(
-  input: CreateTemplateInput
+  input: CreateTemplateInput,
+  userId: string
 ): Promise<CertificateTemplate> {
   const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from(TABLE)
     .insert({
+      user_id: userId,
       name: input.name,
       width: input.width ?? 1920,
       height: input.height ?? 1080,
@@ -28,10 +30,12 @@ export async function createTemplate(
 
 export async function saveBuilderTemplate(
   input: SaveBuilderTemplateInput,
+  userId: string,
   existingId?: string
 ): Promise<CertificateTemplate> {
   const supabase = createAdminClient();
   const row = {
+    user_id: userId,
     name: input.name,
     width: input.width,
     height: input.height,
@@ -46,6 +50,7 @@ export async function saveBuilderTemplate(
       .from(TABLE)
       .update(row)
       .eq("id", existingId)
+      .eq("user_id", userId)
       .select()
       .single();
     if (error) throw new Error(`Failed to update template: ${error.message}`);
@@ -58,7 +63,8 @@ export async function saveBuilderTemplate(
 }
 
 export async function getTemplateById(
-  id: string
+  id: string,
+  userId: string
 ): Promise<CertificateTemplate> {
   const supabase = createAdminClient();
 
@@ -66,27 +72,29 @@ export async function getTemplateById(
     .from(TABLE)
     .select("*")
     .eq("id", id)
+    .eq("user_id", userId)
     .single();
 
   if (error || !data) throw new TemplateNotFoundError(id);
   return data as CertificateTemplate;
 }
 
-export async function listTemplates(): Promise<CertificateTemplate[]> {
+export async function listTemplates(userId: string): Promise<CertificateTemplate[]> {
   const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from(TABLE)
     .select("*")
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(`Failed to list templates: ${error.message}`);
   return (data ?? []) as CertificateTemplate[];
 }
 
-export async function deleteTemplateById(id: string): Promise<void> {
+export async function deleteTemplateById(id: string, userId: string): Promise<void> {
   const supabase = createAdminClient();
-  const { error } = await supabase.from(TABLE).delete().eq("id", id);
+  const { error } = await supabase.from(TABLE).delete().eq("id", id).eq("user_id", userId);
 
   if (error) throw new Error(`Failed to delete template: ${error.message}`);
 }

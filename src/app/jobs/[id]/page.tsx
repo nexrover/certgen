@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getJobWithCertificates } from "@/lib/services/job-service";
 import { JobPoller } from "./_components/job-poller";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -10,10 +11,17 @@ export default async function JobPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    notFound();
+  }
 
   let result;
   try {
-    result = await getJobWithCertificates(id);
+    result = await getJobWithCertificates(id, user.id);
   } catch {
     notFound();
   }

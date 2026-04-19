@@ -6,9 +6,18 @@ import { processJobAsync } from "@/lib/services/certificate-service";
 import { extractVariables } from "@/lib/engine/variable-replacer";
 import { parseAndValidate } from "@/lib/engine/csv-parser";
 import { AppError } from "@/lib/errors";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
   try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
     const formData = await req.formData();
     const templateId = formData.get("templateId") as string;
     const csvFile = formData.get("file") as File | null;
@@ -22,7 +31,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const template = await getTemplateById(templateId);
+    const template = await getTemplateById(templateId, user.id);
     const templateVars = extractVariables(template);
     const csvText = await csvFile.text();
     const csvResult = parseAndValidate(csvText, templateVars);
@@ -34,9 +43,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const job = await createJob(templateId, csvResult.rows.length);
+    const job = await createJob(templateId, csvResult.rows.length, user.id);
 
-    processJobAsync(job.id, template, csvResult.rows);
+    processJobAsync(job.id, user.id, template, csvResult.rows);
 
     return NextResponse.json({
       success: true,

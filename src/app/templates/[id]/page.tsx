@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getTemplateById } from "@/lib/services/template-service";
 import { extractVariables } from "@/lib/engine/variable-replacer";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function TemplateDetailPage({
   params,
@@ -11,10 +12,17 @@ export default async function TemplateDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   let template;
   try {
-    template = await getTemplateById(id);
+    template = await getTemplateById(id, user.id);
   } catch {
     notFound();
   }
