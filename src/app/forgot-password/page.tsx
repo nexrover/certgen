@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { validateSignupPassword } from "@/lib/auth/password-policy";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -19,7 +19,15 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+
   const code = digits.join("");
+
+  useEffect(() => {
+    if (step === "code") {
+      inputsRef.current[0]?.focus();
+    }
+  }, [step]);
 
   const setDigit = (index: number, value: string) => {
     const v = value.replace(/\D/g, "").slice(-1);
@@ -28,6 +36,18 @@ export default function ForgotPasswordPage() {
       next[index] = v;
       return next;
     });
+    if (v && index < 5) {
+      inputsRef.current[index + 1]?.focus();
+    }
+  };
+
+  const onPaste = (event: React.ClipboardEvent) => {
+    const text = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (text.length === 6) {
+      event.preventDefault();
+      setDigits(text.split(""));
+      inputsRef.current[5]?.focus();
+    }
   };
 
   const onEmailSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -97,8 +117,8 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="mx-auto mt-20 max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <h1 className="text-2xl font-semibold text-gray-900">Forgot password</h1>
-      <p className="mt-1 text-sm text-gray-600">
+      <h1 className="text-2xl font-semibold text-gray-900 text-center">Forgot password</h1>
+      <p className="mt-1 text-sm text-gray-600 text-center">
         {step === "email" && "Enter your email to receive a verification code."}
         {step === "code" && "Enter the 6-digit code from your email."}
         {step === "password" && "Choose a new password."}
@@ -128,14 +148,23 @@ export default function ForgotPasswordPage() {
 
       {step === "code" ? (
         <form onSubmit={onCodeContinue} className="mt-6 space-y-4">
-          <div className="flex justify-center gap-2">
+          <div className="flex justify-center gap-2" onPaste={onPaste}>
             {digits.map((d, i) => (
               <input
                 key={i}
+                ref={(el) => {
+                  inputsRef.current[i] = el;
+                }}
                 inputMode="numeric"
+                autoComplete="one-time-code"
                 maxLength={1}
                 value={d}
                 onChange={(e) => setDigit(i, e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Backspace" && !digits[i] && i > 0) {
+                    inputsRef.current[i - 1]?.focus();
+                  }
+                }}
                 className="h-12 w-10 rounded-md border border-gray-300 text-center text-lg font-semibold outline-none ring-indigo-500 focus:ring-2"
               />
             ))}
@@ -174,17 +203,17 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full rounded-md bg-indigo-600 px-4 py-2 mt-4 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isSubmitting ? "Saving..." : "Reset password & return to Sign in"}
+            {isSubmitting ? "Saving..." : "Reset password"}
           </button>
         </form>
       ) : null}
 
-      {message ? <p className="mt-4 text-sm text-emerald-600">{message}</p> : null}
-      {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+      {/* {message ? <p className="mt-4 text-sm text-emerald-600">{message}</p> : null}
+      {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null} */}
 
-      <p className="mt-4 text-sm text-gray-600">
+      <p className="mt-4 text-sm text-gray-600 text-center">
         <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
           Back to login
         </Link>
