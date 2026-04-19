@@ -13,6 +13,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [messageType, setMessageType] = useState<MessageType>("error");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,7 +73,7 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, rememberMe }),
       });
 
       const data = (await res.json()) as { success?: boolean; error?: string };
@@ -107,8 +108,8 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto mt-20 max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <h1 className="text-2xl font-semibold text-gray-900">Welcome back</h1>
-      <p className="mt-1 text-sm text-gray-500">
+      <h1 className="text-2xl font-semibold text-gray-900 text-center">Welcome back</h1>
+      <p className="mt-1 text-sm text-gray-500 text-center">
         Sign in to continue to your dashboard.
       </p>
 
@@ -135,7 +136,16 @@ export default function LoginPage() {
           />
         </div>
 
-        <div className="flex items-center justify-end text-sm">
+        <div className="flex items-center justify-between text-sm">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+            />
+            <span className="text-gray-600">Remember me</span>
+          </label>
           <Link href="/forgot-password" className="text-indigo-600 hover:text-indigo-500">
             Forgot password?
           </Link>
@@ -152,7 +162,7 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <p className="mt-4 text-sm text-gray-600">
+      <p className="mt-4 text-sm text-gray-600 text-center">
         New here?{" "}
         <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
           Create an account
@@ -161,9 +171,8 @@ export default function LoginPage() {
 
       {message ? (
         <p
-          className={`mt-4 text-sm ${
-            messageType === "success" ? "text-emerald-600" : "text-red-600"
-          }`}
+          className={`mt-4 text-sm ${messageType === "success" ? "text-emerald-600" : "text-red-600"
+            }`}
         >
           {message}
         </p>

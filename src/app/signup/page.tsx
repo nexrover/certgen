@@ -129,8 +129,8 @@ export default function SignupPage() {
         />
       ) : null}
 
-      <h1 className="text-2xl font-semibold text-gray-900">Create your account</h1>
-      <p className="mt-1 text-sm text-gray-500">
+      <h1 className="text-2xl font-semibold text-gray-900 text-center">Create your account</h1>
+      <p className="mt-1 text-sm text-gray-500 text-center">
         Start by setting up your profile and credentials.
       </p>
 
@@ -199,7 +199,7 @@ export default function SignupPage() {
 
       {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
 
-      <p className="mt-4 text-sm text-gray-600">
+      <p className="mt-4 text-sm text-gray-600 text-center">
         Already registered?{" "}
         <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
           Sign in

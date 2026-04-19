@@ -4,12 +4,14 @@ import { getSupabaseCookieOptions } from "@/lib/supabase/cookie-options";
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const isRemembered = request.cookies.has("remember_me");
+  const cookieOpts = getSupabaseCookieOptions(isRemembered);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      cookieOptions: getSupabaseCookieOptions(),
+      cookieOptions: cookieOpts,
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -20,7 +22,7 @@ export async function updateSession(request: NextRequest) {
           response = NextResponse.next({ request });
 
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
+            response.cookies.set(name, value, { ...options, maxAge: cookieOpts.maxAge })
           );
         },
       },

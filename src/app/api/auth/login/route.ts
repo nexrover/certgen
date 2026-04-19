@@ -13,6 +13,7 @@ import {
 const BodySchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+  rememberMe: z.boolean().optional(),
 });
 
 export async function POST(request: Request) {
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const supabase = await createRouteHandlerClient();
+  const supabase = await createRouteHandlerClient(body.rememberMe);
   const { error } = await supabase.auth.signInWithPassword({
     email: emailNorm,
     password: body.password,
@@ -60,5 +61,19 @@ export async function POST(request: Request) {
   }
 
   await clearLoginFailures(emailNorm);
-  return NextResponse.json({ success: true });
+
+  const res = NextResponse.json({ success: true });
+  if (body.rememberMe) {
+    res.cookies.set("remember_me", "1", {
+      path: "/",
+      maxAge: 30 * 24 * 60 * 60,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+  } else {
+    res.cookies.delete("remember_me");
+  }
+
+  return res;
 }
