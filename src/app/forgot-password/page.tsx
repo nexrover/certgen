@@ -18,6 +18,8 @@ export default function ForgotPasswordPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendTimer, setResendTimer] = useState(300);
 
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -28,6 +30,12 @@ export default function ForgotPasswordPage() {
       inputsRef.current[0]?.focus();
     }
   }, [step]);
+
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+    const timer = setInterval(() => setResendTimer((prev) => prev - 1), 1000);
+    return () => clearInterval(timer);
+  }, [resendTimer]);
 
   const setDigit = (index: number, value: string) => {
     const v = value.replace(/\D/g, "").slice(-1);
@@ -67,10 +75,35 @@ export default function ForgotPasswordPage() {
       }
       setMessage("If that email is registered, we sent a 6-digit code (valid 5 minutes).");
       setStep("code");
+      setResendTimer(300);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Request failed.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const onResend = async () => {
+    if (!email) return;
+    setResending(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = (await res.json()) as { success?: boolean; error?: string };
+      if (!res.ok || !data.success) {
+        throw new Error(data.error ?? "Could not resend code.");
+      }
+      setMessage("A new 6-digit code has been sent to your email.");
+      setResendTimer(300);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not resend.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -169,6 +202,24 @@ export default function ForgotPasswordPage() {
               />
             ))}
           </div>
+
+          <div className="mt-2 text-center text-sm text-gray-500">
+            {resendTimer > 0 ? (
+              <span>
+                Resend code in <span className="font-medium text-gray-900">{Math.floor(resendTimer / 60)}:{(resendTimer % 60).toString().padStart(2, "0")}</span>
+              </span>
+            ) : (
+              <button
+                type="button"
+                disabled={resending || !email}
+                onClick={() => void onResend()}
+                className="font-medium text-indigo-600 hover:text-indigo-500 disabled:opacity-50 transition-colors"
+              >
+                {resending ? "Sending..." : "Resend code"}
+              </button>
+            )}
+          </div>
+
           <button
             type="submit"
             disabled={code.length !== 6}
@@ -210,8 +261,8 @@ export default function ForgotPasswordPage() {
         </form>
       ) : null}
 
-      {/* {message ? <p className="mt-4 text-sm text-emerald-600">{message}</p> : null}
-      {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null} */}
+      {message ? <p className="mt-4 text-sm text-emerald-600">{message}</p> : null}
+      {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
 
       <p className="mt-4 text-sm text-gray-600 text-center">
         <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
