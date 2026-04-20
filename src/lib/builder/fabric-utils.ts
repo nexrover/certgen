@@ -1,4 +1,4 @@
-import { Canvas, Textbox, Rect, Circle, Triangle, Line, FabricImage, Path, Group, type FabricObject } from "fabric";
+import { Canvas, Textbox, Rect, Circle, Triangle, Line, FabricImage, Path, Group, loadSVGFromURL, type FabricObject } from "fabric";
 
 export function addTextbox(canvas: Canvas, text: string, opts: Partial<{ fontSize: number; fontWeight: string; fill: string; fontFamily: string; left: number; top: number }> = {}) {
   const tb = new Textbox(text, {
@@ -129,6 +129,36 @@ export function addSvgPath(canvas: Canvas, pathData: string, opts: { fill?: stri
   canvas.add(p);
   canvas.setActiveObject(p);
   canvas.requestRenderAll();
+}
+
+export async function addSvgFromUrl(canvas: Canvas, url: string) {
+  try {
+    const { objects, options } = await loadSVGFromURL(url);
+    const validObjects = objects.filter((obj): obj is FabricObject => obj !== null);
+    if (validObjects.length === 0) return;
+
+    const group = new Group(validObjects, {
+      ...options,
+      left: canvas.width! / 2,
+      top: canvas.height! / 2,
+      originX: "center",
+      originY: "center",
+    });
+    
+    // Scale to a reasonable size (e.g., 100px max dimension)
+    const maxDim = 100;
+    const scale = maxDim / Math.max(group.width!, group.height!);
+    group.set({
+      scaleX: scale,
+      scaleY: scale,
+    });
+
+    canvas.add(group);
+    canvas.setActiveObject(group);
+    canvas.requestRenderAll();
+  } catch (error) {
+    console.error("Error loading SVG from URL:", error);
+  }
 }
 
 export async function addImageFromUrl(canvas: Canvas, url: string) {
