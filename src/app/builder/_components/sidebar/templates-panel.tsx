@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { StaticCanvas } from "fabric";
+import { createPortal } from "react-dom";
 import type { CustomTemplate } from "@/lib/custom-templates-store";
 import { PRESET_TEMPLATES } from "@/lib/builder/preset-templates";
 
@@ -289,6 +290,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
   const [loading, setLoading] = useState<string | null>(null);
   const [presetThumbnails, setPresetThumbnails] = useState<Record<string, string>>({});
   const customScrollRef = useRef<HTMLDivElement>(null);
+  const filterScrollRef = useRef<HTMLDivElement>(null);
 
   const scrollCustomRight = useCallback(() => {
     customScrollRef.current?.scrollBy({ left: 120, behavior: "smooth" });
@@ -296,6 +298,14 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
 
   const scrollCustomLeft = useCallback(() => {
     customScrollRef.current?.scrollBy({ left: -120, behavior: "smooth" });
+  }, []);
+
+  const scrollFilterRight = useCallback(() => {
+    filterScrollRef.current?.scrollBy({ left: 100, behavior: "smooth" });
+  }, []);
+
+  const scrollFilterLeft = useCallback(() => {
+    filterScrollRef.current?.scrollBy({ left: -100, behavior: "smooth" });
   }, []);
   const [orientation, setOrientation] = useState<Orientation>("landscape");
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
@@ -384,57 +394,103 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
       </div>
 
       {/* Filter chips */}
-      <div className="flex items-center gap-1.5 px-3 py-2.5">
-        <FilterChip
-          label="Category"
-          active={selectedCategories.length > 0}
-          isOpen={openFilter === "category"}
-          onToggle={() => setOpenFilter(openFilter === "category" ? null : "category")}
-          onClose={() => setOpenFilter(null)}
-          options={ALL_CATEGORIES}
-          selected={selectedCategories}
-          onSelect={(v) => setSelectedCategories(
-            selectedCategories.includes(v)
-              ? selectedCategories.filter((x) => x !== v)
-              : [...selectedCategories, v]
-          )}
-        />
-        <FilterChip
-          label="Style"
-          active={selectedStyles.length > 0}
-          isOpen={openFilter === "style"}
-          onToggle={() => setOpenFilter(openFilter === "style" ? null : "style")}
-          onClose={() => setOpenFilter(null)}
-          options={ALL_STYLES}
-          selected={selectedStyles}
-          onSelect={(v) => setSelectedStyles(
-            selectedStyles.includes(v as Style)
-              ? selectedStyles.filter((x) => x !== v)
-              : [...selectedStyles, v as Style]
-          )}
-        />
-        <FilterChip
-          label="Color"
-          active={selectedColors.length > 0}
-          isOpen={openFilter === "color"}
-          onToggle={() => setOpenFilter(openFilter === "color" ? null : "color")}
-          onClose={() => setOpenFilter(null)}
-          options={ALL_COLORS}
-          selected={selectedColors}
-          onSelect={(v) => setSelectedColors(
-            selectedColors.includes(v as ColorTheme)
-              ? selectedColors.filter((x) => x !== v)
-              : [...selectedColors, v as ColorTheme]
-          )}
-        />
-        {hasFilters && (
+      <div className="group relative mb-2 border-b border-gray-100 bg-white">
+        {/* Left Scroll Button */}
+        <button
+          onClick={scrollFilterLeft}
+          className="absolute left-0 top-0 bottom-0 z-20 flex w-8 items-center justify-center bg-gradient-to-r from-white via-white/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+          title="Scroll left"
+        >
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-gray-500 hover:text-blue-600">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </div>
+        </button>
+
+        <div 
+          ref={filterScrollRef}
+          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar px-3 py-2.5"
+          style={{ scrollbarWidth: "none" }}
+        >
+          <FilterChip
+            label="Category"
+            active={selectedCategories.length > 0}
+            isOpen={openFilter === "category"}
+            onToggle={() => setOpenFilter(openFilter === "category" ? null : "category")}
+            onClose={() => setOpenFilter(null)}
+            options={ALL_CATEGORIES}
+            selected={selectedCategories}
+            onSelect={(v) => setSelectedCategories(
+              selectedCategories.includes(v)
+                ? selectedCategories.filter((x) => x !== v)
+                : [...selectedCategories, v]
+            )}
+            onClear={() => setSelectedCategories([])}
+          />
+          <FilterChip
+            label="Style"
+            active={selectedStyles.length > 0}
+            isOpen={openFilter === "style"}
+            onToggle={() => setOpenFilter(openFilter === "style" ? null : "style")}
+            onClose={() => setOpenFilter(null)}
+            options={ALL_STYLES}
+            selected={selectedStyles}
+            onSelect={(v) => setSelectedStyles(
+              selectedStyles.includes(v as Style)
+                ? selectedStyles.filter((x) => x !== v)
+                : [...selectedStyles, v as Style]
+            )}
+            onClear={() => setSelectedStyles([])}
+            align="center"
+          />
+          <FilterChip
+            label="Color"
+            active={selectedColors.length > 0}
+            isOpen={openFilter === "color"}
+            onToggle={() => setOpenFilter(openFilter === "color" ? null : "color")}
+            onClose={() => setOpenFilter(null)}
+            options={ALL_COLORS}
+            selected={selectedColors}
+            onSelect={(v) => setSelectedColors(
+              selectedColors.includes(v as ColorTheme)
+                ? selectedColors.filter((x) => x !== v)
+                : [...selectedColors, v as ColorTheme]
+            )}
+            onClear={() => setSelectedColors([])}
+            align="right"
+          />
+          
           <button
             onClick={() => { setSelectedCategories([]); setSelectedStyles([]); setSelectedColors([]); }}
-            className="ml-auto text-[10px] text-gray-400 hover:text-gray-600"
+            className={`shrink-0 flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-semibold transition-all ${
+              hasFilters 
+                ? "border-red-100 bg-red-50 text-red-600 hover:bg-red-100" 
+                : "border-gray-100 bg-gray-50 text-gray-400 opacity-60 cursor-default"
+            }`}
           >
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
             Clear All
           </button>
-        )}
+
+          {/* Extra spacing for the fade mask/button */}
+          <div className="shrink-0 w-6" />
+        </div>
+        
+        {/* Right Scroll Button */}
+        <button
+          onClick={scrollFilterRight}
+          className="absolute right-0 top-0 bottom-0 z-20 flex w-10 items-center justify-center bg-gradient-to-l from-white via-white/90 to-transparent"
+          title="Scroll right"
+        >
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-gray-500 hover:text-blue-600">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </button>
       </div>
 
       {/* ── Custom Templates — horizontal scroll ────────── */}
@@ -572,27 +628,46 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
 }
 
 function FilterChip<T extends string>({
-  label, active, isOpen, onToggle, onClose, options, selected, onSelect,
+  label, active, isOpen, onToggle, onClose, options, selected, onSelect, onClear, align = "left",
 }: {
   label: string; active: boolean; isOpen: boolean; onToggle: () => void; onClose: () => void;
-  options: T[]; selected: T[]; onSelect: (v: T) => void;
+  options: T[]; selected: T[]; onSelect: (v: T) => void; onClear: () => void;
+  align?: "left" | "right" | "center";
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number; width: number } | null>(null);
+
+  useEffect(() => {
+    if (isOpen && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
     function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+      if (
+        ref.current && !ref.current.contains(e.target as Node) &&
+        dropdownRef.current && !dropdownRef.current.contains(e.target as Node)
+      ) {
+        onClose();
+      }
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [isOpen, onClose]);
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative shrink-0" ref={ref}>
       <button
         onClick={onToggle}
-        className={`flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-medium transition-colors ${active
+        className={`flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-medium transition-all ${active
           ? "border-blue-400 bg-blue-50 text-blue-600"
           : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
           }`}
@@ -602,38 +677,59 @@ function FilterChip<T extends string>({
           <path d="M12 8v8M8 12h8" />
         </svg>
         {label}
-        {active && <span className="ml-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-blue-500 text-[8px] text-white">{selected.length}</span>}
+        {active && <span className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[8px] font-bold text-white shadow-sm">{selected.length}</span>}
       </button>
 
-      {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
-          <div className="flex items-center justify-between border-b border-gray-100 px-3 py-2">
-            <span className="text-xs font-semibold text-gray-800">{label}</span>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M18 6 6 18M6 6l12 12" /></svg>
+      {isOpen && coords && createPortal(
+        <div 
+          ref={dropdownRef}
+          className="fixed z-[9999] w-48 rounded-xl border border-gray-200 bg-white py-1 shadow-2xl ring-1 ring-black/[0.05]"
+          style={{
+            top: `${coords.top + 6}px`,
+            left: align === "right" 
+              ? `${coords.left + coords.width - 192}px` 
+              : align === "center" 
+                ? `${coords.left + coords.width/2 - 96}px` 
+                : `${coords.left}px`,
+            animation: "dropdown-fade 0.15s ease-out",
+          }}
+        >
+          <div className="flex items-center justify-between border-b border-gray-100 px-3 py-2.5">
+            <span className="text-[11px] font-bold text-gray-800 uppercase tracking-wider">{label}</span>
+            <button onClick={onClose} className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M18 6 6 18M6 6l12 12" /></svg>
             </button>
           </div>
-          <div className="max-h-48 overflow-y-auto py-1">
+          <div className="max-h-56 overflow-y-auto py-1.5">
             {options.map((opt) => (
               <button
                 key={opt}
                 onClick={() => onSelect(opt)}
-                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-gray-700 hover:bg-gray-50"
+                className="group flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 hover:bg-blue-50/50 transition-colors"
               >
-                <div className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border transition-colors ${selected.includes(opt) ? "border-blue-500 bg-blue-500" : "border-gray-300"
+                <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-all ${selected.includes(opt) ? "border-blue-500 bg-blue-500 shadow-sm" : "border-gray-300 group-hover:border-blue-300"
                   }`}>
                   {selected.includes(opt) && (
-                    <svg className="h-2.5 w-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}><path d="M20 6 9 17l-5-5" /></svg>
+                    <svg className="h-3 w-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3.5}><path d="M20 6 9 17l-5-5" /></svg>
                   )}
                 </div>
-                {opt}
+                <span className={selected.includes(opt) ? "font-medium text-blue-700" : ""}>{opt}</span>
               </button>
             ))}
           </div>
-          <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-3 py-2">
-            <button onClick={() => { selected.forEach(() => { }); options.forEach((o) => { if (selected.includes(o)) onSelect(o); }); }} className="text-[10px] text-gray-400 hover:text-gray-600">Clear</button>
+          <div className="flex items-center justify-end border-t border-gray-100 px-3 py-2 bg-gray-50/50 rounded-b-xl">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onClear();
+              }} 
+              className="text-[10px] font-semibold text-gray-400 hover:text-red-500 transition-colors uppercase tracking-tight"
+            >
+              Clear Selection
+            </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
