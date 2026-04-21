@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { LuEye, LuPencil, LuTrash2 } from "react-icons/lu";
 
 interface TemplateCardActionsProps {
   templateId: string;
@@ -48,7 +48,7 @@ export function TemplateCardActions({ templateId }: TemplateCardActionsProps) {
         onClick={() => router.push(`/builder/${templateId}`)}
         className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800"
       >
-        <Pencil className="mr-1.5 h-4 w-4" />
+        <LuPencil className="mr-1.5 h-4 w-4" />
         Edit
       </Button>
       <Button
@@ -57,7 +57,7 @@ export function TemplateCardActions({ templateId }: TemplateCardActionsProps) {
         size="sm"
         onClick={() => router.push(`/templates/${templateId}`)}
       >
-        <Eye className="mr-1.5 h-4 w-4" />
+        <LuEye className="mr-1.5 h-4 w-4" />
         Preview
       </Button>
       <Button
@@ -68,7 +68,7 @@ export function TemplateCardActions({ templateId }: TemplateCardActionsProps) {
         onClick={handleDelete}
         className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
       >
-        <Trash2 className="mr-1.5 h-4 w-4" />
+        <LuTrash2 className="mr-1.5 h-4 w-4" />
         {isDeleting ? "Deleting..." : "Delete"}
       </Button>
     </div>

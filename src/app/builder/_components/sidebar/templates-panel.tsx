@@ -293,7 +293,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
   const scrollCustomRight = useCallback(() => {
     customScrollRef.current?.scrollBy({ left: 120, behavior: "smooth" });
   }, []);
-  
+
   const scrollCustomLeft = useCallback(() => {
     customScrollRef.current?.scrollBy({ left: -120, behavior: "smooth" });
   }, []);
@@ -439,8 +439,8 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
 
       {/* ── Custom Templates — horizontal scroll ────────── */}
       {customTemplates.length > 0 && (
-        <div className="px-3 pb-2">
-          <div className="mb-1.5 flex items-center justify-between">
+        <div className="px-3 pb-6">
+          <div className="mb-2 flex items-center justify-between">
             <span className="text-[11px] font-semibold text-gray-700">Recently Used</span>
             <div className="flex gap-1">
               <button
@@ -465,11 +465,11 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
           </div>
           <div
             ref={customScrollRef}
-            className="flex gap-2 overflow-x-auto pb-1.5"
+            className="flex gap-2 overflow-x-auto pb-2 pt-2"
             style={{ scrollbarWidth: "none" }}
           >
             {customTemplates.map((ct) => (
-              <div key={ct.id} className="group relative shrink-0">
+              <div key={ct.id} className="group relative shrink-0 w-[120px]">
                 <button
                   onClick={() => {
                     onLoadTemplate({
@@ -479,13 +479,14 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
                       height: ct.height,
                     });
                   }}
-                  className="block overflow-hidden rounded-md border border-gray-200 bg-white transition-all hover:border-blue-400 hover:shadow-md"
+                  className="block w-full overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md"
+                  style={{ aspectRatio: `${ct.width} / ${ct.height}` }}
                   title="Load custom template"
                 >
                   <img
                     src={ct.thumbnail}
                     alt="Custom template"
-                    className="h-[62px] w-[88px] object-cover"
+                    className="h-full w-full object-contain"
                     draggable={false}
                   />
                 </button>
@@ -495,7 +496,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
                     e.stopPropagation();
                     onDeleteCustomTemplate?.(ct.id);
                   }}
-                  className="absolute -right-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white shadow transition-colors hover:bg-red-600 group-hover:flex"
+                  className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md transition-colors hover:bg-red-600 group-hover:flex z-10"
                   title="Remove"
                 >
                   <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
@@ -521,15 +522,15 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             ? { width: 595, height: 842 }
             : { width: 842, height: 595 };
           return (
-        <button
-          onClick={handleBlank}
-          className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
-          style={{ aspectRatio: `${blankDims.width} / ${blankDims.height}` }}
-        >
-          <svg className="h-6 w-6 text-gray-300 transition-colors group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-        </button>
+            <button
+              onClick={handleBlank}
+              className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
+              style={{ aspectRatio: `${blankDims.width} / ${blankDims.height}` }}
+            >
+              <svg className="h-6 w-6 text-gray-300 transition-colors group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </button>
           );
         })()}
 
@@ -537,25 +538,25 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
           (() => {
             const dims = getTemplateDimensions(t.id, t.orientation);
             return (
-          <button
-            key={t.id}
-            onClick={() => handleLoad(t.id)}
-            disabled={loading === t.id}
-            className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md disabled:opacity-50"
-            style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
-          >
-            <img
-              src={presetThumbnails[t.id] ?? t.thumbnailSrc}
-              alt={`${t.label} preview`}
-              className="h-full w-full bg-white object-contain"
-              draggable={false}
-            />
-            {loading === t.id && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-              </div>
-            )}
-          </button>
+              <button
+                key={t.id}
+                onClick={() => handleLoad(t.id)}
+                disabled={loading === t.id}
+                className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md disabled:opacity-50"
+                style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
+              >
+                <img
+                  src={presetThumbnails[t.id] ?? t.thumbnailSrc}
+                  alt={`${t.label} preview`}
+                  className="h-full w-full bg-white object-contain"
+                  draggable={false}
+                />
+                {loading === t.id && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                  </div>
+                )}
+              </button>
             );
           })()
         ))}

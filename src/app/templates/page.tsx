@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { listTemplates } from "@/lib/services/template-service";
-import { CalendarClock, FilePlus2, ImageIcon, LayoutTemplate } from "lucide-react";
+import { LuCalendarClock, LuFilePlus2, LuImage as ImageIcon, LuLayoutTemplate } from "react-icons/lu";
 import { TemplateCardActions } from "./_components/template-card-actions";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +28,7 @@ export default async function TemplatesPage() {
         {templates.length > 0 ? (
           <Link href="/builder/new">
             <Button className="bg-indigo-600 text-white hover:bg-indigo-500">
-              <FilePlus2 className="mr-2 h-4 w-4" />
+              <LuFilePlus2 className="mr-2 h-4 w-4" />
               Create Template
             </Button>
           </Link>
@@ -38,7 +38,7 @@ export default async function TemplatesPage() {
       {templates.length === 0 ? (
         <section className="flex min-h-[60vh] flex-col items-center justify-center rounded-2xl border border-dashed border-indigo-200 bg-linear-to-b from-white to-indigo-50/40 px-6 text-center">
           <div className="mb-5 rounded-full bg-indigo-100 p-4 text-indigo-600">
-            <LayoutTemplate className="h-8 w-8" />
+            <LuLayoutTemplate className="h-8 w-8" />
           </div>
           <h2 className="text-2xl font-semibold text-gray-900">No templates yet</h2>
           <p className="mt-2 max-w-md text-sm text-gray-600">
@@ -49,7 +49,7 @@ export default async function TemplatesPage() {
               size="lg"
               className="bg-indigo-600 px-8 text-base text-white hover:bg-indigo-500"
             >
-              <FilePlus2 className="mr-2 h-5 w-5" />
+              <LuFilePlus2 className="mr-2 h-5 w-5" />
               Create Template
             </Button>
           </Link>
@@ -82,7 +82,7 @@ export default async function TemplatesPage() {
               <div className="p-4">
                 <h3 className="line-clamp-1 text-base font-semibold text-gray-900">{t.name}</h3>
                 <p className="mt-1 flex items-center text-xs text-gray-500">
-                  <CalendarClock className="mr-1.5 h-3.5 w-3.5 text-indigo-500" />
+                  <LuCalendarClock className="mr-1.5 h-3.5 w-3.5 text-indigo-500" />
                   Last Created Date: {formatDate(t.created_at)}
                 </p>
                 <TemplateCardActions templateId={t.id} />
