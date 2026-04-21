@@ -135,13 +135,46 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
       //  4. Direct property write (obj.left = v) — avoids Fabric's set() side-effects
       //  5. setCoords() only when clamped position ACTUALLY changed
 
+      /* ── Boundary constraint ──────────────────────────── */
+      //
+      // Jitter-proof strategy for dragging:
+      //  1. Snapshot bounding-rect geometry ONCE at drag start
+      //  2. Compute valid left/top range from cached values
+      //  3. Clamp + Math.round() to avoid sub-pixel oscillation
+      //
+      // Strategy for scaling/resizing:
+      //  1. Capture "last good state" before/during transformation
+      //  2. If new state exceeds canvas, revert to last good state
+      //  3. Toggle "boundary-hit" class for visual feedback
+
       let _bc: {
         dL: number; dT: number;   // offset: obj.left/top → bounding-rect left/top
         bW: number; bH: number;   // bounding-rect dimensions
-        pL: number; pT: number;   // previous clamped left/top (to skip redundant setCoords)
+        pL: number; pT: number;   // previous clamped left/top
       } | null = null;
 
-      fc.on("mouse:down", () => { _bc = null; });
+      let _lastGoodState: {
+        scaleX: number; scaleY: number;
+        left: number; top: number;
+        width: number; height: number;
+      } | null = null;
+
+      fc.on("mouse:down", (e) => {
+        _bc = null;
+        const obj = e.target;
+        if (obj) {
+          _lastGoodState = {
+            scaleX: obj.scaleX || 1,
+            scaleY: obj.scaleY || 1,
+            left: obj.left || 0,
+            top: obj.top || 0,
+            width: obj.width || 0,
+            height: obj.height || 0,
+          };
+        } else {
+          _lastGoodState = null;
+        }
+      });
 
       fc.on("object:moving", (e) => {
         const obj = e.target;
@@ -150,7 +183,6 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
         const cW = fc.width!;
         const cH = fc.height!;
 
-        // ── First frame: snapshot geometry ──
         if (!_bc) {
           const br = obj.getBoundingRect();
           const l = obj.left ?? 0;
@@ -165,7 +197,6 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
           };
         }
 
-        // ── Smart guides: snap to alignment ──
         if (guidesRef.current) {
           const snap = guidesRef.current.calculate(obj, fc);
           obj.left = (obj.left ?? 0) + snap.dx;
@@ -173,18 +204,14 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
         }
 
         const { dL, dT, bW, bH } = _bc;
-
-        // ── Valid range ──
         const minL = dL;
         const maxL = cW - bW + dL;
         const minT = dT;
         const maxT = cH - bH + dT;
 
-        // ── Clamp + round to whole pixels ──
         const clL = Math.round(Math.max(minL, Math.min(obj.left ?? 0, maxL)));
         const clT = Math.round(Math.max(minT, Math.min(obj.top ?? 0, maxT)));
 
-        // ── Apply: direct property write, setCoords only when value changed ──
         obj.left = clL;
         obj.top = clT;
 
@@ -194,14 +221,48 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
           _bc.pT = clT;
         }
 
-        // ── Red border when AT any edge (2px tolerance) ──
         const E = 2;
-        const touching =
-          clL <= minL + E || clL >= maxL - E ||
-          clT <= minT + E || clT >= maxT - E;
-
+        const touching = clL <= minL + E || clL >= maxL - E || clT <= minT + E || clT >= maxT - E;
         canvasWrapperRef.current?.classList.toggle("boundary-hit", touching);
       });
+
+      const handleResizing = (e: any) => {
+        const obj = e.target;
+        if (!obj) return;
+
+        const br = obj.getBoundingRect();
+        const cW = fc.width!;
+        const cH = fc.height!;
+        const E = 1; // small tolerance
+
+        const isOut =
+          br.left < -E ||
+          br.top < -E ||
+          br.left + br.width > cW + E ||
+          br.top + br.height > cH + E;
+
+        if (isOut) {
+          if (_lastGoodState) {
+            obj.set(_lastGoodState);
+            obj.setCoords();
+          }
+          canvasWrapperRef.current?.classList.add("boundary-hit");
+        } else {
+          _lastGoodState = {
+            scaleX: obj.scaleX,
+            scaleY: obj.scaleY,
+            left: obj.left,
+            top: obj.top,
+            width: obj.width,
+            height: obj.height,
+          };
+          canvasWrapperRef.current?.classList.remove("boundary-hit");
+        }
+      };
+
+      fc.on("object:scaling", handleResizing);
+      fc.on("object:resizing", handleResizing);
+
 
       fc.on("mouse:up", () => {
         _bc = null;
