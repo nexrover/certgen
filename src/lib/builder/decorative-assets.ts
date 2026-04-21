@@ -86,11 +86,6 @@ export const BUILDER_ELEMENT_SHAPES = [
   { label: "Shape 12", url: "/Shapes/12.svg" },
 ];
 
-export const BUILDER_ELEMENT_LINES = [
-  { label: "Line 1", url: "/Lines/1.svg" },
-  { label: "Line 2", url: "/Lines/2.svg" },
-];
-
 export const BUILDER_ELEMENT_RIBBONS = [
   { label: "Ribbon 1", url: "/Ribons/1.svg" },
   { label: "Ribbon 2", url: "/Ribons/2.svg" },

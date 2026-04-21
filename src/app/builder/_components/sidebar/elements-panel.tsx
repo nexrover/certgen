@@ -1,11 +1,10 @@
 "use client";
  
 import { useState } from "react";
-import { addSvgFromUrl } from "@/lib/builder/fabric-utils";
+import { addRect, addCircle, addTriangle, addLine, addSvgPath, addSvgFromUrl } from "@/lib/builder/fabric-utils";
 import { 
   BUILDER_ELEMENT_ICONS, 
   BUILDER_ELEMENT_SHAPES, 
-  BUILDER_ELEMENT_LINES, 
   BUILDER_ELEMENT_RIBBONS,
   BUILDER_ELEMENT_BASES,
 } from "@/lib/builder/decorative-assets";
@@ -21,7 +20,29 @@ export function ElementsPanel({ canvas }: ElementsPanelProps) {
   return (
     <div className="space-y-8 pb-10">
       <ElementSection title="Shapes" items={BUILDER_ELEMENT_SHAPES} canvas={canvas} />
-      <ElementSection title="Lines" items={BUILDER_ELEMENT_LINES} canvas={canvas} />
+      
+      <div>
+        <div className="mb-3 px-1">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Lines</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => addLine(canvas, true)}
+            className="flex flex-col items-center gap-1 rounded-lg border border-gray-200 bg-white p-3 transition-all hover:border-indigo-400 hover:bg-indigo-50/50"
+          >
+            <span className="text-xl font-light">―</span>
+            <span className="text-[10px] text-gray-400">Horizontal</span>
+          </button>
+          <button
+            onClick={() => addLine(canvas, false)}
+            className="flex flex-col items-center gap-1 rounded-lg border border-gray-200 bg-white p-3 transition-all hover:border-indigo-400 hover:bg-indigo-50/50"
+          >
+            <span className="text-xl font-light rotate-90">―</span>
+            <span className="text-[10px] text-gray-400">Vertical</span>
+          </button>
+        </div>
+      </div>
+
       <ElementSection title="Icons" items={BUILDER_ELEMENT_ICONS} canvas={canvas} />
       <ElementSection title="Ribbons" items={BUILDER_ELEMENT_RIBBONS} canvas={canvas} />
       <ElementSection title="Bases & Frames" items={BUILDER_ELEMENT_BASES} canvas={canvas} />

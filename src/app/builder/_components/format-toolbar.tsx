@@ -1,10 +1,12 @@
 "use client";
-
+ 
 import { useState, useEffect, useCallback } from "react";
 import type { Canvas } from "fabric";
-
+import { LuPalette, LuType, LuMinus, LuPlus, LuBold, LuItalic, LuUnderline, LuAlignLeft, LuAlignCenter, LuAlignRight, LuUndo2, LuRedo2, LuTrash2, LuImage, LuRotateCcw } from "react-icons/lu";
+import { MdOutlineColorLens } from "react-icons/md";
+ 
 /* ── Font catalogue (Google + system-safe) ────────────── */
-
+ 
 const FONT_FAMILIES = [
   "Arial",
   "Cinzel",
@@ -30,7 +32,7 @@ const FONT_FAMILIES = [
   "Trebuchet MS",
   "Verdana",
 ];
-
+ 
 const FONT_WEIGHTS = [
   { value: "300", label: "Light" },
   { value: "normal", label: "Regular" },
@@ -39,9 +41,9 @@ const FONT_WEIGHTS = [
   { value: "bold", label: "Bold" },
   { value: "800", label: "Extra Bold" },
 ];
-
+ 
 /* ── Types ────────────────────────────────────────────── */
-
+ 
 interface FormatToolbarProps {
   canvas: Canvas | null;
   onUndo: () => void;
@@ -52,9 +54,9 @@ interface FormatToolbarProps {
   onBgImageUpload?: () => void;
   onBgImageRemove?: () => void;
 }
-
+ 
 /* ── Component ────────────────────────────────────────── */
-
+ 
 export function FormatToolbar({
   canvas,
   onUndo,
@@ -75,17 +77,21 @@ export function FormatToolbar({
   const [isUnderline, setIsUnderline] = useState(false);
   const [textAlign, setTextAlign] = useState("center");
   const [isText, setIsText] = useState(false);
-
+  const [isLine, setIsLine] = useState(false);
+  const [strokeWidth, setStrokeWidth] = useState(2);
+ 
   /* ── Sync state from the currently-selected Fabric object ── */
-
+ 
   const syncFromSelection = useCallback(() => {
     if (!canvas) return;
     const obj = canvas.getActiveObject();
     if (!obj) return;
-
+ 
     const textLike = "fontSize" in obj;
+    const lineLike = obj.type === "line";
     setIsText(textLike);
-
+    setIsLine(lineLike);
+ 
     if (textLike) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const t = obj as any;
@@ -99,16 +105,21 @@ export function FormatToolbar({
       setIsItalic(t.fontStyle === "italic");
       setIsUnderline(!!t.underline);
       setTextAlign(t.textAlign || "left");
+    } else if (lineLike) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const l = obj as any;
+      setStrokeWidth(l.strokeWidth || 2);
+      setFontColor(typeof l.stroke === "string" ? l.stroke : "#000000");
     } else {
       // Non-text objects still have fill
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const o = obj as any;
       if (typeof o.fill === "string") setFontColor(o.fill);
     }
-
+ 
     setScaling(obj.lockUniScaling !== true);
   }, [canvas]);
-
+ 
   useEffect(() => {
     if (!canvas) return;
     const handler = () => syncFromSelection();
@@ -121,12 +132,12 @@ export function FormatToolbar({
       canvas.off("object:modified", handler);
     };
   }, [canvas, syncFromSelection]);
-
+ 
   /* Initial sync */
   useEffect(() => { syncFromSelection(); }, [syncFromSelection]);
-
+ 
   /* ── Apply helper — pushes changes into Fabric + triggers history ── */
-
+ 
   function apply(props: Record<string, unknown>) {
     if (!canvas) return;
     const obj = canvas.getActiveObject();
@@ -136,26 +147,26 @@ export function FormatToolbar({
     canvas.requestRenderAll();
     canvas.fire("object:modified", { target: obj });
   }
-
+ 
   /* ── Handlers ────────────────────────────────────────── */
-
+ 
   function handleFontFamilyChange(v: string) {
     setFontFamily(v);
     apply({ fontFamily: v });
   }
-
+ 
   function handleFontWeightChange(v: string) {
     setFontWeight(v);
     apply({ fontWeight: v });
   }
-
+ 
   function handleFontSizeStep(delta: number) {
     const next = Math.max(6, Math.min(200, fontSize + delta));
     setFontSize(next);
     setFontSizeInput(String(next));
     apply({ fontSize: next });
   }
-
+ 
   function commitFontSizeInput() {
     const v = parseInt(fontSizeInput, 10);
     if (!isNaN(v) && v >= 6 && v <= 200) {
@@ -165,46 +176,56 @@ export function FormatToolbar({
       setFontSizeInput(String(fontSize));
     }
   }
-
+ 
+  function handleStrokeWidthStep(delta: number) {
+    const next = Math.max(1, Math.min(50, strokeWidth + delta));
+    setStrokeWidth(next);
+    apply({ strokeWidth: next });
+  }
+ 
   function handleScalingToggle() {
     const next = !scaling;
     setScaling(next);
     apply({ lockUniScaling: !next });
   }
-
+ 
   function handleColorChange(c: string) {
     setFontColor(c);
-    apply({ fill: c });
+    if (isLine) {
+      apply({ stroke: c });
+    } else {
+      apply({ fill: c });
+    }
   }
-
+ 
   function handleBoldToggle() {
     const isBold = fontWeight === "bold" || Number(fontWeight) >= 700;
     const nw = isBold ? "normal" : "bold";
     setFontWeight(nw);
     apply({ fontWeight: nw });
   }
-
+ 
   function handleItalicToggle() {
     const n = !isItalic;
     setIsItalic(n);
     apply({ fontStyle: n ? "italic" : "normal" });
   }
-
+ 
   function handleUnderlineToggle() {
     const n = !isUnderline;
     setIsUnderline(n);
     apply({ underline: n });
   }
-
+ 
   function handleTextAlignChange(a: string) {
     setTextAlign(a);
     apply({ textAlign: a });
   }
-
+ 
   const isBoldActive = fontWeight === "bold" || Number(fontWeight) >= 700;
-
+ 
   /* ── Render ──────────────────────────────────────────── */
-
+ 
   return (
     <div
       className="flex h-11 items-center gap-1 border-b border-gray-200 bg-white px-3"
@@ -225,39 +246,32 @@ export function FormatToolbar({
               title="Choose background color"
             />
           </div>
-
+ 
           <div className="mx-1 h-5 w-px bg-gray-200" />
-
+ 
           {/* Replace Background button */}
           <button
             onClick={onBgImageUpload}
             className="flex h-7 items-center gap-1.5 rounded border border-gray-300 px-2.5 text-xs text-gray-600 transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700"
             title="Replace background image"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <polyline points="21 15 16 10 5 21" />
-            </svg>
+            <LuImage className="w-3.5 h-3.5" />
             Replace Background
           </button>
-
+ 
           {/* Remove Background button */}
           <button
             onClick={onBgImageRemove}
             className="flex h-7 items-center gap-1.5 rounded border border-gray-300 px-2.5 text-xs text-gray-600 transition-colors hover:border-red-400 hover:bg-red-50 hover:text-red-600"
             title="Remove background image"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            </svg>
+            <LuTrash2 className="w-3.5 h-3.5" />
             Remove
           </button>
-
+ 
           {/* Spacer */}
           <div className="flex-1" />
-
+ 
           {/* Undo */}
           <button
             onClick={onUndo}
@@ -299,7 +313,7 @@ export function FormatToolbar({
           ))}
         </select>
       )}
-
+ 
       {/* ─ Font Weight ─ */}
       {isText && (
         <select
@@ -315,72 +329,63 @@ export function FormatToolbar({
           ))}
         </select>
       )}
-
+ 
       {/* ─ Separator ─ */}
       {isText && <div className="mx-1.5 h-5 w-px bg-gray-200" />}
-
-      {/* ─ Font Size ─ */}
-      {isText && (
+ 
+      {/* ─ Font Size / Line Thickness ─ */}
+      {(isText || isLine) && (
         <div className="flex items-center">
           <button
-            id="format-font-size-decrease"
-            onClick={() => handleFontSizeStep(-1)}
+            onClick={() => isText ? handleFontSizeStep(-1) : handleStrokeWidthStep(-1)}
             className="flex h-7 w-7 items-center justify-center rounded-l border border-gray-300 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 active:bg-gray-200"
-            title="Decrease font size"
+            title={isText ? "Decrease font size" : "Decrease thickness"}
           >
-            −
+            <LuMinus className="w-3 h-3" />
           </button>
-          <input
-            id="format-font-size"
-            type="text"
-            inputMode="numeric"
-            value={fontSizeInput}
-            onChange={(e) => setFontSizeInput(e.target.value.replace(/\D/g, ""))}
-            onBlur={commitFontSizeInput}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") commitFontSizeInput();
-            }}
-            className="h-7 w-10 border-y border-gray-300 text-center text-xs text-gray-700 focus:outline-none"
-          />
+          <div className="h-7 w-12 border-y border-gray-300 flex items-center justify-center text-xs text-gray-700 font-medium">
+            {isText ? fontSize : strokeWidth}
+          </div>
           <button
-            id="format-font-size-increase"
-            onClick={() => handleFontSizeStep(1)}
+            onClick={() => isText ? handleFontSizeStep(1) : handleStrokeWidthStep(1)}
             className="flex h-7 w-7 items-center justify-center rounded-r border border-gray-300 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 active:bg-gray-200"
-            title="Increase font size"
+            title={isText ? "Increase font size" : "Increase thickness"}
           >
-            +
+            <LuPlus className="w-3 h-3" />
           </button>
         </div>
       )}
-
+ 
       {/* ─ Separator ─ */}
       <div className="mx-1.5 h-5 w-px bg-gray-200" />
-
+ 
       {/* ─ Scaling ─ */}
-      <label className="flex cursor-pointer items-center gap-1.5 select-none text-xs text-gray-600 transition-colors hover:text-gray-800">
-        <input
-          id="format-scaling"
-          type="checkbox"
-          checked={scaling}
-          onChange={handleScalingToggle}
-          className="h-3.5 w-3.5 cursor-pointer rounded border-gray-300 text-indigo-600 accent-indigo-600"
-        />
-        Scaling
-      </label>
-
-      {/* ─ Separator ─ */}
-      <div className="mx-1.5 h-5 w-px bg-gray-200" />
-
+      {!isLine && (
+        <>
+          <label className="flex cursor-pointer items-center gap-1.5 select-none text-xs text-gray-600 transition-colors hover:text-gray-800">
+            <input
+              id="format-scaling"
+              type="checkbox"
+              checked={scaling}
+              onChange={handleScalingToggle}
+              className="h-3.5 w-3.5 cursor-pointer rounded border-gray-300 text-indigo-600 accent-indigo-600"
+            />
+            Scaling
+          </label>
+          <div className="mx-1.5 h-5 w-px bg-gray-200" />
+        </>
+      )}
+ 
       {/* ─ Color picker ─ */}
-      <div className="relative" title="Font color">
+      <div className="relative" title={isLine ? "Line color" : "Color"}>
         <button
           id="format-font-color"
-          className="flex h-7 w-8 items-center justify-center rounded border border-gray-300 text-sm font-bold transition-colors hover:border-gray-400"
+          className="flex h-7 w-8 items-center justify-center rounded border border-gray-300 transition-colors hover:border-gray-400 group"
         >
-          <span style={{ color: fontColor }}>A</span>
+          <MdOutlineColorLens className="w-4 h-4" style={{ color: fontColor }} />
         </button>
         <div
-          className="absolute bottom-0.5 left-1.5 right-1.5 h-[3px] rounded-sm"
+          className="absolute bottom-0.5 left-1.5 right-1.5 h-[2px] rounded-full"
           style={{ backgroundColor: fontColor }}
         />
         <input
@@ -388,10 +393,10 @@ export function FormatToolbar({
           value={fontColor}
           onChange={(e) => handleColorChange(e.target.value)}
           className="absolute inset-0 cursor-pointer opacity-0"
-          title="Choose font color"
+          title={isLine ? "Choose line color" : "Choose color"}
         />
       </div>
-
+ 
       {/* ─ Bold ─ */}
       {isText && (
         <button
@@ -403,10 +408,10 @@ export function FormatToolbar({
             }`}
           title="Bold"
         >
-          B
+          <LuBold className="w-4 h-4" />
         </button>
       )}
-
+ 
       {/* ─ Italic ─ */}
       {isText && (
         <button
@@ -418,10 +423,10 @@ export function FormatToolbar({
             }`}
           title="Italic"
         >
-          I
+          <LuItalic className="w-4 h-4" />
         </button>
       )}
-
+ 
       {/* ─ Underline ─ */}
       {isText && (
         <button
@@ -433,13 +438,13 @@ export function FormatToolbar({
             }`}
           title="Underline"
         >
-          U
+          <LuUnderline className="w-4 h-4" />
         </button>
       )}
-
+ 
       {/* ─ Separator ─ */}
       {isText && <div className="mx-1.5 h-5 w-px bg-gray-200" />}
-
+ 
       {/* ─ Text alignment ─ */}
       {isText && (
         <div className="flex items-center gap-0.5">
@@ -453,12 +458,7 @@ export function FormatToolbar({
               }`}
             title="Align left"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="17" y1="10" x2="3" y2="10" />
-              <line x1="21" y1="6" x2="3" y2="6" />
-              <line x1="21" y1="14" x2="3" y2="14" />
-              <line x1="17" y1="18" x2="3" y2="18" />
-            </svg>
+            <LuAlignLeft className="w-4 h-4" />
           </button>
           {/* Center */}
           <button
@@ -470,12 +470,7 @@ export function FormatToolbar({
               }`}
             title="Align center"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="18" y1="10" x2="6" y2="10" />
-              <line x1="21" y1="6" x2="3" y2="6" />
-              <line x1="21" y1="14" x2="3" y2="14" />
-              <line x1="18" y1="18" x2="6" y2="18" />
-            </svg>
+            <LuAlignCenter className="w-4 h-4" />
           </button>
           {/* Right */}
           <button
@@ -487,19 +482,14 @@ export function FormatToolbar({
               }`}
             title="Align right"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="21" y1="10" x2="7" y2="10" />
-              <line x1="21" y1="6" x2="3" y2="6" />
-              <line x1="21" y1="14" x2="3" y2="14" />
-              <line x1="21" y1="18" x2="7" y2="18" />
-            </svg>
+            <LuAlignRight className="w-4 h-4" />
           </button>
         </div>
       )}
-
+ 
       {/* ─ Spacer ─ */}
       <div className="flex-1" />
-
+ 
       {/* ─ Undo ─ */}
       <button
         id="format-undo"
@@ -507,12 +497,9 @@ export function FormatToolbar({
         className="flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
         title="Undo (Ctrl+Z)"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 7v6h6" />
-          <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6.69 3L3 13" />
-        </svg>
+        <LuUndo2 className="w-4 h-4" />
       </button>
-
+ 
       {/* ─ Redo ─ */}
       <button
         id="format-redo"
@@ -520,10 +507,7 @@ export function FormatToolbar({
         className="flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
         title="Redo (Ctrl+Y)"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 7v6h-6" />
-          <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6.69 3L21 13" />
-        </svg>
+        <LuRedo2 className="w-4 h-4" />
       </button>
         </>
       )}

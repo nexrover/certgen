@@ -112,7 +112,7 @@ export function addLine(canvas: Canvas, horizontal: boolean) {
   const coords: [number, number, number, number] = horizontal
     ? [half - 80, vmid, half + 80, vmid]
     : [half, vmid - 60, half, vmid + 60];
-  const l = new Line(coords, { stroke: "#000000", strokeWidth: 2 });
+  const l = new Line(coords, { stroke: "#000000", strokeWidth: 2, strokeUniform: true });
   canvas.add(l);
   canvas.setActiveObject(l);
   canvas.requestRenderAll();
