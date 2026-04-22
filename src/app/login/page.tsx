@@ -1,12 +1,12 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type AuthMode = "signin" | "signup";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = useMemo(() => createClient(), []);
@@ -184,5 +184,22 @@ export default function LoginPage() {
 
       {message ? <p className="mt-4 text-sm text-gray-600">{message}</p> : null}
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="mx-auto mt-20 max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 w-40 rounded bg-gray-200" />
+          <div className="h-10 w-full rounded bg-gray-200" />
+          <div className="h-10 w-full rounded bg-gray-200" />
+          <div className="h-10 w-full rounded bg-gray-200" />
+        </div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

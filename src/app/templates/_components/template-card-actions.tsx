@@ -43,8 +43,7 @@ export function TemplateCardActions({ templateId }: TemplateCardActionsProps) {
     <div className="mt-4 flex items-center gap-2">
       <Button
         type="button"
-        variant="outline"
-        size="sm"
+        variant="secondary"
         onClick={() => router.push(`/builder/${templateId}`)}
         className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800"
       >
@@ -53,8 +52,7 @@ export function TemplateCardActions({ templateId }: TemplateCardActionsProps) {
       </Button>
       <Button
         type="button"
-        variant="outline"
-        size="sm"
+        variant="secondary"
         onClick={() => router.push(`/templates/${templateId}`)}
       >
         <LuEye className="mr-1.5 h-4 w-4" />
@@ -62,8 +60,7 @@ export function TemplateCardActions({ templateId }: TemplateCardActionsProps) {
       </Button>
       <Button
         type="button"
-        variant="outline"
-        size="sm"
+        variant="secondary"
         disabled={isDeleting}
         onClick={handleDelete}
         className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"

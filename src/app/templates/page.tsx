@@ -46,7 +46,6 @@ export default async function TemplatesPage() {
           </p>
           <Link href="/builder/new" className="mt-6">
             <Button
-              size="lg"
               className="bg-indigo-600 px-8 text-base text-white hover:bg-indigo-500"
             >
               <LuFilePlus2 className="mr-2 h-5 w-5" />

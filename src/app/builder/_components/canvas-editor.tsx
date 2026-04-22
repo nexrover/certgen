@@ -545,7 +545,7 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
       toJSON: () => fabricRef.current ? (fabricRef.current.toJSON() as Record<string, unknown>) : {},
       toDataURL: (opts) => {
         if (!fabricRef.current) return "";
-        return fabricRef.current.toDataURL({ multiplier: opts?.multiplier ?? 0.15, format: opts?.format ?? "png" });
+        return fabricRef.current.toDataURL({ multiplier: opts?.multiplier ?? 0.15, format: (opts?.format ?? "png") as any });
       },
       loadFromJSON: async (json: Record<string, unknown>) => {
         const fc = fabricRef.current;
