@@ -175,10 +175,10 @@ export function LayersPanel({ canvas, onBgSelected }: LayersPanelProps) {
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, displayIdx)}
               onDragEnd={handleDragEnd}
-              className={`group flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] transition-all cursor-grab active:cursor-grabbing select-none ${
+              className={`group flex items-center gap-2 rounded-lg border p-2 text-[13px] transition-all cursor-grab active:cursor-grabbing select-none ${
                 isActive
-                  ? "bg-indigo-50 ring-1 ring-indigo-200"
-                  : "hover:bg-gray-50"
+                  ? "border-indigo-400 bg-indigo-50 shadow-sm"
+                  : "border-gray-200 bg-white hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-sm"
               } ${isDragOver ? "ring-2 ring-indigo-400 bg-indigo-50/50" : ""}`}
               onClick={() => selectObject(layer)}
             >
@@ -243,10 +243,10 @@ export function LayersPanel({ canvas, onBgSelected }: LayersPanelProps) {
       <div className="mt-auto border-t border-gray-100 pt-2">
         <button
           onClick={selectBackground}
-          className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-[13px] transition-all select-none ${
+          className={`flex w-full items-center gap-2 rounded-lg border p-2 text-[13px] transition-all select-none ${
             bgActive
-              ? "bg-indigo-50 ring-1 ring-indigo-200"
-              : "bg-gray-50 hover:bg-gray-100"
+              ? "border-indigo-400 bg-indigo-50 shadow-sm"
+              : "border-gray-200 bg-white hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-sm"
           }`}
         >
           {/* Grid icon */}
