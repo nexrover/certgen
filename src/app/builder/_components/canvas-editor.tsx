@@ -5,6 +5,8 @@ import { Canvas, type FabricObject } from "fabric";
 import { FloatingContextMenu } from "./floating-context-menu";
 import { SmartGuideManager } from "./smart-guides";
 
+import { LuPlus, LuMinus } from "react-icons/lu";
+
 /* ── Public handle for parent components ──────────────── */
 
 export interface CanvasEditorHandle {
@@ -270,6 +272,18 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
         canvasWrapperRef.current?.classList.remove("boundary-hit");
       });
 
+      fc.on("mouse:wheel", (opt) => {
+        if (!opt.e.ctrlKey) return;
+        const delta = opt.e.deltaY;
+        let zoom = scaleRef.current;
+        if (delta > 0) zoom -= 0.05;
+        else zoom += 0.05;
+        zoom = Math.min(3, Math.max(0.1, zoom));
+        setScale(zoom);
+        opt.e.preventDefault();
+        opt.e.stopPropagation();
+      });
+
       saveHistory();
       setScale(calcFitScale());
 
@@ -526,6 +540,16 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
           e.preventDefault();
           handleLock();
         }
+        // Zoom In         Ctrl + =
+        if (e.key === "=" && ctrl) {
+          e.preventDefault();
+          setScale((s) => Math.min(s + 0.05, 3));
+        }
+        // Zoom Out        Ctrl + -
+        if (e.key === "-" && ctrl) {
+          e.preventDefault();
+          setScale((s) => Math.max(s - 0.05, 0.1));
+        }
       }
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
@@ -571,8 +595,8 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
       },
       undo: handleUndo,
       redo: handleRedo,
-      zoomIn: () => setScale((s) => Math.min(s * 1.2, 3)),
-      zoomOut: () => setScale((s) => Math.max(s / 1.2, 0.1)),
+      zoomIn: () => setScale((s) => Math.min(s + 0.05, 3)),
+      zoomOut: () => setScale((s) => Math.max(s - 0.05, 0.1)),
       zoomFit: () => setScale(calcFitScale()),
       deleteSelected: handleDelete,
     }));
@@ -636,9 +660,30 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
         </div>
 
         {/* Zoom indicator */}
-        <div className="absolute bottom-4 right-4 flex items-center gap-2 rounded bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-600 shadow">
-          <button onClick={() => setScale(calcFitScale())} className="hover:text-gray-900">Fit</button>
-          <span>{Math.round(scale * 100)}%</span>
+        <div className="absolute bottom-4 right-4 flex flex-col items-center gap-1 rounded bg-white/90 p-1 text-xs font-medium text-gray-600 shadow-lg ring-1 ring-black/5 backdrop-blur-sm">
+          <button
+            onClick={() => setScale((s) => Math.min(s + 0.05, 3))}
+            className="flex h-7 w-7 items-center justify-center rounded hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            title="Zoom In"
+          >
+            <LuPlus className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={() => setScale(1)}
+            className="h-7 px-1 flex items-center justify-center rounded hover:bg-gray-100 hover:text-gray-900 transition-colors min-w-[40px] text-[10px]"
+            title="Reset to 100%"
+          >
+            {Math.round(scale * 100)}%
+          </button>
+
+          <button
+            onClick={() => setScale((s) => Math.max(s - 0.05, 0.1))}
+            className="flex h-7 w-7 items-center justify-center rounded hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            title="Zoom Out"
+          >
+            <LuMinus className="w-3.5 h-3.5" />
+          </button>
         </div>
 
         {/* Boundary warning styles — toggled via direct DOM classList */}
