@@ -20,7 +20,6 @@ const PAPER_OPTIONS: { value: PaperSize; label: string }[] = [
   { value: "A4_LANDSCAPE", label: "A4 Landscape" },
   { value: "US_LETTER", label: "US Letter" },
   { value: "US_LETTER_LANDSCAPE", label: "US Letter Landscape" },
-  { value: "CUSTOM", label: "Custom (1920×1080)" },
 ];
 
 export function Toolbar({
@@ -45,12 +44,6 @@ export function Toolbar({
       </div>
 
       <div className="flex items-center gap-3">
-        <Link
-          href="/dashboard?view=templates"
-          className="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Back to Dashboard
-        </Link>
         <select
           value={paperSize}
           onChange={(e) => onPaperSizeChange(e.target.value as PaperSize)}

@@ -12,14 +12,13 @@ export interface TemplateField {
   height?: number;
 }
 
-export type PaperSize = "A4" | "A4_LANDSCAPE" | "US_LETTER" | "US_LETTER_LANDSCAPE" | "CUSTOM";
+export type PaperSize = "A4" | "A4_LANDSCAPE" | "US_LETTER" | "US_LETTER_LANDSCAPE";
 
 export const PAPER_DIMENSIONS: Record<PaperSize, { width: number; height: number }> = {
   A4: { width: 595, height: 842 },
   A4_LANDSCAPE: { width: 842, height: 595 },
   US_LETTER: { width: 612, height: 792 },
   US_LETTER_LANDSCAPE: { width: 792, height: 612 },
-  CUSTOM: { width: 1920, height: 1080 },
 };
 
 export interface CertificateTemplate {
