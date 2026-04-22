@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { LuX, LuRefreshCw } from "react-icons/lu";
 
 interface PreviewModalProps {
   open: boolean;
@@ -89,50 +90,114 @@ export function PreviewModal({ open, onClose, canvasJson, width, height }: Previ
 
   if (!open) return null;
 
-  const scale = Math.min(600 / width, 500 / height, 1);
+  // Calculate scale to fit in the preview area
+  // We want to leave some padding around the canvas
+  const padding = 80;
+  const maxWidth = 1100 - 320 - padding; // modal max-width - sidebar width - padding
+  const maxHeight = (90 * 0.9) - 80 - padding; // roughly 90vh * 0.9 - header - padding (in px)
+  
+  // Since we are in a flex-1 container, let's use more reliable estimates
+  const scale = Math.min(700 / width, 550 / height, 1);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div className="max-h-[90vh] w-[900px] overflow-y-auto rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">Preview</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">✕</button>
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all animate-in fade-in duration-300" 
+      onClick={onClose}
+    >
+      <div 
+        className="relative flex h-[90vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all animate-in zoom-in-95 duration-300" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-gray-100 px-8 py-5">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 tracking-tight">Live Preview</h2>
+            <p className="text-sm text-gray-500">Preview your certificate with sample data</p>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="group flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-600"
+          >
+            <LuX className="text-2xl transition-transform group-hover:rotate-90" />
+          </button>
         </div>
 
-        <div className="flex gap-6 p-6">
-          <div className="flex-1">
-            <div className="overflow-auto rounded border border-gray-200 bg-gray-50 p-4">
-              <div style={{ transform: `scale(${scale})`, transformOrigin: "top left", width: width * scale, height: height * scale }}>
+        {/* Content */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Canvas Area */}
+          <div className="flex flex-1 items-center justify-center bg-[#F8FAFC] p-10 overflow-hidden">
+            <div 
+              className="relative shadow-[0_10px_30px_rgba(0,0,0,0.1)] transition-transform duration-500 ease-out"
+              style={{ 
+                width: width * scale, 
+                height: height * scale,
+                background: "white" 
+              }}
+            >
+              <div style={{ transform: `scale(${scale})`, transformOrigin: "top left" }}>
                 <canvas ref={canvasRef} />
               </div>
             </div>
           </div>
 
-          <div className="w-56 shrink-0">
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Sample Data</h3>
-            <div className="space-y-2">
-              {variables.map((v) => (
-                <div key={v}>
-                  <label className="mb-0.5 block text-xs text-gray-500">{v}</label>
-                  <input
-                    type="text"
-                    value={data[v] ?? ""}
-                    onChange={(e) => setData((prev) => ({ ...prev, [v]: e.target.value }))}
-                    className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-indigo-500 focus:outline-none"
-                  />
-                </div>
-              ))}
+          {/* Sidebar Area */}
+          <div className="flex w-80 flex-col border-l border-gray-100 bg-white">
+            <div className="flex-1 overflow-y-auto px-6 py-8">
+              <div className="mb-6 flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">Sample Data</h3>
+                <button
+                  onClick={() => {
+                    const reset: Record<string, string> = {};
+                    for (const v of variables) reset[v] = DEFAULT_DATA[v] ?? `Sample ${v}`;
+                    setData(reset);
+                  }}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 transition-colors hover:text-indigo-700"
+                >
+                  <LuRefreshCw className="text-sm" />
+                  Reset
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                {variables.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 text-gray-300">
+                      <LuRefreshCw className="text-2xl" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-400">
+                      No dynamic variables found
+                    </p>
+                    <p className="mt-1 text-xs text-gray-300">
+                      Use {"{{variable_name}}"} in text objects
+                    </p>
+                  </div>
+                )}
+                {variables.map((v) => (
+                  <div key={v} className="group">
+                    <label className="mb-1.5 block text-xs font-semibold text-gray-500 transition-colors group-focus-within:text-indigo-600">
+                      {v.replace(/_/g, ' ').toUpperCase()}
+                    </label>
+                    <input
+                      type="text"
+                      value={data[v] ?? ""}
+                      onChange={(e) => setData((prev) => ({ ...prev, [v]: e.target.value }))}
+                      placeholder={`Enter ${v}...`}
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm transition-all placeholder:text-gray-300 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-            <button
-              onClick={() => {
-                const reset: Record<string, string> = {};
-                for (const v of variables) reset[v] = DEFAULT_DATA[v] ?? `Sample ${v}`;
-                setData(reset);
-              }}
-              className="mt-3 w-full rounded bg-gray-100 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200"
-            >
-              Reset to Default Data
-            </button>
+
+            {/* Sidebar Footer */}
+            <div className="border-t border-gray-100 bg-gray-50/50 p-6">
+              <button
+                onClick={onClose}
+                className="w-full rounded-xl bg-gray-900 py-3.5 text-sm font-bold text-white shadow-lg shadow-gray-200 transition-all hover:bg-gray-800 hover:shadow-gray-300 active:scale-[0.98]"
+              >
+                Done Previewing
+              </button>
+            </div>
           </div>
         </div>
       </div>
