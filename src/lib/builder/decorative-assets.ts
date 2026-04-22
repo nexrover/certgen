@@ -72,18 +72,18 @@ export const BUILDER_ELEMENT_ICONS = [
 ];
 
 export const BUILDER_ELEMENT_SHAPES = [
-  { label: "Shape 1", url: "/Shapes/1.svg" },
-  { label: "Shape 2", url: "/Shapes/2.svg" },
-  { label: "Shape 3", url: "/Shapes/3.svg" },
-  { label: "Shape 4", url: "/Shapes/4.svg" },
-  { label: "Shape 5", url: "/Shapes/5.svg" },
-  { label: "Shape 6", url: "/Shapes/6.svg" },
-  { label: "Shape 7", url: "/Shapes/7.svg" },
-  { label: "Shape 8", url: "/Shapes/8.svg" },
-  { label: "Shape 9", url: "/Shapes/9.svg" },
-  { label: "Shape 10", url: "/Shapes/10.svg" },
-  { label: "Shape 11", url: "/Shapes/11.svg" },
-  { label: "Shape 12", url: "/Shapes/12.svg" },
+  { label: "Shape 1", url: "/Shapes_updated/1.svg" },
+  { label: "Shape 2", url: "/Shapes_updated/2.svg" },
+  { label: "Shape 3", url: "/Shapes_updated/3.svg" },
+  { label: "Shape 4", url: "/Shapes_updated/4.svg" },
+  { label: "Shape 5", url: "/Shapes_updated/5.svg" },
+  { label: "Shape 6", url: "/Shapes_updated/6.svg" },
+  { label: "Shape 7", url: "/Shapes_updated/7.svg" },
+  { label: "Shape 8", url: "/Shapes_updated/8.svg" },
+  { label: "Shape 9", url: "/Shapes_updated/9.svg" },
+  { label: "Shape 10", url: "/Shapes_updated/10.svg" },
+  { label: "Shape 11", url: "/Shapes_updated/11.svg" },
+  { label: "Shape 12", url: "/Shapes_updated/12.svg" },
 ];
 
 export const BUILDER_ELEMENT_RIBBONS = [
