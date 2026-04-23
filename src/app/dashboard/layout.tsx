@@ -21,11 +21,14 @@ export default async function DashboardLayout({
     redirect("/login?error=verify_email_required");
   }
 
+  console.log("[DashboardLayout] user.email:", user.email);
+  console.log("[DashboardLayout] user.user_metadata:", JSON.stringify(user.user_metadata));
+
   return (
     <div className="flex h-screen bg-[#F9FAFB] overflow-hidden">
       <DashboardSidebar userEmail={user.email} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar user={user} />
+        <TopBar />
         <main className="flex-1 overflow-y-auto p-8">
           <div className="mx-auto max-w-7xl">
             {children}

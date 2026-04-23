@@ -2,15 +2,13 @@
 
 import { FiSearch, FiBell, FiSun } from "react-icons/fi";
 import Image from "next/image";
-import type { User } from "@supabase/supabase-js";
+import { useUserProfile } from "@/hooks/use-user-profile";
 
-interface TopBarProps {
-  user: User | null;
-}
+export function TopBar() {
+  const { userProfile, loading } = useUserProfile();
 
-export function TopBar({ user }: TopBarProps) {
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User Name";
-  const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`;
+  const displayName = userProfile?.name || "User Name";
+  const firstLetter = displayName.charAt(0).toUpperCase();
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-8">
@@ -44,18 +42,33 @@ export function TopBar({ user }: TopBarProps) {
         </button>
 
         <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
-          <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-indigo-100">
-            <Image
-              src={avatarUrl}
-              alt="User"
-              width={40}
-              height={40}
-              className="h-full w-full object-cover"
-            />
+          <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-indigo-100 flex items-center justify-center bg-indigo-50">
+            {loading ? (
+              <div className="h-full w-full animate-pulse bg-gray-200" />
+            ) : userProfile?.avatarUrl ? (
+              <Image
+                src={userProfile.avatarUrl}
+                alt={displayName}
+                width={40}
+                height={40}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="text-sm font-bold text-indigo-600">{firstLetter}</span>
+            )}
           </div>
-          <div className="text-left">
-            <p className="text-sm font-semibold text-gray-900 leading-none">{userName}</p>
-            <p className="text-[11px] text-gray-500 mt-1">Admin</p>
+          <div className="text-left min-w-[100px]">
+            {loading ? (
+              <>
+                <div className="h-4 w-20 animate-pulse rounded bg-gray-200"></div>
+                <div className="mt-1 h-3 w-12 animate-pulse rounded bg-gray-200"></div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-semibold text-gray-900 leading-none">{displayName}</p>
+                <p className="text-[11px] text-gray-500 mt-1">Admin</p>
+              </>
+            )}
           </div>
         </div>
       </div>
