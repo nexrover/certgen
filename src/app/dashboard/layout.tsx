@@ -16,6 +16,10 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  if (!user.email_confirmed_at) {
+    redirect("/login?error=verify_email_required");
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar userEmail={user.email} />

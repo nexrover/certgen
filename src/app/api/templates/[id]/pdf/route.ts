@@ -2,14 +2,23 @@ import { NextResponse } from "next/server";
 import { getTemplateById } from "@/lib/services/template-service";
 import { canvasJsonToPdf, closeBrowser } from "@/lib/engine/canvas-renderer";
 import { AppError } from "@/lib/errors";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
-    const template = await getTemplateById(id);
+    const template = await getTemplateById(id, user.id);
 
     if (!template.canvas_json) {
       return NextResponse.json(

@@ -2,9 +2,9 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getSupabaseCookieOptions } from "@/lib/supabase/cookie-options";
 
-export async function createClient() {
+export async function createRouteHandlerClient(rememberMe: boolean = false) {
   const cookieStore = await cookies();
-  const isRemembered = cookieStore.has("remember_me");
+  const isRemembered = rememberMe || cookieStore.has("remember_me");
   const cookieOpts = getSupabaseCookieOptions(isRemembered);
 
   return createServerClient(
@@ -17,13 +17,9 @@ export async function createClient() {
           return cookieStore.getAll();
         },
         setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, { ...options, maxAge: cookieOpts.maxAge })
-            );
-          } catch {
-            // Server Components can't always write cookies.
-          }
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, { ...options, maxAge: cookieOpts.maxAge })
+          );
         },
       },
     }

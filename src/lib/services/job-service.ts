@@ -7,13 +7,15 @@ const CERTS_TABLE = "certificates";
 
 export async function createJob(
   templateId: string,
-  totalCount: number
+  totalCount: number,
+  userId: string
 ): Promise<GenerationJob> {
   const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from(JOBS_TABLE)
     .insert({
+      user_id: userId,
       template_id: templateId,
       status: "pending",
       total_count: totalCount,
@@ -25,29 +27,32 @@ export async function createJob(
   return data as GenerationJob;
 }
 
-export async function getJobById(id: string): Promise<GenerationJob> {
+export async function getJobById(id: string, userId?: string): Promise<GenerationJob> {
   const supabase = createAdminClient();
 
-  const { data, error } = await supabase
-    .from(JOBS_TABLE)
-    .select("*")
-    .eq("id", id)
-    .single();
+  let query = supabase.from(JOBS_TABLE).select("*").eq("id", id);
+  if (userId) {
+    query = query.eq("user_id", userId);
+  }
+
+  const { data, error } = await query.single();
 
   if (error || !data) throw new JobNotFoundError(id);
   return data as GenerationJob;
 }
 
 export async function getJobWithCertificates(
-  id: string
+  id: string,
+  userId: string
 ): Promise<{ job: GenerationJob; certificates: Certificate[] }> {
-  const job = await getJobById(id);
+  const job = await getJobById(id, userId);
 
   const supabase = createAdminClient();
   const { data: certificates } = await supabase
     .from(CERTS_TABLE)
     .select("*")
     .eq("job_id", id)
+    .eq("user_id", userId)
     .order("created_at", { ascending: true });
 
   return { job, certificates: (certificates ?? []) as Certificate[] };

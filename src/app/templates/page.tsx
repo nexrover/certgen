@@ -1,9 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { listTemplates } from "@/lib/services/template-service";
 import { LuCalendarClock, LuFilePlus2, LuImage as ImageIcon, LuLayoutTemplate } from "react-icons/lu";
 import { TemplateCardActions } from "./_components/template-card-actions";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +16,15 @@ function formatDate(value: string) {
 }
 
 export default async function TemplatesPage() {
-  const templates = await listTemplates();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const templates = await listTemplates(user.id);
 
   return (
     <div className="mx-auto max-w-7xl p-6 md:p-8">

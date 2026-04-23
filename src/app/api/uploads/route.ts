@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/svg+xml"];
 
 export async function POST(req: Request) {
   try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
@@ -21,9 +30,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "File too large. Maximum 2MB" }, { status: 400 });
     }
 
-    const supabase = createAdminClient();
     const ext = file.name.split(".").pop() ?? "png";
-    const path = `uploads/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+    const path = `uploads/${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const { error: uploadError } = await supabase.storage
