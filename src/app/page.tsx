@@ -19,11 +19,10 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col bg-background text-text font-sans transition-colors duration-300">
       <div className="w-full px-4 md:px-6 fixed top-0 z-50 pt-4 md:pt-6 transition-all duration-300">
         <nav
-          className={`mx-auto max-w-6xl flex justify-between items-center px-4 py-3 md:px-6 md:py-3 transition-all duration-300 rounded-full bg-white/90 border border-white/50 backdrop-blur-xl ${
-            isScrolled 
-              ? 'shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1),0_15px_25px_-10px_rgba(0,0,0,0.05)]' 
+          className={`mx-auto max-w-6xl flex justify-between items-center px-4 py-3 md:px-6 md:py-3 transition-all duration-300 rounded-full bg-white/90 border border-white/50 backdrop-blur-xl ${isScrolled
+              ? 'shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1),0_15px_25px_-10px_rgba(0,0,0,0.05)]'
               : 'shadow-[0_15px_35px_-10px_rgba(0,0,0,0.05),0_5px_15px_-5px_rgba(0,0,0,0.02)]'
-          }`}
+            }`}
         >
           <Link
             href="/"

@@ -228,6 +228,7 @@ export function TextPanel({ canvas }: TextPanelProps) {
                 className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50 text-left transition-all hover:border-indigo-300 hover:shadow-sm"
                 style={{ aspectRatio: `${combo.previewWidth} / ${combo.previewHeight}` }}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={combo.previewSrc}
                   alt={`${combo.id} preview`}

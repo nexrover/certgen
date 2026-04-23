@@ -9,6 +9,7 @@ interface TemplateCardProps {
   name: string;
   createdAt: string | null;
   backgroundUrl: string | null;
+  onDeleted?: (id: string) => void;
 }
 
 function formatDate(value: string | null | undefined) {
@@ -25,6 +26,7 @@ export function TemplateCard({
   name,
   createdAt,
   backgroundUrl,
+  onDeleted,
 }: TemplateCardProps) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
@@ -44,6 +46,9 @@ export function TemplateCard({
         throw new Error(data.error ?? "Failed to delete template");
       }
 
+      if (onDeleted) {
+        onDeleted(id);
+      }
       router.refresh();
     } catch (error) {
       const message =
@@ -59,6 +64,7 @@ export function TemplateCard({
       <div className="relative flex aspect-video items-center justify-center overflow-hidden bg-linear-to-br from-indigo-100 via-violet-50 to-white">
         {backgroundUrl ? (
           backgroundUrl.startsWith("data:image/") ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={backgroundUrl}
               alt={`${name} thumbnail`}

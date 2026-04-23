@@ -228,7 +228,7 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
         canvasWrapperRef.current?.classList.toggle("boundary-hit", touching);
       });
 
-      const handleResizing = (e: any) => {
+      const handleResizing = (e: { target?: FabricObject }) => {
         const obj = e.target;
         if (!obj) return;
 
@@ -569,7 +569,7 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
       toJSON: () => fabricRef.current ? (fabricRef.current.toJSON() as Record<string, unknown>) : {},
       toDataURL: (opts) => {
         if (!fabricRef.current) return "";
-        return fabricRef.current.toDataURL({ multiplier: opts?.multiplier ?? 0.15, format: (opts?.format ?? "png") as any });
+        return fabricRef.current.toDataURL({ multiplier: opts?.multiplier ?? 0.15, format: (opts?.format as "png" | "jpeg") ?? "png" });
       },
       loadFromJSON: async (json: Record<string, unknown>) => {
         const fc = fabricRef.current;

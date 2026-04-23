@@ -92,10 +92,6 @@ export function PreviewModal({ open, onClose, canvasJson, width, height }: Previ
 
   // Calculate scale to fit in the preview area
   // We want to leave some padding around the canvas
-  const padding = 80;
-  const maxWidth = 1100 - 320 - padding; // modal max-width - sidebar width - padding
-  const maxHeight = (90 * 0.9) - 80 - padding; // roughly 90vh * 0.9 - header - padding (in px)
-  
   // Since we are in a flex-1 container, let's use more reliable estimates
   const scale = Math.min(700 / width, 550 / height, 1);
 

@@ -4,6 +4,7 @@ import { CertificateChart } from "@/app/dashboard/_components/certificate-chart"
 import { RecentCertificates } from "@/app/dashboard/_components/recent-certificates";
 import { QuickActions } from "@/app/dashboard/_components/quick-actions";
 import { ComingSoon } from "@/app/dashboard/_components/coming-soon";
+import { TemplateManagement } from "@/app/dashboard/_components/template-management";
 import { redirect } from "next/navigation";
 import { FiCalendar, FiChevronDown, FiMail } from "react-icons/fi";
 
@@ -25,11 +26,33 @@ export default async function DashboardPage({
 
   if (view === "emails") {
     return (
-      <ComingSoon 
-        title="Coming Soon" 
+      <ComingSoon
+        title="Coming Soon"
         subtitle="This feature is under development. We're working hard to bring you a powerful email builder."
         icon={FiMail}
       />
+    );
+  }
+
+  if (view === "templates") {
+    const { data: templatesData } = await supabase
+      .from("certificate_templates")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">Certificate Templates</h1>
+            <p className="mt-1.5 text-sm font-medium text-gray-500">
+              Manage and create your professional certificate templates.
+            </p>
+          </div>
+        </div>
+        <TemplateManagement templates={templatesData || []} />
+      </div>
     );
   }
 

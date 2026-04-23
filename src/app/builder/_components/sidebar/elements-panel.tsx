@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { addRect, addCircle, addTriangle, addLine, addSvgPath, addSvgFromUrl } from "@/lib/builder/fabric-utils";
+import { addLine, addSvgFromUrl } from "@/lib/builder/fabric-utils";
 import {
   BUILDER_ELEMENT_ICONS,
   BUILDER_ELEMENT_SHAPES,
@@ -50,7 +50,7 @@ export function ElementsPanel({ canvas }: ElementsPanelProps) {
   );
 }
 
-function ElementSection({ title, items, canvas }: { title: string; items: any[]; canvas: Canvas }) {
+function ElementSection({ title, items, canvas }: { title: string; items: { url: string; label: string }[]; canvas: Canvas }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const displayedItems = isExpanded ? items : items.slice(0, 6);
 
@@ -83,6 +83,7 @@ function ElementButton({ url, label, onClick }: { url: string; label: string; on
       className="group flex flex-col items-center rounded-lg border border-gray-200 bg-white p-2.5 transition-all hover:border-indigo-400 hover:bg-indigo-50/50 hover:shadow-sm"
     >
       <div className="flex h-16 w-full items-center justify-center p-1">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={url}
           alt={label}

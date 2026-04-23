@@ -1,4 +1,4 @@
-import { FiMail, FiClock } from "react-icons/fi";
+import { FiClock } from "react-icons/fi";
 import { IconType } from "react-icons";
 
 interface ComingSoonProps {

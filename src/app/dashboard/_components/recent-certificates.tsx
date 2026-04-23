@@ -1,10 +1,8 @@
 "use client";
 
 import { FiMoreVertical, FiFileText } from "react-icons/fi";
-import Image from "next/image";
-
 interface RecentCertificatesProps {
-  certificates: any[];
+  certificates: { id: string; template_id: string; created_at: string; file_url?: string; [key: string]: unknown }[];
 }
 
 export function RecentCertificates({ certificates }: RecentCertificatesProps) {

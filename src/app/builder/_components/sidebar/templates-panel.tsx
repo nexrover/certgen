@@ -539,6 +539,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
                   style={{ aspectRatio: `${ct.width} / ${ct.height}` }}
                   title="Load custom template"
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={ct.thumbnail}
                     alt="Custom template"
@@ -601,6 +602,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
                 className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md disabled:opacity-50"
                 style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={presetThumbnails[t.id] ?? t.thumbnailSrc}
                   alt={`${t.label} preview`}

@@ -31,7 +31,7 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [hasSelection, setHasSelection] = useState(false);
+
   const [canvasReady, setCanvasReady] = useState(false);
   const [bgSelected, setBgSelected] = useState(false);
   const [bgColor, setBgColor] = useState("#ffffff");
@@ -131,9 +131,8 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
     loadNow();
   }, [paperSize]);
 
-  const handleSelectionChange = useCallback((selected: boolean) => {
+  const handleSelectionChange = useCallback(() => {
     setCanvasReady(true);
-    setHasSelection(selected);
   }, []);
 
   const initialLoaded = useRef(false);
@@ -176,7 +175,11 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
         setTemplateId(data.data.id);
         setDirty(false);
         router.push("/dashboard?view=templates");
+      } else {
+        alert(data.error || "Failed to save template.");
       }
+    } catch (error) {
+      alert("An error occurred while saving the template.");
     } finally {
       setSaving(false);
     }
