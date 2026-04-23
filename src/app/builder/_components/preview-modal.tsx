@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import { LuX, LuRefreshCw } from "react-icons/lu";
 
 interface PreviewModalProps {
@@ -95,7 +96,9 @@ export function PreviewModal({ open, onClose, canvasJson, width, height }: Previ
   // Since we are in a flex-1 container, let's use more reliable estimates
   const scale = Math.min(700 / width, 550 / height, 1);
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div 
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all animate-in fade-in duration-300" 
       onClick={onClose}
@@ -197,6 +200,7 @@ export function PreviewModal({ open, onClose, canvasJson, width, height }: Previ
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -113,7 +113,7 @@ export function TemplateManagement({ templates: initialTemplates }: TemplateMana
 
       {/* Templates Grid */}
       {filteredAndSortedTemplates.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6">
           {filteredAndSortedTemplates.map((template) => (
             <div key={template.id} className="animate-in fade-in zoom-in-95 duration-300">
               <TemplateCard
