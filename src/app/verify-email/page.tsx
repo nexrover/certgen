@@ -1,9 +1,9 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
@@ -48,7 +48,7 @@ export default function VerifyEmailPage() {
     }
   };
 
-  const onSubmit = async (event: FormEvent) => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (code.length !== 6 || !email) {
       setError("Enter the 6-digit code sent to your email.");
@@ -160,5 +160,13 @@ export default function VerifyEmailPage() {
         After verification you can sign in and open your dashboard.
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto mt-20 max-w-lg text-center p-8">Loading...</div>}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
