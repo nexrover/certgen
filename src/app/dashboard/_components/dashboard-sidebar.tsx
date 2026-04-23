@@ -103,11 +103,11 @@ export function DashboardSidebar({ userEmail }: DashboardSidebarProps) {
             {isTemplatesOpen && (
               <div className="mt-1 ml-4 space-y-1 border-l-2 border-gray-50 pl-2">
                 <Link
-                  href="/dashboard?view=templates"
+                  href="/builder"
                   className={`flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
                     activeView === "templates"
                       ? "bg-indigo-50/60 text-indigo-700"
-                      : "text-gray-500 hover:bg-gray-50"
+                      : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
                   <FiFileText className="h-4 w-4" />
@@ -118,7 +118,7 @@ export function DashboardSidebar({ userEmail }: DashboardSidebarProps) {
                   className={`flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
                     activeView === "emails"
                       ? "bg-indigo-50/60 text-indigo-700"
-                      : "text-gray-500 hover:bg-gray-50"
+                      : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
                   <FiMail className="h-4 w-4" />

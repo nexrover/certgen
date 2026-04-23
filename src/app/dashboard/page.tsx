@@ -3,18 +3,34 @@ import { StatsCards } from "@/app/dashboard/_components/stats-cards";
 import { CertificateChart } from "@/app/dashboard/_components/certificate-chart";
 import { RecentCertificates } from "@/app/dashboard/_components/recent-certificates";
 import { QuickActions } from "@/app/dashboard/_components/quick-actions";
+import { ComingSoon } from "@/app/dashboard/_components/coming-soon";
 import { redirect } from "next/navigation";
-import { FiCalendar, FiChevronDown } from "react-icons/fi";
+import { FiCalendar, FiChevronDown, FiMail } from "react-icons/fi";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const { view } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const userId = user?.id;
-  
+
   if (!userId) {
     redirect("/login");
+  }
+
+  if (view === "emails") {
+    return (
+      <ComingSoon 
+        title="Coming Soon" 
+        subtitle="This feature is under development. We're working hard to bring you a powerful email builder."
+        icon={FiMail}
+      />
+    );
   }
 
   // Fetch real data
@@ -55,9 +71,9 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Section */}
-      <StatsCards 
-        templateCount={templateCount || 0} 
-        certificateCount={certificateCount || 0} 
+      <StatsCards
+        templateCount={templateCount || 0}
+        certificateCount={certificateCount || 0}
       />
 
       {/* Main Content Grid */}

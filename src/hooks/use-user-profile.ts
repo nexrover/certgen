@@ -18,7 +18,7 @@ export function useUserProfile() {
         if (!response.ok) {
           throw new Error("Failed to fetch user");
         }
-        
+
         const { user } = await response.json();
 
         if (user) {
