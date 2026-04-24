@@ -147,23 +147,22 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
       </div>
 
       {/* Upgrade Banner */}
-      <div className="p-4 mt-auto flex-shrink-0">
-        <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-indigo-600 to-purple-600 p-4 text-white shadow-xl shadow-indigo-100">
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/20 backdrop-blur-md">
-                <FaCrown className="h-3.5 w-3.5 text-white" />
-              </div>
-              <span className="text-sm font-bold">Upgrade to Pro</span>
+      <div className="px-4 py-4 mt-auto flex-shrink-0">
+        <button className="group relative flex w-full items-center justify-between overflow-hidden rounded-xl bg-linear-to-r from-indigo-600 to-purple-600 p-2.5 text-white shadow-md transition-all hover:shadow-lg active:scale-[0.98]">
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/20 backdrop-blur-md">
+              <FaCrown className="h-4 w-4 text-white" />
             </div>
-            <p className="text-[11px] text-indigo-100 mb-3 leading-relaxed">Unlock advanced analytics, custom branding, and more.</p>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-white/80">Unlock premium features</span>
-              <FiChevronRight className="h-4 w-4" />
+            <div className="flex flex-col text-left">
+              <p className="text-[13px] font-bold leading-tight">Upgrade to Pro</p>
+              <p className="text-[10px] text-white/70 leading-tight mt-0.5">Unlock premium features</p>
             </div>
           </div>
-          <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-        </div>
+          <FiChevronRight className="relative z-10 h-4 w-4 text-white/80 transition-transform group-hover:translate-x-0.5" />
+          
+          {/* Subtle reflection effect */}
+          <div className="absolute -left-[100%] top-0 h-full w-[100%] bg-linear-to-r from-transparent via-white/10 to-transparent transition-all duration-1000 group-hover:left-[100%]" />
+        </button>
       </div>
     </aside>
   );
