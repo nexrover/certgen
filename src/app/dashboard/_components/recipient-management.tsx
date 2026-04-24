@@ -53,6 +53,13 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
   const [showAddAttribute, setShowAddAttribute] = useState(false);
   const [newAttributeName, setNewAttributeName] = useState("");
 
+  // Column Deletion State
+  const [columnToDelete, setColumnToDelete] = useState<string | null>(null);
+
+  // Filter State
+  const [showFilter, setShowFilter] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<"All" | "Active" | "Inactive">("All");
+
   const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
@@ -359,9 +366,13 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
   };
 
   // Derived State
-  const filteredRows = currentFile ? (searchQuery ? currentFile.rows.filter(row => 
-      Object.values(row.attributes).some(val => val.toLowerCase().includes(searchQuery.toLowerCase()))
-    ) : currentFile.rows) : [];
+  const filteredRows = currentFile ? currentFile.rows.filter(row => {
+    const matchesSearch = searchQuery 
+      ? Object.values(row.attributes).some(val => val.toLowerCase().includes(searchQuery.toLowerCase()))
+      : true;
+    const matchesStatus = filterStatus === "All" ? true : row.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  }) : [];
 
   const paginatedRows = filteredRows.slice((currentPage - 1) * rowsPerPage, (currentPage - 1) * rowsPerPage + rowsPerPage);
 
@@ -432,7 +443,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
           ) : (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 h-10">
               <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-500 font-medium">Total: {currentFile.rows.length}</span>
+                <span className="text-sm text-gray-500 font-medium">Total: {filteredRows.length}</span>
                 <div className="relative">
                   <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
@@ -443,10 +454,45 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                     className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 w-64 bg-white shadow-sm"
                   />
                 </div>
-                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-sm">
-                  <FiFilter className="w-4 h-4" />
-                  Filter
-                </button>
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowFilter(!showFilter)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-sm transition-colors"
+                  >
+                    <FiFilter className="w-4 h-4" />
+                    Filter
+                    {filterStatus !== "All" && (
+                      <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
+                    )}
+                  </button>
+
+                  {showFilter && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 p-2 z-20">
+                      <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                        Filter by Status
+                      </div>
+                      <div className="space-y-1">
+                        {["All", "Active", "Inactive"].map((status) => (
+                          <button
+                            key={status}
+                            onClick={() => {
+                              setFilterStatus(status as "All" | "Active" | "Inactive");
+                              setShowFilter(false);
+                              setCurrentPage(1);
+                            }}
+                            className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                              filterStatus === status 
+                                ? "bg-indigo-50 text-indigo-700 font-medium" 
+                                : "text-gray-700 hover:bg-gray-50"
+                            }`}
+                          >
+                            {status}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button 
@@ -509,8 +555,19 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                   Status
                 </th>
                 {currentFile.headers.map((header) => (
-                  <th key={header} className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200 min-w-[150px]">
-                    {header}
+                  <th key={header} className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200 min-w-[150px] group relative">
+                    <div className="flex items-center justify-between">
+                      {header}
+                      {header !== "Name" && header !== "Email" && (
+                        <button 
+                          onClick={() => setColumnToDelete(header)}
+                          className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                          title="Delete Column"
+                        >
+                          <FiTrash2 className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -591,6 +648,49 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
             </div>
           )}
         </div>
+
+        {/* Column Deletion Confirmation Modal */}
+        {columnToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+              <div className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                    <FiTrash2 className="w-5 h-5 text-red-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Delete Column</h3>
+                </div>
+                <p className="text-sm text-gray-500 mb-6">
+                  Are you sure you want to delete the column <strong>&quot;{columnToDelete}&quot;</strong>? This action cannot be undone and will remove data for this column from all rows.
+                </p>
+                <div className="flex items-center justify-end gap-3">
+                  <button
+                    onClick={() => setColumnToDelete(null)}
+                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!currentFile || !columnToDelete) return;
+                      const newHeaders = currentFile.headers.filter(h => h !== columnToDelete);
+                      const newRows = currentFile.rows.map(row => {
+                        const newAttributes = { ...row.attributes };
+                        delete newAttributes[columnToDelete];
+                        return { ...row, attributes: newAttributes };
+                      });
+                      updateCurrentFile({ headers: newHeaders, rows: newRows });
+                      setColumnToDelete(null);
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+                  >
+                    Yes, Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Pagination Footer */}
         <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100 bg-gray-50 flex-shrink-0">
