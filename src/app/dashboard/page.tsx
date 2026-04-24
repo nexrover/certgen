@@ -38,7 +38,19 @@ export default async function DashboardPage({
   if (view === "csvs") {
     const { data: lists } = await supabase
       .from("recipient_lists")
-      .select("*")
+      .select(`
+        id,
+        name,
+        headers,
+        created_at,
+        recipients (
+          id,
+          name,
+          email,
+          status,
+          attributes
+        )
+      `)
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 

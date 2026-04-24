@@ -22,18 +22,23 @@ interface SavedFile {
   isNew?: boolean;
 }
 
-export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omit<SavedFile, "createdAt"> & { created_at: string | Date })[] }) {
+export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omit<SavedFile, "createdAt"> & { created_at: string | Date, recipients?: Record<string, unknown>[] })[] }) {
   const [savedFiles, setSavedFiles] = useState<SavedFile[]>(
     initialLists.map((list) => ({
       id: list.id,
       name: list.name,
-      rows: list.rows || [],
+      rows: (list.recipients || []).map((r: Record<string, unknown>) => ({
+        id: r.id as string,
+        status: r.status as "Active" | "Inactive",
+        attributes: { Name: (r.name as string) || "", Email: (r.email as string) || "", ...((r.attributes as Record<string, string>) || {}) }
+      })),
       headers: list.headers || [],
       createdAt: new Date(list.created_at),
     }))
   );
   const [currentFile, setCurrentFile] = useState<SavedFile | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const supabase = createClient();
   
   // File upload state
@@ -171,59 +176,125 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) {
         setIsSaving(false);
+        alert("Authentication error: Please log in again to save.");
         return;
       }
 
-      const { data, error } = await supabase
+      const { data: listData, error: listError } = await supabase
         .from("recipient_lists")
         .insert({
           user_id: userData.user.id,
           name: currentFile.name,
-          rows: currentFile.rows,
           headers: currentFile.headers,
         })
         .select()
         .single();
 
-      setIsSaving(false);
-
-      if (error) {
-        console.error("Error saving list:", error);
-        alert("Failed to save the list.");
+      if (listError) {
+        setIsSaving(false);
+        console.error("Error saving list:", listError);
+        alert(`Failed to save the list: ${listError.message || listError.details}`);
         return;
       }
 
+      const recipientsToInsert = currentFile.rows.map(r => {
+        const { Name, Email, ...customAttrs } = r.attributes;
+        return {
+          id: r.id,
+          user_id: userData.user.id,
+          list_id: listData.id,
+          name: Name || "",
+          email: Email || "",
+          status: r.status,
+          attributes: customAttrs
+        };
+      });
+
+      if (recipientsToInsert.length > 0) {
+        const { error: recipientsError } = await supabase
+          .from("recipients")
+          .insert(recipientsToInsert);
+          
+        if (recipientsError) {
+          setIsSaving(false);
+          console.error("Error saving recipients:", recipientsError);
+          alert(`Failed to save recipients data. The list was created but data could not be saved. Error: ${recipientsError.message}`);
+          return;
+        }
+      }
+
+      setIsSaving(false);
+
       const savedFile: SavedFile = {
-        id: data.id,
-        name: data.name,
-        rows: data.rows,
-        headers: data.headers,
-        createdAt: new Date(data.created_at),
+        id: listData.id,
+        name: listData.name,
+        rows: currentFile.rows,
+        headers: listData.headers,
+        createdAt: new Date(listData.created_at),
         isNew: false,
       };
 
       setSavedFiles([savedFile, ...savedFiles]);
-      setCurrentFile(savedFile);
+      setCurrentFile(null);
+      showToast("List saved successfully!");
     } else {
-      const { error } = await supabase
+      const { error: listError } = await supabase
         .from("recipient_lists")
         .update({
           name: currentFile.name,
-          rows: currentFile.rows,
           headers: currentFile.headers,
           updated_at: new Date().toISOString()
         })
         .eq("id", currentFile.id);
         
-      setIsSaving(false);
-      
-      if (error) {
-        console.error("Error updating list:", error);
+      if (listError) {
+        setIsSaving(false);
+        console.error("Error updating list:", listError);
         alert("Failed to save changes.");
-      } else {
-        setSavedFiles(savedFiles.map(f => f.id === currentFile.id ? currentFile : f));
+        return;
       }
+
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        setIsSaving(false);
+        alert("Authentication error: Please log in again to save.");
+        return;
+      }
+      
+      // Upsert recipients (Delete old and insert new)
+      await supabase.from("recipients").delete().eq("list_id", currentFile.id);
+      const recipientsToInsert = currentFile.rows.map(r => {
+          const { Name, Email, ...customAttrs } = r.attributes;
+          return {
+            id: r.id,
+            user_id: userData.user.id,
+            list_id: currentFile.id,
+            name: Name || "",
+            email: Email || "",
+            status: r.status,
+            attributes: customAttrs
+          };
+        });
+
+        if (recipientsToInsert.length > 0) {
+          const { error: recipientsError } = await supabase.from("recipients").insert(recipientsToInsert);
+          if (recipientsError) {
+            setIsSaving(false);
+            console.error("Error updating recipients:", recipientsError);
+            alert(`Failed to save recipients data: ${recipientsError.message}`);
+            return;
+          }
+        }
+      setIsSaving(false);
+      setSavedFiles(savedFiles.map(f => f.id === currentFile.id ? currentFile : f));
+      setCurrentFile(null);
+      showToast("Changes saved successfully!");
     }
+  };
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const deleteSavedFile = async (id: string, e: React.MouseEvent) => {
@@ -383,7 +454,14 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
     const isIndeterminate = selectedRowIds.size > 0 && selectedRowIds.size < filteredRows.length;
 
     return (
-      <div className="flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <>
+        {toastMessage && (
+          <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg animate-in slide-in-from-top-4 fade-in duration-300">
+            <FiCheck className="w-5 h-5 text-green-400" />
+            <span className="text-sm font-medium">{toastMessage}</span>
+          </div>
+        )}
+        <div className="flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Header */}
         <div className="px-6 py-6 border-b border-gray-100 flex-shrink-0">
           <div className="flex items-start justify-between">
@@ -734,11 +812,19 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
           </div>
         </div>
       </div>
+      </>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      {toastMessage && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg animate-in slide-in-from-top-4 fade-in duration-300">
+          <FiCheck className="w-5 h-5 text-green-400" />
+          <span className="text-sm font-medium">{toastMessage}</span>
+        </div>
+      )}
+      <div className="space-y-6">
       {/* List Header */}
       {savedFiles.length > 0 && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -880,17 +966,30 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                   <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
                     {file.rows.length} rows
                   </span>
-                  <button 
-                    onClick={(e) => deleteSavedFile(file.id, e)}
-                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                  >
-                    <FiTrash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center ml-2 space-x-1">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentFile(file);
+                      }}
+                      className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                      title="Edit List"
+                    >
+                      <FiEdit2 className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={(e) => deleteSavedFile(file.id, e)}
+                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      title="Delete List"
+                    >
+                      <FiTrash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
               <h4 className="font-bold text-gray-900 mb-1">{file.name}</h4>
               <p className="text-sm text-gray-500 mb-4">
-                Added on {file.createdAt.toLocaleDateString()}
+                Last Edited: {file.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}, {file.createdAt.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
               </p>
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <span className="truncate max-w-[200px]">
@@ -903,5 +1002,6 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
         </div>
       )}
     </div>
+    </>
   );
 }
