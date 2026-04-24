@@ -5,6 +5,7 @@ import { RecentCertificates } from "@/app/dashboard/_components/recent-certifica
 import { QuickActions } from "@/app/dashboard/_components/quick-actions";
 import { ComingSoon } from "@/app/dashboard/_components/coming-soon";
 import { TemplateManagement } from "@/app/dashboard/_components/template-management";
+import { RecipientManagement } from "@/app/dashboard/_components/recipient-management";
 import { redirect } from "next/navigation";
 import { FiCalendar, FiChevronDown, FiMail } from "react-icons/fi";
 
@@ -31,6 +32,20 @@ export default async function DashboardPage({
         subtitle="This feature is under development. We're working hard to bring you a powerful email builder."
         icon={FiMail}
       />
+    );
+  }
+
+  if (view === "csvs") {
+    const { data: lists } = await supabase
+      .from("recipient_lists")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    return (
+      <div className="h-[calc(100vh-2rem)]">
+        <RecipientManagement initialLists={lists || []} />
+      </div>
     );
   }
 
