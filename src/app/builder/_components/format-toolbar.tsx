@@ -115,7 +115,7 @@ export function FormatToolbar({
       if (typeof o.fill === "string") setFontColor(o.fill);
     }
 
-    setScaling((obj as Record<string, unknown>).lockUniScaling !== true);
+    setScaling((obj as unknown as Record<string, unknown>).lockUniScaling !== true);
   }, [canvas]);
 
   useEffect(() => {
@@ -162,7 +162,6 @@ export function FormatToolbar({
   function handleFontSizeStep(delta: number) {
     const next = Math.max(6, Math.min(200, fontSize + delta));
     setFontSize(next);
-    setFontSizeInput(String(next));
     apply({ fontSize: next });
   }
 

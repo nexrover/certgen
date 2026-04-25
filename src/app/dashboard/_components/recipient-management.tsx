@@ -22,7 +22,7 @@ interface SavedFile {
   isNew?: boolean;
 }
 
-export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omit<SavedFile, "createdAt"> & { created_at: string | Date, recipients?: Record<string, unknown>[] })[] }) {
+export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omit<SavedFile, "createdAt" | "rows"> & { created_at: string | Date, recipients?: Record<string, unknown>[] })[] }) {
   const [savedFiles, setSavedFiles] = useState<SavedFile[]>(
     initialLists.map((list) => ({
       id: list.id,

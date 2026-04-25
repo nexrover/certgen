@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { 
-  User, 
-  Mail, 
-  Lock, 
-  CreditCard, 
-  Bell, 
-  Shield, 
-  Save, 
+import {
+  User,
+  Mail,
+  Lock,
+  CreditCard,
+  Bell,
+  Shield,
+  Save,
   X,
   AlertCircle,
   Phone,
@@ -102,7 +102,7 @@ export function ProfileSettings() {
       const newOtp = [...otpValue];
       newOtp[index] = value;
       setOtpValue(newOtp);
-      
+
       // Auto-focus next
       if (value && index < 5) {
         const nextInput = document.getElementById(`otp-${index + 1}`);
@@ -216,11 +216,10 @@ export function ProfileSettings() {
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center gap-2 py-4 px-2 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
-                  activeTab === tab.id
+                className={`flex items-center gap-2 py-4 px-2 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${activeTab === tab.id
                     ? "border-indigo-600 text-indigo-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                  }`}
               >
                 <tab.icon className="h-4 w-4" />
                 {tab.label}
@@ -243,148 +242,122 @@ export function ProfileSettings() {
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full rounded-xl" />
                 </div>
                 <div className="space-y-2">
                   <Skeleton className="h-3 w-20" />
-                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full rounded-xl" />
                 </div>
               </div>
               <div className="space-y-2">
                 <Skeleton className="h-3 w-20" />
-                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full rounded-xl" />
               </div>
             </div>
           ) : (
             <form className="max-w-4xl space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
               {activeTab === "general" && (
-                <div className="space-y-10">
-                  {/* Avatar Section */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-6">
-                      <div className="relative group">
-                        <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow-md transition-all group-hover:scale-105">
-                          <img src={selectedAvatar} alt="Profile" className="h-full w-full object-cover" />
+                <div className="space-y-12">
+                  {/* Avatar Section - 2 Column Layout */}
+                  <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Profile Picture</h3>
+                      <div className="flex items-center gap-6 p-6 rounded-xl border border-gray-100 bg-white shadow-sm">
+                        <div className="relative group shrink-0">
+                          <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow-md transition-all group-hover:scale-105">
+                            <img src={selectedAvatar} alt="Profile" className="h-full w-full object-cover" />
+                          </div>
+                          <button className="absolute bottom-0 right-0 p-1.5 rounded-full bg-indigo-600 text-white border-2 border-white shadow-sm hover:bg-indigo-700 transition-colors">
+                            <Plus className="h-3 w-3" />
+                          </button>
                         </div>
-                        <button className="absolute bottom-0 right-0 p-1.5 rounded-full bg-indigo-600 text-white border-2 border-white shadow-sm hover:bg-indigo-700 transition-colors">
-                          <Plus className="h-3 w-3" />
-                        </button>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-bold text-gray-900">Profile Picture</h3>
-                        <p className="text-sm text-gray-500 mb-4">Choose a default avatar or upload your own.</p>
-                        <div className="flex flex-wrap gap-3">
-                          {DEFAULT_AVATARS.map((url, i) => (
-                            <button
-                              key={i}
-                              type="button"
-                              onClick={() => handleAvatarSelect(url)}
-                              className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all hover:scale-110 ${
-                                selectedAvatar === url ? "border-indigo-600 ring-2 ring-indigo-100" : "border-transparent"
-                              }`}
-                            >
-                              <img src={url} alt={`Avatar ${i}`} className="h-full w-full object-cover" />
-                            </button>
-                          ))}
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">Your Avatar</p>
+                          <p className="text-xs text-gray-500 mt-1">Click the plus to upload a custom image.</p>
                           <button 
                             type="button"
-                            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-gray-300 text-xs font-semibold text-gray-600 hover:border-indigo-400 hover:bg-indigo-50 transition-all"
+                            className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all"
                           >
                             <Upload className="h-3 w-3" />
-                            Upload Custom
+                            Change Photo
                           </button>
                         </div>
                       </div>
                     </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Quick Select</h3>
+                      <div className="grid grid-cols-4 gap-3 p-6 rounded-xl border border-gray-100 bg-white shadow-sm">
+                        {DEFAULT_AVATARS.map((url, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => handleAvatarSelect(url)}
+                            className={`h-12 w-12 rounded-full overflow-hidden border-2 transition-all hover:scale-110 ${
+                              selectedAvatar === url ? "border-indigo-600 ring-4 ring-indigo-50" : "border-transparent"
+                            }`}
+                          >
+                            <img src={url} alt={`Avatar ${i}`} className="h-full w-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* User Info Grid */}
-                  <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-                    <div className="space-y-2.5">
-                      <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                        <User className="h-3.5 w-3.5 text-gray-400" />
-                        Username
-                      </label>
-                      <input
-                        {...form.register("username")}
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all placeholder-gray-400"
-                        placeholder="e.g. johndoe"
-                      />
-                      {form.formState.errors.username && (
-                        <p className="text-xs text-red-500 font-medium">{form.formState.errors.username.message}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2.5">
-                      <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                        <Mail className="h-3.5 w-3.5 text-gray-400" />
-                        Email Address
-                      </label>
-                      <input
-                        {...form.register("email")}
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all placeholder-gray-400"
-                        placeholder="john@example.com"
-                      />
-                      {form.formState.errors.email && (
-                        <p className="text-xs text-red-500 font-medium">{form.formState.errors.email.message}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2.5">
-                      <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                        <Phone className="h-3.5 w-3.5 text-gray-400" />
-                        Phone Number
-                      </label>
-                      <input
-                        {...form.register("phone")}
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all placeholder-gray-400"
-                        placeholder="+1 (555) 000-0000"
-                      />
-                    </div>
-
-                    <div className="space-y-2.5">
-                      <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                        <Shield className="h-3.5 w-3.5 text-gray-400" />
-                        Role
-                      </label>
-                      <input
-                        {...form.register("role")}
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all placeholder-gray-400"
-                      />
+                  {/* User Info Grid - 2 Column Layout */}
+                  <div className="space-y-6">
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Personal Information</h3>
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                      {[
+                        { label: "Username", icon: User, name: "username", placeholder: "e.g. johndoe" },
+                        { label: "Email Address", icon: Mail, name: "email", placeholder: "john@example.com" },
+                        { label: "Phone Number", icon: Phone, name: "phone", placeholder: "+1 (555) 000-0000" },
+                        { label: "Role", icon: Shield, name: "role", placeholder: "e.g. Designer" },
+                      ].map((field) => (
+                        <div key={field.name} className="space-y-2">
+                          <label className="text-xs font-bold text-gray-500 uppercase ml-1 flex items-center gap-2">
+                            <field.icon className="h-3 w-3" />
+                            {field.label}
+                          </label>
+                          <input
+                            {...form.register(field.name as any)}
+                            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all placeholder-gray-300 shadow-xs"
+                            placeholder={field.placeholder}
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
 
                   {/* Bio Section */}
-                  <div className="space-y-2.5">
-                    <label className="text-sm font-bold text-gray-700">Bio</label>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase ml-1">About You</label>
                     <textarea
                       {...form.register("bio")}
-                      rows={5}
-                      className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all resize-none placeholder-gray-400"
-                      placeholder="Share a brief introduction about yourself..."
+                      rows={4}
+                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all resize-none placeholder-gray-300 shadow-xs"
+                      placeholder="Write a brief introduction..."
                     />
                   </div>
                 </div>
               )}
 
-              {/* Account Settings Tab */}
               {activeTab === "account" && (
-                <div className="space-y-12">
-                  {/* Change Password Section */}
+                <div className="max-w-2xl space-y-12">
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">Change Password</h3>
-                      <p className="text-sm text-gray-500">Update your password to keep your account secure.</p>
+                      <h3 className="text-lg font-bold text-gray-900">Password & Security</h3>
+                      <p className="text-sm text-gray-500 mt-1">Keep your account safe by updating your password regularly.</p>
                     </div>
 
-                    <div className="max-w-md space-y-4 rounded-2xl border border-gray-100 bg-gray-50/30 p-6">
+                    <div className="space-y-4 rounded-xl border border-gray-100 bg-white p-8 shadow-sm">
                       {passwordStep === 0 ? (
-                        <div className="space-y-4 animate-in fade-in duration-300">
+                        <div className="space-y-4">
                           <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-700">Current Password</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Current Password</label>
                             <input
                               type="password"
-                              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all"
+                              className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white outline-none transition-all"
                               placeholder="••••••••"
                               onChange={(e) => setCurrentPwd(e.target.value)}
                             />
@@ -392,119 +365,81 @@ export function ProfileSettings() {
                           <button
                             type="button"
                             onClick={() => currentPwd === "password" ? setPasswordStep(1) : alert("Invalid current password (hint: 'password')")}
-                            className="w-full rounded-xl bg-white border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+                            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all"
                           >
-                            Verify Current Password
+                            Verify to Change Password
                           </button>
                         </div>
                       ) : (
                         <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-                          <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-700">New Password</label>
-                            <input
-                              type="password"
-                              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all"
-                              placeholder="••••••••"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-700">Confirm New Password</label>
-                            <input
-                              type="password"
-                              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all"
-                              placeholder="••••••••"
-                            />
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                              <label className="text-xs font-bold text-gray-500 uppercase ml-1">New Password</label>
+                              <input type="password" className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 outline-none transition-all" placeholder="••••••••" />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-xs font-bold text-gray-500 uppercase ml-1">Confirm New Password</label>
+                              <input type="password" className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 outline-none transition-all" placeholder="••••••••" />
+                            </div>
                           </div>
                           <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setPasswordStep(0)}
-                              className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all"
-                            >
-                              Back
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                alert("Password updated successfully!");
-                                setPasswordStep(0);
-                              }}
-                              className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
-                            >
-                              Update
-                            </button>
+                            <button type="button" onClick={() => setPasswordStep(0)} className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Cancel</button>
+                            <button type="button" onClick={() => { alert("Password updated!"); setPasswordStep(0); }} className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">Update Password</button>
                           </div>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* 2FA Section */}
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900">Two-Factor Authentication (2FA)</h3>
-                        <p className="text-sm text-gray-500">Add an extra layer of security to your account.</p>
+                        <h3 className="text-lg font-bold text-gray-900">Two-Factor Authentication</h3>
+                        <p className="text-sm text-gray-500 mt-1">Extra security for your login sessions.</p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setShow2FAModal(true)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ${
-                          is2FAEnabled ? "bg-indigo-600" : "bg-gray-200"
-                        }`}
+                        className={`relative inline-flex h-6 w-11 rounded-full border-2 border-transparent transition-all ${is2FAEnabled ? "bg-indigo-600" : "bg-gray-200"}`}
                       >
-                        <span
-                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                            is2FAEnabled ? "translate-x-5" : "translate-x-0"
-                          }`}
-                        />
+                        <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ${is2FAEnabled ? "translate-x-5" : "translate-x-0"}`} />
                       </button>
                     </div>
-
+                    
                     {is2FAEnabled && (
-                      <div className="rounded-2xl bg-indigo-50/50 border border-indigo-100 p-6 flex items-center gap-4 animate-in fade-in duration-500">
-                        <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-                          <Shield className="h-5 w-5" />
-                        </div>
+                      <div className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-6 flex items-center gap-4">
+                        <Shield className="h-6 w-6 text-indigo-600" />
                         <div>
                           <p className="text-sm font-bold text-indigo-900">2FA is currently active</p>
-                          <p className="text-sm text-indigo-700">Verifications are sent to your registered email.</p>
+                          <p className="text-xs text-indigo-700 mt-1">Verification codes are being sent to your registered email.</p>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Danger Zone */}
                   <div className="pt-8 border-t border-gray-100 space-y-6">
                     <div className="flex items-center gap-2 text-red-600">
                       <AlertCircle className="h-5 w-5" />
                       <h3 className="text-lg font-bold">Danger Zone</h3>
                     </div>
 
-                    <div className="rounded-2xl border border-red-100 bg-red-50/30 p-8 space-y-6">
+                    <div className="rounded-xl border border-red-100 bg-red-50/20 p-8 space-y-6 shadow-sm">
                       <div>
-                        <h4 className="text-sm font-bold text-gray-900">Delete Account</h4>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Once you delete your account, there is no going back. Please be certain.
-                        </p>
+                        <h4 className="text-sm font-bold text-gray-900">Delete Your Account</h4>
+                        <p className="text-sm text-gray-500 mt-1">Once deleted, all your certificate data is permanently lost. This action is irreversible.</p>
                       </div>
 
                       <div className="space-y-4">
-                        <p className="text-xs font-bold text-red-700 uppercase tracking-wider">
-                          Type your username <span className="underline italic">"{form.getValues("username")}"</span> to confirm:
-                        </p>
+                        <p className="text-[10px] font-bold text-red-700 uppercase tracking-widest">Type "{form.getValues("username")}" to confirm:</p>
                         <input
-                          type="text"
-                          spellCheck="false"
-                          onPaste={(e) => e.preventDefault()}
+                          type="text" spellCheck="false" onPaste={(e) => e.preventDefault()}
                           onChange={(e) => setDeleteConfirm(e.target.value)}
-                          className="w-full max-w-md rounded-xl border border-red-200 bg-white px-4 py-3 text-sm focus:border-red-500 focus:ring-4 focus:ring-red-50 outline-none transition-all placeholder-gray-400"
+                          className="w-full rounded-xl border border-red-200 bg-white px-4 py-3 text-sm focus:border-red-500 focus:ring-4 focus:ring-red-50 outline-none transition-all shadow-xs"
                           placeholder="Confirm username"
                         />
                         <button
-                          type="button"
-                          disabled={deleteConfirm !== form.getValues("username")}
-                          className="w-full max-w-md rounded-xl bg-red-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-red-100 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          type="button" disabled={deleteConfirm !== form.getValues("username")}
+                          className="w-full rounded-xl bg-red-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-red-100 hover:bg-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         >
                           Delete Account Permanently
                         </button>
@@ -514,144 +449,107 @@ export function ProfileSettings() {
                 </div>
               )}
 
-              {/* Notifications Tab */}
+              {/* Notifications Tab - 2 Column Layout */}
               {activeTab === "notifications" && (
-                <div className="space-y-10">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">Notification Preferences</h3>
-                    <p className="text-sm text-gray-500">Choose how and when you want to be notified.</p>
-                  </div>
+                <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">General Notifications</h3>
+                      <p className="text-sm text-gray-500 mt-1">Control which updates you receive.</p>
+                    </div>
 
-                  <div className="space-y-6">
-                    {[
-                      { id: "email", label: "Email Notifications", desc: "Receive updates and alerts via email." },
-                      { id: "push", label: "Push Notifications", desc: "Get real-time alerts on your browser." },
-                      { id: "sms", label: "SMS Notifications", desc: "Receive critical alerts on your mobile device." },
-                    ].map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-6 rounded-2xl border border-gray-100 bg-gray-50/30">
-                        <div>
-                          <p className="text-sm font-bold text-gray-900">{item.label}</p>
-                          <p className="text-xs text-gray-500 mt-1">{item.desc}</p>
+                    <div className="space-y-4">
+                      {[
+                        { id: "email", label: "Email Alerts", icon: Mail },
+                        { id: "push", label: "Browser Push", icon: Bell },
+                        { id: "sms", label: "SMS Alerts", icon: Phone },
+                      ].map((item) => (
+                        <div key={item.id} className="flex items-center justify-between p-5 rounded-xl border border-gray-100 bg-white shadow-sm">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400">
+                              <item.icon className="h-5 w-5" />
+                            </div>
+                            <p className="text-sm font-bold text-gray-900">{item.label}</p>
+                          </div>
+                          <button type="button" className="relative h-6 w-11 rounded-full bg-gray-200 border-2 border-transparent"><span className="translate-x-0 h-5 w-5 rounded-full bg-white block shadow transition" /></button>
                         </div>
-                        <button
-                          type="button"
-                          className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none"
-                        >
-                          <span className="translate-x-0 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" />
-                        </button>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="space-y-4 pt-6 border-t border-gray-100">
-                    <label className="text-sm font-bold text-gray-900">Notification Frequency</label>
-                    <select className="w-full max-w-md rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all appearance-none cursor-pointer">
-                      <option>Instantly</option>
-                      <option>Weekly Digest</option>
-                      <option>Monthly Summary</option>
-                    </select>
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Frequency & Timing</h3>
+                      <p className="text-sm text-gray-500 mt-1">Decide how often you want to be interrupted.</p>
+                    </div>
+
+                    <div className="space-y-4 p-8 rounded-xl border border-gray-100 bg-gray-50/30">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Delivery Frequency</label>
+                        <select className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 outline-none cursor-pointer shadow-xs">
+                          <option>Instantly (Highly recommended)</option>
+                          <option>Daily Digest</option>
+                          <option>Weekly Roundup</option>
+                        </select>
+                      </div>
+                      <p className="text-[10px] text-gray-400 leading-relaxed">Note: Critical security alerts and billing notifications will always be sent instantly regardless of these settings.</p>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Billing & Plans Tab */}
+              {/* Billing Tab - 2 Column Layout */}
               {activeTab === "billing" && (
-                <div className="space-y-10">
-                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    {/* Current Plan Card */}
-                    <div className="rounded-2xl border border-indigo-100 bg-indigo-50/30 p-8 space-y-6">
+                <div className="space-y-12">
+                  <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                    <div className="rounded-xl border border-indigo-100 bg-indigo-50/30 p-10 space-y-8 shadow-sm">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Current Plan</p>
-                          <h3 className="text-3xl font-black text-gray-900 mt-2">Free Plan</h3>
-                          <p className="text-sm text-gray-500 mt-1">Perfect for getting started.</p>
+                          <span className="inline-block px-3 py-1 rounded-full bg-indigo-600 text-[10px] font-black text-white uppercase tracking-widest">Active</span>
+                          <h3 className="text-4xl font-black text-gray-900 mt-4">Free Plan</h3>
+                          <p className="text-sm text-indigo-700/70 mt-2 font-medium">Starter plan for individuals</p>
                         </div>
-                        <div className="h-12 w-12 rounded-xl bg-white flex items-center justify-center shadow-sm text-indigo-600">
-                          <Zap className="h-6 w-6" />
-                        </div>
+                        <Zap className="h-10 w-10 text-indigo-600" />
                       </div>
-                      
-                      <div className="space-y-3">
-                        {["Up to 10 certificates", "Basic templates", "Email support"].map((feature, i) => (
-                          <div key={i} className="flex items-center gap-2 text-sm text-gray-600 font-medium">
-                            <Plus className="h-4 w-4 text-indigo-500" />
-                            {feature}
-                          </div>
+                      <div className="space-y-4">
+                        {["10 Monthly Certificates", "Standard Templates", "Community Support"].map((f, i) => (
+                          <div key={i} className="flex items-center gap-3 text-sm font-bold text-gray-700"><div className="h-2 w-2 rounded-full bg-indigo-500" />{f}</div>
                         ))}
                       </div>
-
-                      <button className="w-full rounded-xl bg-indigo-600 px-4 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-[0.98]">
-                        Upgrade to Pro
-                      </button>
+                      <button className="w-full rounded-xl bg-indigo-600 px-4 py-5 text-sm font-bold text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all hover:-translate-y-0.5">Upgrade to Pro</button>
                     </div>
 
-                    {/* Quick Billing Actions */}
                     <div className="space-y-6">
-                      <div className="rounded-2xl border border-gray-100 p-8 space-y-4">
-                        <h4 className="text-sm font-bold text-gray-900">Have a coupon?</h4>
+                      <div className="rounded-xl border border-gray-100 bg-white p-10 space-y-6 shadow-sm">
+                        <h4 className="text-lg font-bold text-gray-900">Promotions</h4>
                         <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <input 
-                              type="text" 
-                              placeholder="CODE2024"
-                              className="w-full rounded-xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all"
-                            />
-                          </div>
-                          <button className="rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">
-                            Apply
-                          </button>
+                          <input type="text" placeholder="DISCOUNT20" className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm font-bold focus:border-indigo-500 focus:bg-white outline-none transition-all shadow-xs" />
+                          <button className="rounded-xl border border-gray-200 bg-white px-8 py-4 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">Apply</button>
                         </div>
                       </div>
-
-                      <div className="rounded-2xl border border-gray-100 p-8 bg-gray-50/30 flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-bold text-gray-900">Next Billing Date</p>
-                          <p className="text-sm text-gray-500 mt-1">N/A (Free Plan)</p>
-                        </div>
-                        <CreditCard className="h-8 w-8 text-gray-300" />
+                      <div className="rounded-xl border border-gray-100 bg-white p-10 flex items-center justify-between shadow-sm">
+                        <div><p className="text-sm font-bold text-gray-900">Next Payment</p><p className="text-2xl font-black text-indigo-600 mt-1">$0.00</p></div>
+                        <CreditCard className="h-10 w-10 text-gray-100" />
                       </div>
                     </div>
                   </div>
 
-                  {/* Billing History */}
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-bold text-gray-900">Billing History</h3>
-                      <button className="text-sm font-bold text-indigo-600 hover:underline">Download All</button>
+                    <div className="flex items-center justify-between px-2">
+                      <h3 className="text-lg font-bold text-gray-900">Payment History</h3>
+                      <button className="text-xs font-bold text-indigo-600 uppercase tracking-widest hover:underline">Export CSV</button>
                     </div>
-
-                    <div className="overflow-x-auto rounded-2xl border border-gray-100">
+                    <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
                       <table className="w-full text-left text-sm">
-                        <thead className="bg-gray-50/50 text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-gray-100">
-                          <tr>
-                            <th className="px-6 py-4">Invoice ID</th>
-                            <th className="px-6 py-4">Date</th>
-                            <th className="px-6 py-4">Amount</th>
-                            <th className="px-6 py-4">Status</th>
-                            <th className="px-6 py-4 text-right">Action</th>
-                          </tr>
+                        <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">
+                          <tr><th className="px-8 py-5">Invoice</th><th className="px-8 py-5">Date</th><th className="px-8 py-5">Status</th><th className="px-8 py-5 text-right">Download</th></tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100 font-medium">
+                        <tbody className="divide-y divide-gray-100">
                           {[
-                            { id: "INV-001", date: "May 12, 2024", amount: "$0.00", status: "Paid" },
-                            { id: "INV-002", date: "Apr 12, 2024", amount: "$0.00", status: "Paid" },
-                          ].map((invoice) => (
-                            <tr key={invoice.id} className="hover:bg-gray-50/50 transition-colors">
-                              <td className="px-6 py-4 text-gray-900">{invoice.id}</td>
-                              <td className="px-6 py-4 text-gray-500">{invoice.date}</td>
-                              <td className="px-6 py-4 text-gray-900">{invoice.amount}</td>
-                              <td className="px-6 py-4">
-                                <span className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-bold text-green-700">
-                                  {invoice.status}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                <button className="text-gray-400 hover:text-indigo-600 transition-colors">
-                                  <Download className="h-4 w-4" />
-                                </button>
-                              </td>
-                            </tr>
+                            { id: "INV-2024-001", date: "May 10, 2024", status: "Successful" },
+                            { id: "INV-2024-002", date: "Apr 10, 2024", status: "Successful" },
+                          ].map((inv) => (
+                            <tr key={inv.id} className="hover:bg-gray-50/30 transition-all"><td className="px-8 py-6 font-bold text-gray-900">{inv.id}</td><td className="px-8 py-6 text-gray-500">{inv.date}</td><td className="px-8 py-6"><span className="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-[10px] font-black text-green-600 uppercase tracking-tighter">{inv.status}</span></td><td className="px-8 py-6 text-right"><button className="text-gray-300 hover:text-indigo-600 transition-all"><Download className="h-5 w-5" /></button></td></tr>
                           ))}
                         </tbody>
                       </table>
@@ -723,18 +621,16 @@ export function ProfileSettings() {
                 <button
                   type="button"
                   onClick={() => setOtpMethod("email")}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-                    otpMethod === "email" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                  }`}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${otpMethod === "email" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                    }`}
                 >
                   Email OTP
                 </button>
                 <button
                   type="button"
                   onClick={() => setOtpMethod("phone")}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-                    otpMethod === "phone" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                  }`}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${otpMethod === "phone" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                    }`}
                 >
                   Phone OTP
                 </button>
@@ -758,7 +654,7 @@ export function ProfileSettings() {
                 <p className="text-gray-500 font-medium">
                   Expire in <span className="text-indigo-600 font-bold">{formatTime(countdown)}</span>
                 </p>
-                <button 
+                <button
                   type="button"
                   onClick={() => setCountdown(300)}
                   className="text-indigo-600 font-bold hover:underline"
