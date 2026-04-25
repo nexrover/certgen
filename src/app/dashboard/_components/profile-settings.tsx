@@ -16,7 +16,10 @@ import {
   AlertCircle,
   Phone,
   Plus,
-  Upload
+  Upload,
+  Download,
+  Tag,
+  Zap
 } from "lucide-react";
 
 const profileSchema = z.object({
@@ -511,15 +514,149 @@ export function ProfileSettings() {
                 </div>
               )}
 
-              {["notifications", "billing"].includes(activeTab) && (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="h-16 w-16 rounded-full bg-indigo-50 flex items-center justify-center mb-6">
-                    <AlertCircle className="h-8 w-8 text-indigo-600" />
+              {/* Notifications Tab */}
+              {activeTab === "notifications" && (
+                <div className="space-y-10">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Notification Preferences</h3>
+                    <p className="text-sm text-gray-500">Choose how and when you want to be notified.</p>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">Coming Soon</h3>
-                  <p className="text-gray-500 max-w-sm mt-2">
-                    We're working hard to bring you {activeTab} settings. Stay tuned for updates!
-                  </p>
+
+                  <div className="space-y-6">
+                    {[
+                      { id: "email", label: "Email Notifications", desc: "Receive updates and alerts via email." },
+                      { id: "push", label: "Push Notifications", desc: "Get real-time alerts on your browser." },
+                      { id: "sms", label: "SMS Notifications", desc: "Receive critical alerts on your mobile device." },
+                    ].map((item) => (
+                      <div key={item.id} className="flex items-center justify-between p-6 rounded-2xl border border-gray-100 bg-gray-50/30">
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">{item.label}</p>
+                          <p className="text-xs text-gray-500 mt-1">{item.desc}</p>
+                        </div>
+                        <button
+                          type="button"
+                          className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none"
+                        >
+                          <span className="translate-x-0 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-4 pt-6 border-t border-gray-100">
+                    <label className="text-sm font-bold text-gray-900">Notification Frequency</label>
+                    <select className="w-full max-w-md rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all appearance-none cursor-pointer">
+                      <option>Instantly</option>
+                      <option>Weekly Digest</option>
+                      <option>Monthly Summary</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {/* Billing & Plans Tab */}
+              {activeTab === "billing" && (
+                <div className="space-y-10">
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    {/* Current Plan Card */}
+                    <div className="rounded-2xl border border-indigo-100 bg-indigo-50/30 p-8 space-y-6">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Current Plan</p>
+                          <h3 className="text-3xl font-black text-gray-900 mt-2">Free Plan</h3>
+                          <p className="text-sm text-gray-500 mt-1">Perfect for getting started.</p>
+                        </div>
+                        <div className="h-12 w-12 rounded-xl bg-white flex items-center justify-center shadow-sm text-indigo-600">
+                          <Zap className="h-6 w-6" />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {["Up to 10 certificates", "Basic templates", "Email support"].map((feature, i) => (
+                          <div key={i} className="flex items-center gap-2 text-sm text-gray-600 font-medium">
+                            <Plus className="h-4 w-4 text-indigo-500" />
+                            {feature}
+                          </div>
+                        ))}
+                      </div>
+
+                      <button className="w-full rounded-xl bg-indigo-600 px-4 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-[0.98]">
+                        Upgrade to Pro
+                      </button>
+                    </div>
+
+                    {/* Quick Billing Actions */}
+                    <div className="space-y-6">
+                      <div className="rounded-2xl border border-gray-100 p-8 space-y-4">
+                        <h4 className="text-sm font-bold text-gray-900">Have a coupon?</h4>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <input 
+                              type="text" 
+                              placeholder="CODE2024"
+                              className="w-full rounded-xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 py-3 text-sm focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all"
+                            />
+                          </div>
+                          <button className="rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">
+                            Apply
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-gray-100 p-8 bg-gray-50/30 flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">Next Billing Date</p>
+                          <p className="text-sm text-gray-500 mt-1">N/A (Free Plan)</p>
+                        </div>
+                        <CreditCard className="h-8 w-8 text-gray-300" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Billing History */}
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold text-gray-900">Billing History</h3>
+                      <button className="text-sm font-bold text-indigo-600 hover:underline">Download All</button>
+                    </div>
+
+                    <div className="overflow-x-auto rounded-2xl border border-gray-100">
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-gray-50/50 text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-gray-100">
+                          <tr>
+                            <th className="px-6 py-4">Invoice ID</th>
+                            <th className="px-6 py-4">Date</th>
+                            <th className="px-6 py-4">Amount</th>
+                            <th className="px-6 py-4">Status</th>
+                            <th className="px-6 py-4 text-right">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 font-medium">
+                          {[
+                            { id: "INV-001", date: "May 12, 2024", amount: "$0.00", status: "Paid" },
+                            { id: "INV-002", date: "Apr 12, 2024", amount: "$0.00", status: "Paid" },
+                          ].map((invoice) => (
+                            <tr key={invoice.id} className="hover:bg-gray-50/50 transition-colors">
+                              <td className="px-6 py-4 text-gray-900">{invoice.id}</td>
+                              <td className="px-6 py-4 text-gray-500">{invoice.date}</td>
+                              <td className="px-6 py-4 text-gray-900">{invoice.amount}</td>
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-bold text-green-700">
+                                  {invoice.status}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <button className="text-gray-400 hover:text-indigo-600 transition-colors">
+                                  <Download className="h-4 w-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               )}
             </form>
