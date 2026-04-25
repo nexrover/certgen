@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { FiUpload, FiPlus, FiSave, FiEdit2, FiTrash2, FiFileText, FiX, FiCheck, FiSearch, FiFilter, FiChevronLeft, FiChevronRight, FiCheckSquare, FiSquare, FiLoader } from "react-icons/fi";
+import { FiUpload, FiPlus, FiSave, FiEdit2, FiTrash2, FiFileText, FiX, FiCheck, FiSearch, FiFilter, FiChevronLeft, FiChevronRight, FiLoader } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/client";
 
@@ -23,6 +24,7 @@ interface SavedFile {
 }
 
 export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omit<SavedFile, "createdAt" | "rows"> & { created_at: string | Date, recipients?: Record<string, unknown>[] })[] }) {
+  const { t } = useTranslation();
   const [savedFiles, setSavedFiles] = useState<SavedFile[]>(
     initialLists.map((list) => ({
       id: list.id,
@@ -130,7 +132,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
         console.error("Error parsing CSV:", error);
         clearInterval(progressInterval);
         setIsUploading(false);
-        alert("Failed to parse CSV file.");
+        alert(t("dashboard.recipients.parse_error"));
       }
     });
   };
@@ -467,14 +469,14 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">{currentFile.name}</h2>
-              <p className="mt-1 text-sm text-gray-500">{currentFile.rows.length} recipients • Uploaded on {currentFile.createdAt.toLocaleDateString()}</p>
+              <p className="mt-1 text-sm text-gray-500">{currentFile.rows.length} {t("dashboard.recipients.stats_info")} {currentFile.createdAt.toLocaleDateString()}</p>
             </div>
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setCurrentFile(null)}
                 className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                Back
+                {t("dashboard.recipients.back")}
               </button>
               <button 
                 onClick={saveCurrentFileChanges}
@@ -482,7 +484,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-70"
               >
                 {isSaving ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiSave className="w-4 h-4" />}
-                Save Data
+                {t("dashboard.recipients.save_data")}
               </button>
             </div>
           </div>
@@ -494,20 +496,20 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
             <div className="flex items-center justify-between h-10">
               <div className="flex items-center gap-4">
                 <span className="text-sm font-medium text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-md">
-                  {selectedRowIds.size} selected
+                  {selectedRowIds.size} {t("dashboard.recipients.selected")}
                 </span>
                 <div className="h-4 w-px bg-gray-300"></div>
                 <button 
                   onClick={() => handleBulkStatusChange("Active")}
                   className="text-sm font-medium text-gray-700 hover:text-green-600 transition-colors"
                 >
-                  Set Active
+                  {t("dashboard.recipients.status_active")}
                 </button>
                 <button 
                   onClick={() => handleBulkStatusChange("Inactive")}
                   className="text-sm font-medium text-gray-700 hover:text-orange-600 transition-colors"
                 >
-                  Set Inactive
+                  {t("dashboard.recipients.status_inactive")}
                 </button>
               </div>
               <button 
@@ -515,18 +517,18 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                 className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               >
                 <FiTrash2 className="w-4 h-4" />
-                Delete Selected
+                {t("dashboard.recipients.delete_selected")}
               </button>
             </div>
           ) : (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 h-10">
               <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-500 font-medium">Total: {filteredRows.length}</span>
+                <span className="text-sm text-gray-500 font-medium">{t("dashboard.recipients.total")}: {filteredRows.length}</span>
                 <div className="relative">
                   <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="text"
-                    placeholder="Search recipients..."
+                    placeholder={t("dashboard.recipients.search_placeholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 w-64 bg-white shadow-sm"
@@ -538,7 +540,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                     className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-sm transition-colors"
                   >
                     <FiFilter className="w-4 h-4" />
-                    Filter
+                    {t("dashboard.recipients.filter")}
                     {filterStatus !== "All" && (
                       <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
                     )}
@@ -547,7 +549,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                   {showFilter && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 p-2 z-20">
                       <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                        Filter by Status
+                        {t("dashboard.recipients.filter_status")}
                       </div>
                       <div className="space-y-1">
                         {["All", "Active", "Inactive"].map((status) => (
@@ -578,7 +580,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                   className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
                 >
                   <FiPlus className="w-4 h-4" />
-                  Add Row
+                  {t("dashboard.recipients.add_row")}
                 </button>
                 
                 {/* Add Attribute Popover/Dropdown */}
@@ -588,11 +590,11 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                     className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-lg hover:bg-indigo-100 transition-colors shadow-sm"
                   >
                     <FiPlus className="w-4 h-4" />
-                    Add Column
+                    {t("dashboard.recipients.add_column")}
                   </button>
                   {showAddAttribute && (
                     <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 p-4 z-20">
-                      <h4 className="text-sm font-semibold text-gray-900 mb-3">Add Custom Attribute</h4>
+                      <h4 className="text-sm font-semibold text-gray-900 mb-3">{t("dashboard.recipients.add_attribute")}</h4>
                       <input
                         type="text"
                         value={newAttributeName}
@@ -601,8 +603,8 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                         className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 mb-3"
                       />
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => setShowAddAttribute(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900">Cancel</button>
-                        <button onClick={handleAddAttribute} className="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Add</button>
+                        <button onClick={() => setShowAddAttribute(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900">{t("profile.cancel")}</button>
+                        <button onClick={handleAddAttribute} className="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">{t("common.add")}</button>
                       </div>
                     </div>
                   )}
@@ -627,15 +629,15 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                   />
                 </th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200 w-24">
-                  Action
+                  {t("dashboard.recipients.action_label")}
                 </th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200 w-32">
-                  Status
+                  {t("dashboard.recipients.status_label")}
                 </th>
                 {currentFile.headers.map((header) => (
                   <th key={header} className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200 min-w-[150px] group relative">
                     <div className="flex items-center justify-between">
-                      {header}
+                      {header === "Name" ? t("dashboard.recipients.name") : header === "Email" ? t("dashboard.recipients.email") : header}
                       {header !== "Name" && header !== "Email" && (
                         <button 
                           onClick={() => setColumnToDelete(header)}
@@ -678,7 +680,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                         }`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${row.status === "Active" ? "bg-green-500" : "bg-orange-500"}`}></span>
-                        {row.status}
+                        {row.status === "Active" ? t("dashboard.recipients.status_active") : t("dashboard.recipients.status_inactive")}
                       </button>
                     </td>
                     {currentFile.headers.map((header) => (
@@ -704,8 +706,8 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                       <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
                         <FiFileText className="w-6 h-6 text-gray-400" />
                       </div>
-                      <p className="text-base font-medium text-gray-900 mb-1">No recipients found</p>
-                      <p className="text-sm text-gray-500 mb-4">Add a new row or clear your search filters.</p>
+                      <p className="text-base font-medium text-gray-900 mb-1">{t("dashboard.recipients.no_recipients")}</p>
+                      <p className="text-sm text-gray-500 mb-4">{t("dashboard.recipients.no_recipients_desc")}</p>
                     </div>
                   </td>
                 </tr>
@@ -721,7 +723,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                 className="pointer-events-auto flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-full hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
               >
                 <FiPlus className="w-4 h-4 text-indigo-600" />
-                Add New Row
+                {t("dashboard.recipients.add_row")}
               </button>
             </div>
           )}
@@ -736,10 +738,10 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                     <FiTrash2 className="w-5 h-5 text-red-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">Delete Column</h3>
+                  <h3 className="text-xl font-bold text-gray-900">{t("dashboard.recipients.delete_column_title")}</h3>
                 </div>
                 <p className="text-sm text-gray-500 mb-6">
-                  Are you sure you want to delete the column <strong>&quot;{columnToDelete}&quot;</strong>? This action cannot be undone and will remove data for this column from all rows.
+                  {t("dashboard.recipients.delete_column_desc", { name: columnToDelete })}
                 </p>
                 <div className="flex items-center justify-end gap-3">
                   <button
@@ -829,13 +831,13 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
       {savedFiles.length > 0 && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Recipient Lists</h2>
-            <p className="mt-1 text-sm text-gray-500">Manage and organize your recipient data</p>
+            <h2 className="text-xl font-bold text-gray-900">{t("dashboard.recipients.list_title")}</h2>
+            <p className="mt-1 text-sm text-gray-500">{t("dashboard.recipients.list_subtitle")}</p>
           </div>
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer shadow-sm">
               <FiUpload className="w-4 h-4" />
-              Upload CSV
+              {t("dashboard.recipients.upload_csv")}
               <input 
                 type="file" 
                 accept=".csv" 
@@ -848,7 +850,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
             >
               <FiPlus className="w-4 h-4" />
-              Add Manually
+              {t("dashboard.recipients.add_manually")}
             </button>
           </div>
         </div>
@@ -860,15 +862,15 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
           <div className="flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-sm mb-4">
             <FiUpload className="w-8 h-8 text-indigo-600" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Upload Recipients</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">{t("dashboard.recipients.upload_title")}</h3>
           <p className="text-gray-500 text-center mb-6 max-w-md">
-            Upload a CSV file containing your recipients&apos; data. We&apos;ll automatically match the headers for you.
+            {t("dashboard.recipients.upload_desc")}
           </p>
           
           {isUploading ? (
             <div className="w-full max-w-md space-y-2">
               <div className="flex justify-between text-sm font-medium text-gray-700">
-                <span>Uploading...</span>
+                <span>{t("dashboard.recipients.uploading")}</span>
                 <span>{uploadProgress}%</span>
               </div>
               <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
@@ -882,7 +884,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
             <div className="flex gap-4">
               <label className="flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors cursor-pointer shadow-sm">
                 <FiUpload className="w-4 h-4" />
-                Upload CSV
+                {t("dashboard.recipients.upload_csv")}
                 <input 
                   type="file" 
                   accept=".csv" 
@@ -895,7 +897,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                 className="flex items-center gap-2 px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
               >
                 <FiPlus className="w-4 h-4" />
-                Add Manually
+                {t("dashboard.recipients.add_manually")}
               </button>
             </div>
           )}
@@ -908,23 +910,23 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900">Open Uploaded File</h3>
+                <h3 className="text-xl font-bold text-gray-900">{t("dashboard.recipients.open_file")}</h3>
                 <button onClick={() => { setShowSavePrompt(false); setTempData(null); }} className="text-gray-400 hover:text-gray-600">
                   <FiX className="w-5 h-5" />
                 </button>
               </div>
               <p className="text-sm text-gray-500 mb-4">
-                Successfully parsed {tempData?.rows.length} rows. Please provide a name for this list to open it.
+                {t("dashboard.recipients.parsed_rows", { count: tempData?.rows.length })}
               </p>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">List Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("dashboard.recipients.list_name_label")}</label>
                   <input
                     type="text"
                     value={newFileName}
                     onChange={(e) => setNewFileName(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none"
-                    placeholder="e.g., Marketing Team 2024"
+                    placeholder={t("dashboard.recipients.list_name_placeholder")}
                   />
                 </div>
               </div>
@@ -942,7 +944,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm disabled:opacity-70"
               >
                 <FiCheck className="w-4 h-4" />
-                Open List
+                {t("dashboard.recipients.open_list_btn")}
               </button>
             </div>
           </div>
@@ -964,7 +966,7 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
-                    {file.rows.length} rows
+                    {file.rows.length} {t("dashboard.recipients.rows")}
                   </span>
                   <div className="flex items-center ml-2 space-x-1">
                     <button 
@@ -973,14 +975,14 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
                         setCurrentFile(file);
                       }}
                       className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
-                      title="Edit List"
+                      title={t("common.edit") || "Edit List"}
                     >
                       <FiEdit2 className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={(e) => deleteSavedFile(file.id, e)}
                       className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                      title="Delete List"
+                      title={t("common.delete") || "Delete List"}
                     >
                       <FiTrash2 className="w-4 h-4" />
                     </button>
@@ -989,11 +991,11 @@ export function RecipientManagement({ initialLists = [] }: { initialLists?: (Omi
               </div>
               <h4 className="font-bold text-gray-900 mb-1">{file.name}</h4>
               <p className="text-sm text-gray-500 mb-4">
-                Last Edited: {file.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}, {file.createdAt.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                {t("dashboard.recipients.last_edited")}: {file.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}, {file.createdAt.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
               </p>
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <span className="truncate max-w-[200px]">
-                  Headers: {file.headers.slice(0, 3).join(", ")}
+                  {t("dashboard.recipients.headers_label")}: {file.headers.slice(0, 3).join(", ")}
                   {file.headers.length > 3 ? "..." : ""}
                 </span>
               </div>

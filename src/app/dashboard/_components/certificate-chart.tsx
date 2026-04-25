@@ -1,14 +1,17 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { FiChevronDown } from "react-icons/fi";
 
 export function CertificateChart() {
+  const { t } = useTranslation();
+  
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-8">
-        <h3 className="text-lg font-bold text-gray-900">Certificate Analytics</h3>
+        <h3 className="text-lg font-bold text-gray-900">{t("dashboard.analytics.title")}</h3>
         <button className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50">
-          This Week
+          {t("dashboard.analytics.this_week", "This Week")}
           <FiChevronDown className="h-3.5 w-3.5" />
         </button>
       </div>

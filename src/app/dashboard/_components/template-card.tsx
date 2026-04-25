@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { PreviewModal } from "@/app/builder/_components/preview-modal";
 
 interface TemplateCardProps {
@@ -13,10 +14,11 @@ interface TemplateCardProps {
   onDeleted?: (id: string) => void;
 }
 
-function formatDate(value: string | null | undefined) {
-  if (!value) return "Unknown";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function formatDate(value: string | null | undefined, t: any) {
+  if (!value) return t("dashboard.templates.unknown");
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unknown";
+  if (Number.isNaN(date.getTime())) return t("dashboard.templates.unknown");
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
   }).format(date);
@@ -29,14 +31,15 @@ export function TemplateCard({
   backgroundUrl,
   onDeleted,
 }: TemplateCardProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
-  const [previewData, setPreviewData] = useState<{ canvasJson: any; width: number; height: number } | null>(null);
+  const [previewData, setPreviewData] = useState<{ canvasJson: Record<string, unknown>; width: number; height: number } | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
 
   async function handleDelete() {
     const confirmed = window.confirm(
-      "Delete this template? This action cannot be undone."
+      t("dashboard.templates.delete_confirm")
     );
     if (!confirmed) return;
 
@@ -46,7 +49,7 @@ export function TemplateCard({
       const data = (await response.json()) as { success?: boolean; error?: string };
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error ?? "Failed to delete template");
+        throw new Error(data.error ?? t("dashboard.templates.delete_error"));
       }
 
       if (onDeleted) {
@@ -55,7 +58,7 @@ export function TemplateCard({
       router.refresh();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to delete template";
+        error instanceof Error ? error.message : t("dashboard.templates.delete_error");
       window.alert(message);
     } finally {
       setDeleting(false);
@@ -74,10 +77,10 @@ export function TemplateCard({
           height: result.data.height || 600,
         });
       } else {
-        throw new Error(result.error || "Failed to load template for preview");
+        throw new Error(result.error || t("dashboard.templates.preview_error"));
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to load preview";
+      const message = error instanceof Error ? error.message : t("dashboard.templates.preview_error");
       window.alert(message);
     } finally {
       setLoadingPreview(false);
@@ -107,7 +110,7 @@ export function TemplateCard({
           <div className="flex flex-col items-center gap-2 text-indigo-500">
             <IconImage className="h-8 w-8" />
             <span className="text-xs font-medium uppercase tracking-wide text-indigo-600/80">
-              No thumbnail
+              {t("dashboard.templates.no_thumbnail")}
             </span>
           </div>
         )}
@@ -117,7 +120,7 @@ export function TemplateCard({
         <h3 className="line-clamp-1 text-base font-semibold text-gray-900">{name}</h3>
         <p className="mt-1 flex items-center text-xs text-gray-500">
           <IconCalendar className="mr-1.5 h-3.5 w-3.5 text-indigo-500" />
-          Last Created: {formatDate(createdAt)}
+          {t("dashboard.templates.last_created")}: {formatDate(createdAt, t)}
         </p>
 
         <div className="mt-4 flex items-center justify-between gap-2">
@@ -127,7 +130,7 @@ export function TemplateCard({
             className="flex-1 inline-flex justify-center items-center rounded-md border border-indigo-200 px-2 py-1.5 text-xs font-medium text-indigo-700 transition-colors hover:bg-indigo-50"
           >
             <IconPencil className="mr-1.5 h-3.5 w-3.5" />
-            Edit
+            {t("common.edit")}
           </button>
           <button
             type="button"
@@ -140,7 +143,7 @@ export function TemplateCard({
             ) : (
               <IconEye className="mr-1.5 h-3.5 w-3.5" />
             )}
-            Preview
+            {t("dashboard.templates.preview")}
           </button>
           <button
             type="button"
@@ -149,7 +152,7 @@ export function TemplateCard({
             className="flex-1 inline-flex justify-center items-center rounded-md border border-red-200 px-2 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <IconTrash className="mr-1.5 h-3.5 w-3.5" />
-            {deleting ? "Del..." : "Delete"}
+            {deleting ? t("dashboard.templates.deleting") : t("common.delete")}
           </button>
         </div>
       </div>

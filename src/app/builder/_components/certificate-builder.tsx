@@ -179,6 +179,7 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
         alert(data.error || "Failed to save template.");
       }
     } catch (error) {
+      console.error("Save error:", error);
       alert("An error occurred while saving the template.");
     } finally {
       setSaving(false);
@@ -227,8 +228,7 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
     reader.onload = () => {
       const url = reader.result as string;
       // Remove existing bg image object if any
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const existing = fc.getObjects().find((o: any) => o.__isBackground);
+      const existing = fc.getObjects().find((o: FabricObject) => (o as unknown as { __isBackground?: boolean }).__isBackground);
       if (existing) fc.remove(existing);
 
       const imgEl = new Image();
@@ -237,8 +237,7 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
         const sx = fc.width! / imgEl.width;
         const sy = fc.height! / imgEl.height;
         fabricImg.set({ scaleX: sx, scaleY: sy });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (fabricImg as any).__isBackground = true;
+        (fabricImg as unknown as FabricObject & { __isBackground: boolean }).__isBackground = true;
         fabricImg.set({ selectable: false, evented: false, lockMovementX: true, lockMovementY: true, hasControls: false, hasBorders: false });
         fc.insertAt(0, fabricImg);
         fc.requestRenderAll();
@@ -253,8 +252,7 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
   const handleBgImageRemove = useCallback(() => {
     const fc = canvasRef.current?.getCanvas();
     if (!fc) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const bgObj = fc.getObjects().find((o: any) => o.__isBackground);
+    const bgObj = fc.getObjects().find((o: FabricObject) => (o as unknown as { __isBackground?: boolean }).__isBackground);
     if (bgObj) {
       fc.remove(bgObj);
       fc.requestRenderAll();

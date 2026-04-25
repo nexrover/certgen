@@ -18,14 +18,7 @@ import {
 } from "react-icons/fi";
 import { FaCrown } from "react-icons/fa6";
 import { HiOutlineSquares2X2 } from "react-icons/hi2";
-
-const navItems = [
-  { label: "Dashboard", view: "dashboard", icon: HiOutlineSquares2X2 },
-  { label: "Recipients", view: "csvs", icon: FiUsers },
-  { label: "Analysis", view: "analysis", icon: FiBarChart2 },
-  { label: "Tutorial", view: "tutorial", icon: FiBookOpen },
-  { label: "Setting", view: "settings", icon: FiSettings },
-] as const;
+import { useTranslation } from "react-i18next";
 
 interface DashboardSidebarProps {
   userEmail: string | undefined;
@@ -33,8 +26,17 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({}: DashboardSidebarProps) {
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const activeView = searchParams.get("view") ?? "dashboard";
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(true);
+
+  const navItems = [
+    { label: t("sidebar.dashboard"), view: "dashboard", icon: HiOutlineSquares2X2 },
+    { label: t("sidebar.recipients"), view: "csvs", icon: FiUsers },
+    { label: t("sidebar.analysis"), view: "analysis", icon: FiBarChart2 },
+    { label: t("sidebar.tutorial"), view: "tutorial", icon: FiBookOpen },
+    { label: t("sidebar.setting"), view: "settings", icon: FiSettings },
+  ] as const;
 
   return (
     <aside className="flex h-screen w-64 flex-col border-r border-gray-100 bg-white shadow-sm overflow-y-auto no-scrollbar">
@@ -52,7 +54,7 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
           <FiSearch className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search menu..."
+            placeholder={t("common.search_menu")}
             className="w-full rounded-lg bg-gray-50 py-2 pl-9 pr-3 text-xs border-none focus:ring-1 focus:ring-indigo-100 transition-all"
           />
           <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-300">⌘F</kbd>
@@ -66,13 +68,13 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
           className="flex items-center justify-center gap-2 w-full rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-[0.98]"
         >
           <FiPlus className="h-4 w-4" />
-          Generate Certificate
+          {t("sidebar.generate_certificate")}
         </Link>
       </div>
 
       {/* Navigation */}
       <div className="flex-1 px-3 overflow-y-auto no-scrollbar">
-        <p className="px-4 mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">Main Menu</p>
+        <p className="px-4 mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t("common.main_menu")}</p>
         <nav className="space-y-1">
           {/* Dashboard Item */}
           <Link
@@ -83,7 +85,7 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
               }`}
           >
             <HiOutlineSquares2X2 className={`h-5 w-5 ${activeView === "dashboard" ? "text-indigo-600" : "text-gray-400"}`} />
-            Dashboard
+            {t("sidebar.dashboard")}
           </Link>
 
           {/* Collapsible Templates Item */}
@@ -94,7 +96,7 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
             >
               <div className="flex items-center gap-3">
                 <FiLayout className="h-5 w-5 text-gray-400" />
-                <span>Templates</span>
+                <span>{t("sidebar.templates")}</span>
               </div>
               {isTemplatesOpen ? <FiChevronDown className="h-4 w-4" /> : <FiChevronRight className="h-4 w-4" />}
             </button>
@@ -109,7 +111,7 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
                     }`}
                 >
                   <FiFileText className="h-4 w-4" />
-                  Certificate
+                  {t("sidebar.certificate")}
                 </Link>
                 <Link
                   href="/dashboard?view=emails"
@@ -119,7 +121,7 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
                     }`}
                 >
                   <FiMail className="h-4 w-4" />
-                  Email
+                  {t("sidebar.email")}
                 </Link>
               </div>
             )}
@@ -154,8 +156,8 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
               <FaCrown className="h-4 w-4 text-white" />
             </div>
             <div className="flex flex-col text-left">
-              <p className="text-[13px] font-bold leading-tight">Upgrade to Pro</p>
-              <p className="text-[10px] text-white/70 leading-tight mt-0.5">Unlock premium features</p>
+              <p className="text-[13px] font-bold leading-tight">{t("sidebar.upgrade_to_pro")}</p>
+              <p className="text-[10px] text-white/70 leading-tight mt-0.5">{t("sidebar.unlock_premium")}</p>
             </div>
           </div>
           <FiChevronRight className="relative z-10 h-4 w-4 text-white/80 transition-transform group-hover:translate-x-0.5" />

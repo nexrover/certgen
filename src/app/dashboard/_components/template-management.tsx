@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiPlus, FiSearch, FiFilter, FiTrash2, FiCopy, FiX, FiChevronDown } from "react-icons/fi";
 import { TemplateCard } from "./template-card";
+import { useTranslation } from "react-i18next";
 
 /* ─────────────────────────── types ─────────────────────────── */
 
@@ -21,9 +22,10 @@ interface TemplateManagementProps {
 
 type SortKey = "newest" | "oldest" | "a-z" | "z-a";
 
-const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: "newest", label: "Newest First" },
-  { value: "oldest", label: "Oldest First" },
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getSortOptions = (t: any) => [
+  { value: "newest", label: t("common.sort_newest", "Newest First") },
+  { value: "oldest", label: t("common.sort_oldest", "Oldest First") },
   { value: "a-z",    label: "A → Z" },
   { value: "z-a",    label: "Z → A" },
 ];
@@ -54,7 +56,9 @@ function Toolbar({
   onBulkDuplicate,
   onClearSelection,
 }: ToolbarProps) {
+  const { t } = useTranslation();
   const hasSelection = selectedCount > 0;
+  const SORT_OPTIONS = getSortOptions(t);
 
   return (
     <div className="sticky top-0 z-10 flex flex-wrap items-center gap-3 rounded-2xl border border-gray-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-sm transition-all">
@@ -63,7 +67,7 @@ function Toolbar({
         <FiSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
         <input
           type="text"
-          placeholder="Search templates…"
+          placeholder={t("common.search_templates", "Search templates...")}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-9 pr-4 text-sm text-gray-900 transition-colors focus:border-indigo-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200"
@@ -96,7 +100,7 @@ function Toolbar({
       {hasSelection && (
         <div className="flex flex-shrink-0 items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-200">
           <span className="rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
-            {selectedCount} selected
+            {selectedCount} {t("dashboard.recipients.selected")}
           </span>
 
           {onBulkDuplicate && (
@@ -116,7 +120,7 @@ function Toolbar({
             className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-100 active:scale-95"
           >
             <FiTrash2 className="h-3.5 w-3.5" />
-            Delete Selected
+            {t("dashboard.recipients.delete_selected")}
           </button>
 
           <button
@@ -139,7 +143,7 @@ function Toolbar({
         className="inline-flex flex-shrink-0 items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
       >
         <FiPlus className="h-4 w-4" />
-        Create Certificate
+        {t("sidebar.certificate")}
       </Link>
     </div>
   );
@@ -150,6 +154,7 @@ function Toolbar({
 export function TemplateManagement({
   templates: initialTemplates,
 }: TemplateManagementProps) {
+  const { t } = useTranslation();
   const router = useRouter();
 
   /* ── state ── */
@@ -259,17 +264,17 @@ export function TemplateManagement({
             <FiPlus className="h-8 w-8" />
           </div>
           <h3 className="mb-2 text-xl font-bold text-gray-900">
-            No Templates Yet
+            {t("dashboard.recent.no_templates", "No Templates Yet")}
           </h3>
           <p className="mb-6 text-sm text-gray-500">
-            Start by creating your first professional certificate template.
+            {t("dashboard.recent.no_templates_desc", "Start by creating your first professional certificate template.")}
           </p>
           <Link
             href="/builder"
             className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-indigo-200 transition-all hover:bg-indigo-700 active:scale-95"
           >
             <FiPlus className="h-5 w-5" />
-            Create Certificate
+            {t("sidebar.certificate")}
           </Link>
         </div>
       </div>

@@ -1,17 +1,20 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { FiMoreVertical, FiFileText } from "react-icons/fi";
 interface RecentCertificatesProps {
   certificates: { id: string; template_id: string; created_at: string; file_url?: string; [key: string]: unknown }[];
 }
 
 export function RecentCertificates({ certificates }: RecentCertificatesProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold text-gray-900">Recent Certificates</h3>
+        <h3 className="text-lg font-bold text-gray-900">{t("dashboard.recent.title")}</h3>
         <button className="text-sm font-semibold text-gray-500 hover:text-indigo-600 transition-colors">
-          View all
+          {t("dashboard.recent.view_all")}
         </button>
       </div>
 
@@ -21,8 +24,7 @@ export function RecentCertificates({ certificates }: RecentCertificatesProps) {
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 text-gray-400 mb-4">
               <FiFileText className="h-6 w-6" />
             </div>
-            <p className="text-sm font-medium text-gray-900">No certificates yet</p>
-            <p className="text-xs text-gray-500 mt-1">Start by creating your first template.</p>
+            <p className="text-sm font-medium text-gray-900">{t("dashboard.recent.no_certificates")}</p>
           </div>
         ) : (
           certificates.map((cert) => (
@@ -53,7 +55,7 @@ export function RecentCertificates({ certificates }: RecentCertificatesProps) {
               </div>
               <div className="hidden sm:block">
                 <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-600">
-                  Completed
+                  {t("dashboard.recent.completed", "Completed")}
                 </span>
               </div>
               <div className="hidden md:block text-right min-w-[100px]">

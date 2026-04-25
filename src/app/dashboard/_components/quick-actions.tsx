@@ -1,43 +1,46 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { FiPlusSquare, FiMail, FiUserPlus, FiLayout, FiChevronRight } from "react-icons/fi";
 import Link from "next/link";
 
-const actions = [
-  {
-    label: "Create New Certificate",
-    description: "Design a new certificate",
-    icon: FiPlusSquare,
-    color: "text-indigo-600 bg-indigo-50",
-    href: "/builder",
-  },
-  {
-    label: "Send Email",
-    description: "Send certificate via email",
-    icon: FiMail,
-    color: "text-blue-600 bg-blue-50",
-    href: "/dashboard?view=emails",
-  },
-  {
-    label: "Add Recipients",
-    description: "Import or add recipients",
-    icon: FiUserPlus,
-    color: "text-purple-600 bg-purple-50",
-    href: "/dashboard?view=csvs",
-  },
-  {
-    label: "View Templates",
-    description: "Browse certificate templates",
-    icon: FiLayout,
-    color: "text-orange-600 bg-orange-50",
-    href: "/dashboard?view=templates",
-  },
-];
-
 export function QuickActions() {
+  const { t } = useTranslation();
+
+  const actions = [
+    {
+      label: t("dashboard.quick_actions.create_cert", "Create New Certificate"),
+      description: t("dashboard.quick_actions.design_cert", "Design a new certificate"),
+      icon: FiPlusSquare,
+      color: "text-indigo-600 bg-indigo-50",
+      href: "/builder",
+    },
+    {
+      label: t("dashboard.quick_actions.send_email", "Send Email"),
+      description: t("dashboard.quick_actions.send_via_email", "Send certificate via email"),
+      icon: FiMail,
+      color: "text-blue-600 bg-blue-50",
+      href: "/dashboard?view=emails",
+    },
+    {
+      label: t("dashboard.quick_actions.add_recipients", "Add Recipients"),
+      description: t("dashboard.quick_actions.import_add", "Import or add recipients"),
+      icon: FiUserPlus,
+      color: "text-purple-600 bg-purple-50",
+      href: "/dashboard?view=csvs",
+    },
+    {
+      label: t("dashboard.quick_actions.view_templates", "View Templates"),
+      description: t("dashboard.quick_actions.browse_templates", "Browse certificate templates"),
+      icon: FiLayout,
+      color: "text-orange-600 bg-orange-50",
+      href: "/dashboard?view=templates",
+    },
+  ];
+
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-      <h3 className="text-lg font-bold text-gray-900 mb-6">Quick Actions</h3>
+      <h3 className="text-lg font-bold text-gray-900 mb-6">{t("dashboard.quick_actions.title")}</h3>
       <div className="space-y-3">
         {actions.map((action) => {
           const Icon = action.icon;

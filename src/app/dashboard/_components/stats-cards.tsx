@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { FiFileText, FiUsers, FiSend, FiPieChart, FiArrowUpRight } from "react-icons/fi";
 
 interface StatsCardsProps {
@@ -8,9 +9,11 @@ interface StatsCardsProps {
 }
 
 export function StatsCards({ templateCount, certificateCount }: StatsCardsProps) {
+  const { t } = useTranslation();
+  
   const stats = [
     {
-      label: "Certificates Generated",
+      label: t("dashboard.stats.certificates_generated"),
       value: certificateCount.toLocaleString(),
       change: "12.5%",
       trend: "up",
@@ -18,7 +21,7 @@ export function StatsCards({ templateCount, certificateCount }: StatsCardsProps)
       color: "bg-indigo-50 text-indigo-600",
     },
     {
-      label: "Templates Created",
+      label: t("dashboard.stats.templates_created"),
       value: templateCount.toLocaleString(),
       change: "8.3%",
       trend: "up",
@@ -26,7 +29,7 @@ export function StatsCards({ templateCount, certificateCount }: StatsCardsProps)
       color: "bg-emerald-50 text-emerald-600",
     },
     {
-      label: "Emails Sent",
+      label: t("dashboard.stats.emails_sent"),
       value: "0",
       change: "0%",
       trend: "up",
@@ -34,7 +37,7 @@ export function StatsCards({ templateCount, certificateCount }: StatsCardsProps)
       color: "bg-blue-50 text-blue-600",
     },
     {
-      label: "Avg. Open Rate",
+      label: t("dashboard.stats.avg_open_rate"),
       value: "0%",
       change: "0%",
       trend: "up",
@@ -65,7 +68,7 @@ export function StatsCards({ templateCount, certificateCount }: StatsCardsProps)
                 {stat.change}
               </div>
             </div>
-            <p className="mt-1 text-xs text-gray-400">from last week</p>
+            <p className="mt-1 text-xs text-gray-400">{t("dashboard.stats.from_last_week")}</p>
           </div>
         );
       })}

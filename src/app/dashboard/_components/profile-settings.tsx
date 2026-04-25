@@ -1,24 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import Image from "next/image";
 import {
   User,
   Mail,
-  Lock,
   CreditCard,
   Bell,
   Shield,
   Save,
-  X,
   AlertCircle,
   Phone,
   Plus,
   Upload,
   Download,
-  Tag,
   Zap
 } from "lucide-react";
 
@@ -50,6 +49,7 @@ function Skeleton({ className }: { className?: string }) {
 }
 
 export function ProfileSettings() {
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState("general");
   const [pendingTab, setPendingTab] = useState<string | null>(null);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
@@ -113,11 +113,8 @@ export function ProfileSettings() {
 
   // Tab switching with loading state
   useEffect(() => {
-    if (activeTab) {
-      setIsLoadingTab(true);
-      const timer = setTimeout(() => setIsLoadingTab(false), 600);
-      return () => clearTimeout(timer);
-    }
+    const timer = setTimeout(() => setIsLoadingTab(false), 600);
+    return () => clearTimeout(timer);
   }, [activeTab]);
 
   // Prevent accidental tab closing
@@ -147,6 +144,7 @@ export function ProfileSettings() {
       setPendingTab(tabId);
       setShowDiscardModal(true);
     } else {
+      setIsLoadingTab(true);
       setActiveTab(tabId);
     }
   };
@@ -154,6 +152,7 @@ export function ProfileSettings() {
   const confirmDiscard = () => {
     form.reset();
     if (pendingTab) {
+      setIsLoadingTab(true);
       setActiveTab(pendingTab);
       setPendingTab(null);
     }
@@ -161,10 +160,10 @@ export function ProfileSettings() {
   };
 
   const tabs = [
-    { id: "general", label: "General", icon: User },
-    { id: "account", label: "Account Settings", icon: Mail },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "billing", label: "Billing & Plans", icon: CreditCard },
+    { id: "general", label: t("profile.general"), icon: User },
+    { id: "account", label: t("profile.account"), icon: Mail },
+    { id: "notifications", label: t("profile.notifications"), icon: Bell },
+    { id: "billing", label: t("profile.billing"), icon: CreditCard },
   ];
 
   const handleAvatarSelect = (url: string) => {
@@ -177,16 +176,16 @@ export function ProfileSettings() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t("profile.title")}</h1>
           <p className="text-sm text-gray-500">
-            Manage your personal information, security preferences, and billing.
+            {t("profile.subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-3">
           {isDirty && (
             <span className="text-xs font-medium text-amber-600 bg-amber-50 px-3 py-1 rounded-full animate-pulse flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-600"></span>
-              Unsaved Changes
+              {t("profile.unsaved_changes")}
             </span>
           )}
           <button
@@ -194,7 +193,7 @@ export function ProfileSettings() {
             disabled={!isDirty || isSaving}
             className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 shadow-sm transition-all hover:bg-gray-50 disabled:opacity-50"
           >
-            Cancel
+            {t("profile.cancel")}
           </button>
           <button
             onClick={form.handleSubmit(onSubmit)}
@@ -202,7 +201,7 @@ export function ProfileSettings() {
             className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
-            {isSaving ? "Saving..." : "Save Changes"}
+            {isSaving ? t("profile.saving") : t("profile.save_changes")}
           </button>
         </div>
       </div>
@@ -261,43 +260,43 @@ export function ProfileSettings() {
                   {/* Avatar Section - 2 Column Layout */}
                   <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
                     <div className="space-y-4">
-                      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Profile Picture</h3>
+                      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">{t("profile.picture")}</h3>
                       <div className="flex items-center gap-6 p-6 rounded-xl border border-gray-100 bg-white shadow-sm">
                         <div className="relative group shrink-0">
-                          <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow-md transition-all group-hover:scale-105">
-                            <img src={selectedAvatar} alt="Profile" className="h-full w-full object-cover" />
+                          <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow-md transition-all group-hover:scale-105 relative">
+                            <Image src={selectedAvatar} alt="Profile" fill className="object-cover" />
                           </div>
                           <button className="absolute bottom-0 right-0 p-1.5 rounded-full bg-indigo-600 text-white border-2 border-white shadow-sm hover:bg-indigo-700 transition-colors">
                             <Plus className="h-3 w-3" />
                           </button>
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-gray-900">Your Avatar</p>
-                          <p className="text-xs text-gray-500 mt-1">Click the plus to upload a custom image.</p>
+                          <p className="text-sm font-bold text-gray-900">{t("profile.your_avatar")}</p>
+                          <p className="text-xs text-gray-500 mt-1">{t("profile.avatar_desc")}</p>
                           <button 
                             type="button"
                             className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all"
                           >
                             <Upload className="h-3 w-3" />
-                            Change Photo
+                            {t("profile.change_photo")}
                           </button>
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-4">
-                      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Quick Select</h3>
+                      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">{t("profile.quick_select")}</h3>
                       <div className="grid grid-cols-4 gap-3 p-6 rounded-xl border border-gray-100 bg-white shadow-sm">
                         {DEFAULT_AVATARS.map((url, i) => (
                           <button
                             key={i}
                             type="button"
                             onClick={() => handleAvatarSelect(url)}
-                            className={`h-12 w-12 rounded-full overflow-hidden border-2 transition-all hover:scale-110 ${
+                            className={`h-12 w-12 rounded-full overflow-hidden border-2 transition-all hover:scale-110 relative ${
                               selectedAvatar === url ? "border-indigo-600 ring-4 ring-indigo-50" : "border-transparent"
                             }`}
                           >
-                            <img src={url} alt={`Avatar ${i}`} className="h-full w-full object-cover" />
+                            <Image src={url} alt={`Avatar ${i}`} fill className="object-cover" />
                           </button>
                         ))}
                       </div>
@@ -306,13 +305,13 @@ export function ProfileSettings() {
 
                   {/* User Info Grid - 2 Column Layout */}
                   <div className="space-y-6">
-                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Personal Information</h3>
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">{t("profile.personal_info")}</h3>
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                       {[
-                        { label: "Username", icon: User, name: "username", placeholder: "e.g. johndoe" },
-                        { label: "Email Address", icon: Mail, name: "email", placeholder: "john@example.com" },
-                        { label: "Phone Number", icon: Phone, name: "phone", placeholder: "+1 (555) 000-0000" },
-                        { label: "Role", icon: Shield, name: "role", placeholder: "e.g. Designer" },
+                        { label: t("profile.username"), icon: User, name: "username", placeholder: "e.g. johndoe" },
+                        { label: t("profile.email"), icon: Mail, name: "email", placeholder: "john@example.com" },
+                        { label: t("profile.phone"), icon: Phone, name: "phone", placeholder: "+1 (555) 000-0000" },
+                        { label: t("profile.role"), icon: Shield, name: "role", placeholder: "e.g. Designer" },
                       ].map((field) => (
                         <div key={field.name} className="space-y-2">
                           <label className="text-xs font-bold text-gray-500 uppercase ml-1 flex items-center gap-2">
@@ -320,7 +319,7 @@ export function ProfileSettings() {
                             {field.label}
                           </label>
                           <input
-                            {...form.register(field.name as any)}
+                            {...form.register(field.name as keyof ProfileFormValues)}
                             className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all placeholder-gray-300 shadow-xs"
                             placeholder={field.placeholder}
                           />
@@ -331,12 +330,12 @@ export function ProfileSettings() {
 
                   {/* Bio Section */}
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-500 uppercase ml-1">About You</label>
+                    <label className="text-xs font-bold text-gray-500 uppercase ml-1">{t("profile.about")}</label>
                     <textarea
                       {...form.register("bio")}
                       rows={4}
                       className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all resize-none placeholder-gray-300 shadow-xs"
-                      placeholder="Write a brief introduction..."
+                      placeholder={t("profile.bio_placeholder")}
                     />
                   </div>
                 </div>
@@ -346,15 +345,15 @@ export function ProfileSettings() {
                 <div className="max-w-2xl space-y-12">
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">Password & Security</h3>
-                      <p className="text-sm text-gray-500 mt-1">Keep your account safe by updating your password regularly.</p>
+                      <h3 className="text-lg font-bold text-gray-900">{t("profile.pwd_security")}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{t("profile.pwd_desc")}</p>
                     </div>
 
                     <div className="space-y-4 rounded-xl border border-gray-100 bg-white p-8 shadow-sm">
                       {passwordStep === 0 ? (
                         <div className="space-y-4">
                           <div className="space-y-2">
-                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">Current Password</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase ml-1">{t("profile.current_pwd")}</label>
                             <input
                               type="password"
                               className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white outline-none transition-all"
@@ -367,24 +366,24 @@ export function ProfileSettings() {
                             onClick={() => currentPwd === "password" ? setPasswordStep(1) : alert("Invalid current password (hint: 'password')")}
                             className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all"
                           >
-                            Verify to Change Password
+                            {t("profile.verify_to_change")}
                           </button>
                         </div>
                       ) : (
                         <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
-                              <label className="text-xs font-bold text-gray-500 uppercase ml-1">New Password</label>
+                              <label className="text-xs font-bold text-gray-500 uppercase ml-1">{t("profile.new_pwd")}</label>
                               <input type="password" className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 outline-none transition-all" placeholder="••••••••" />
                             </div>
                             <div className="space-y-2">
-                              <label className="text-xs font-bold text-gray-500 uppercase ml-1">Confirm New Password</label>
+                              <label className="text-xs font-bold text-gray-500 uppercase ml-1">{t("profile.confirm_new_pwd")}</label>
                               <input type="password" className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 outline-none transition-all" placeholder="••••••••" />
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <button type="button" onClick={() => setPasswordStep(0)} className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Cancel</button>
-                            <button type="button" onClick={() => { alert("Password updated!"); setPasswordStep(0); }} className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">Update Password</button>
+                            <button type="button" onClick={() => setPasswordStep(0)} className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">{t("profile.cancel")}</button>
+                            <button type="button" onClick={() => { alert("Password updated!"); setPasswordStep(0); }} className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">{t("profile.update_pwd_btn")}</button>
                           </div>
                         </div>
                       )}
@@ -394,8 +393,8 @@ export function ProfileSettings() {
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900">Two-Factor Authentication</h3>
-                        <p className="text-sm text-gray-500 mt-1">Extra security for your login sessions.</p>
+                        <h3 className="text-lg font-bold text-gray-900">{t("profile.two_factor")}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{t("profile.two_factor_desc")}</p>
                       </div>
                       <button
                         type="button"
@@ -410,8 +409,8 @@ export function ProfileSettings() {
                       <div className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-6 flex items-center gap-4">
                         <Shield className="h-6 w-6 text-indigo-600" />
                         <div>
-                          <p className="text-sm font-bold text-indigo-900">2FA is currently active</p>
-                          <p className="text-xs text-indigo-700 mt-1">Verification codes are being sent to your registered email.</p>
+                          <p className="text-sm font-bold text-indigo-900">{t("profile.two_factor_active")}</p>
+                          <p className="text-xs text-indigo-700 mt-1">{t("profile.two_factor_active_desc")}</p>
                         </div>
                       </div>
                     )}
@@ -425,23 +424,23 @@ export function ProfileSettings() {
 
                     <div className="rounded-xl border border-red-100 bg-red-50/20 p-8 space-y-6 shadow-sm">
                       <div>
-                        <h4 className="text-sm font-bold text-gray-900">Delete Your Account</h4>
-                        <p className="text-sm text-gray-500 mt-1">Once deleted, all your certificate data is permanently lost. This action is irreversible.</p>
+                        <h4 className="text-sm font-bold text-gray-900">{t("profile.delete_account")}</h4>
+                        <p className="text-sm text-gray-500 mt-1">{t("profile.delete_desc")}</p>
                       </div>
 
                       <div className="space-y-4">
-                        <p className="text-[10px] font-bold text-red-700 uppercase tracking-widest">Type "{form.getValues("username")}" to confirm:</p>
+                        <p className="text-[10px] font-bold text-red-700 uppercase tracking-widest">Type &quot;{form.getValues("username")}&quot; to confirm:</p>
                         <input
                           type="text" spellCheck="false" onPaste={(e) => e.preventDefault()}
                           onChange={(e) => setDeleteConfirm(e.target.value)}
                           className="w-full rounded-xl border border-red-200 bg-white px-4 py-3 text-sm focus:border-red-500 focus:ring-4 focus:ring-red-50 outline-none transition-all shadow-xs"
-                          placeholder="Confirm username"
+                          placeholder={t("profile.confirm_username")}
                         />
                         <button
                           type="button" disabled={deleteConfirm !== form.getValues("username")}
                           className="w-full rounded-xl bg-red-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-red-100 hover:bg-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         >
-                          Delete Account Permanently
+                          {t("profile.delete_btn")}
                         </button>
                       </div>
                     </div>
@@ -454,15 +453,15 @@ export function ProfileSettings() {
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
                   <div className="space-y-8">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">General Notifications</h3>
-                      <p className="text-sm text-gray-500 mt-1">Control which updates you receive.</p>
+                      <h3 className="text-lg font-bold text-gray-900">{t("profile.notifications_general")}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{t("profile.notifications_desc")}</p>
                     </div>
 
                     <div className="space-y-4">
                       {[
-                        { id: "email", label: "Email Alerts", icon: Mail },
-                        { id: "push", label: "Browser Push", icon: Bell },
-                        { id: "sms", label: "SMS Alerts", icon: Phone },
+                        { id: "email", label: t("profile.email_alerts"), icon: Mail },
+                        { id: "push", label: t("profile.browser_push"), icon: Bell },
+                        { id: "sms", label: t("profile.sms_alerts"), icon: Phone },
                       ].map((item) => (
                         <div key={item.id} className="flex items-center justify-between p-5 rounded-xl border border-gray-100 bg-white shadow-sm">
                           <div className="flex items-center gap-3">
@@ -479,20 +478,20 @@ export function ProfileSettings() {
 
                   <div className="space-y-8">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">Frequency & Timing</h3>
-                      <p className="text-sm text-gray-500 mt-1">Decide how often you want to be interrupted.</p>
+                      <h3 className="text-lg font-bold text-gray-900">{t("profile.freq_timing")}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{t("profile.freq_desc")}</p>
                     </div>
 
                     <div className="space-y-4 p-8 rounded-xl border border-gray-100 bg-gray-50/30">
                       <div className="space-y-2">
-                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">Delivery Frequency</label>
+                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">{t("profile.delivery_freq")}</label>
                         <select className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 outline-none cursor-pointer shadow-xs">
-                          <option>Instantly (Highly recommended)</option>
-                          <option>Daily Digest</option>
-                          <option>Weekly Roundup</option>
+                          <option>{t("profile.instantly")}</option>
+                          <option>{t("profile.daily_digest")}</option>
+                          <option>{t("profile.weekly_roundup")}</option>
                         </select>
                       </div>
-                      <p className="text-[10px] text-gray-400 leading-relaxed">Note: Critical security alerts and billing notifications will always be sent instantly regardless of these settings.</p>
+                      <p className="text-[10px] text-gray-400 leading-relaxed">{t("profile.critical_note")}</p>
                     </div>
                   </div>
                 </div>
@@ -506,29 +505,29 @@ export function ProfileSettings() {
                       <div className="flex items-start justify-between">
                         <div>
                           <span className="inline-block px-3 py-1 rounded-full bg-indigo-600 text-[10px] font-black text-white uppercase tracking-widest">Active</span>
-                          <h3 className="text-4xl font-black text-gray-900 mt-4">Free Plan</h3>
-                          <p className="text-sm text-indigo-700/70 mt-2 font-medium">Starter plan for individuals</p>
+                          <h3 className="text-4xl font-black text-gray-900 mt-4">{t("profile.free_plan")}</h3>
+                          <p className="text-sm text-indigo-700/70 mt-2 font-medium">{t("profile.free_plan_desc")}</p>
                         </div>
                         <Zap className="h-10 w-10 text-indigo-600" />
                       </div>
                       <div className="space-y-4">
-                        {["10 Monthly Certificates", "Standard Templates", "Community Support"].map((f, i) => (
+                        {[t("profile.f_monthly_certs"), t("profile.f_std_templates"), t("profile.f_community_support")].map((f, i) => (
                           <div key={i} className="flex items-center gap-3 text-sm font-bold text-gray-700"><div className="h-2 w-2 rounded-full bg-indigo-500" />{f}</div>
                         ))}
                       </div>
-                      <button className="w-full rounded-xl bg-indigo-600 px-4 py-5 text-sm font-bold text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all hover:-translate-y-0.5">Upgrade to Pro</button>
+                      <button className="w-full rounded-xl bg-indigo-600 px-4 py-5 text-sm font-bold text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all hover:-translate-y-0.5">{t("profile.upgrade_pro")}</button>
                     </div>
 
                     <div className="space-y-6">
                       <div className="rounded-xl border border-gray-100 bg-white p-10 space-y-6 shadow-sm">
-                        <h4 className="text-lg font-bold text-gray-900">Promotions</h4>
+                        <h4 className="text-lg font-bold text-gray-900">{t("profile.promotions")}</h4>
                         <div className="flex gap-2">
                           <input type="text" placeholder="DISCOUNT20" className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm font-bold focus:border-indigo-500 focus:bg-white outline-none transition-all shadow-xs" />
-                          <button className="rounded-xl border border-gray-200 bg-white px-8 py-4 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">Apply</button>
+                          <button className="rounded-xl border border-gray-200 bg-white px-8 py-4 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">{t("profile.apply")}</button>
                         </div>
                       </div>
                       <div className="rounded-xl border border-gray-100 bg-white p-10 flex items-center justify-between shadow-sm">
-                        <div><p className="text-sm font-bold text-gray-900">Next Payment</p><p className="text-2xl font-black text-indigo-600 mt-1">$0.00</p></div>
+                        <div><p className="text-sm font-bold text-gray-900">{t("profile.next_payment")}</p><p className="text-2xl font-black text-indigo-600 mt-1">$0.00</p></div>
                         <CreditCard className="h-10 w-10 text-gray-100" />
                       </div>
                     </div>
@@ -536,18 +535,18 @@ export function ProfileSettings() {
 
                   <div className="space-y-6">
                     <div className="flex items-center justify-between px-2">
-                      <h3 className="text-lg font-bold text-gray-900">Payment History</h3>
-                      <button className="text-xs font-bold text-indigo-600 uppercase tracking-widest hover:underline">Export CSV</button>
+                      <h3 className="text-lg font-bold text-gray-900">{t("profile.payment_history")}</h3>
+                      <button className="text-xs font-bold text-indigo-600 uppercase tracking-widest hover:underline">{t("profile.export_csv")}</button>
                     </div>
                     <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
                       <table className="w-full text-left text-sm">
                         <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">
-                          <tr><th className="px-8 py-5">Invoice</th><th className="px-8 py-5">Date</th><th className="px-8 py-5">Status</th><th className="px-8 py-5 text-right">Download</th></tr>
+                          <tr><th className="px-8 py-5">{t("profile.invoice")}</th><th className="px-8 py-5">{t("profile.date")}</th><th className="px-8 py-5">{t("profile.status")}</th><th className="px-8 py-5 text-right">{t("profile.download")}</th></tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {[
-                            { id: "INV-2024-001", date: "May 10, 2024", status: "Successful" },
-                            { id: "INV-2024-002", date: "Apr 10, 2024", status: "Successful" },
+                            { id: "INV-2024-001", date: "May 10, 2024", status: t("profile.successful") },
+                            { id: "INV-2024-002", date: "Apr 10, 2024", status: t("profile.successful") },
                           ].map((inv) => (
                             <tr key={inv.id} className="hover:bg-gray-50/30 transition-all"><td className="px-8 py-6 font-bold text-gray-900">{inv.id}</td><td className="px-8 py-6 text-gray-500">{inv.date}</td><td className="px-8 py-6"><span className="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-[10px] font-black text-green-600 uppercase tracking-tighter">{inv.status}</span></td><td className="px-8 py-6 text-right"><button className="text-gray-300 hover:text-indigo-600 transition-all"><Download className="h-5 w-5" /></button></td></tr>
                           ))}
@@ -571,9 +570,9 @@ export function ProfileSettings() {
                 <AlertCircle className="h-8 w-8" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Unsaved Changes</h2>
+                <h2 className="text-2xl font-bold text-gray-900">{t("profile.discard_title")}</h2>
                 <p className="text-gray-500 mt-2">
-                  You have unsaved changes on this tab. Leaving now will discard all modifications.
+                  {t("profile.discard_desc")}
                 </p>
               </div>
             </div>
@@ -582,7 +581,7 @@ export function ProfileSettings() {
                 onClick={confirmDiscard}
                 className="w-full rounded-xl bg-red-600 px-4 py-3.5 text-sm font-bold text-white hover:bg-red-700 transition-all shadow-lg shadow-red-200 active:scale-[0.98]"
               >
-                Discard & Continue
+                {t("profile.discard_btn")}
               </button>
               <button
                 onClick={() => {
@@ -591,7 +590,7 @@ export function ProfileSettings() {
                 }}
                 className="w-full rounded-xl border border-gray-200 px-4 py-3.5 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all active:scale-[0.98]"
               >
-                Go Back
+                {t("profile.go_back")}
               </button>
             </div>
           </div>
@@ -608,10 +607,10 @@ export function ProfileSettings() {
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {is2FAEnabled ? "Disable 2FA" : "Enable 2FA"}
+                  {is2FAEnabled ? t("profile.disable_2fa") : t("profile.enable_2fa")}
                 </h2>
                 <p className="text-gray-500 mt-2">
-                  To {is2FAEnabled ? "disable" : "enable"} two-factor authentication, please verify your identity.
+                  {t("profile.verify_identity", { action: is2FAEnabled ? (i18n.language === 'bn' ? 'নিষ্ক্রিয়' : 'disable') : (i18n.language === 'bn' ? 'সক্রিয়' : 'enable') })}
                 </p>
               </div>
             </div>
@@ -624,7 +623,7 @@ export function ProfileSettings() {
                   className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${otpMethod === "email" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
                     }`}
                 >
-                  Email OTP
+                  {t("profile.email_otp")}
                 </button>
                 <button
                   type="button"
@@ -632,7 +631,7 @@ export function ProfileSettings() {
                   className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${otpMethod === "phone" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
                     }`}
                 >
-                  Phone OTP
+                  {t("profile.phone_otp")}
                 </button>
               </div>
 
@@ -652,14 +651,14 @@ export function ProfileSettings() {
 
               <div className="flex items-center justify-between text-xs">
                 <p className="text-gray-500 font-medium">
-                  Expire in <span className="text-indigo-600 font-bold">{formatTime(countdown)}</span>
+                  {t("profile.expire_in")} <span className="text-indigo-600 font-bold">{formatTime(countdown)}</span>
                 </p>
                 <button
                   type="button"
                   onClick={() => setCountdown(300)}
                   className="text-indigo-600 font-bold hover:underline"
                 >
-                  Resend Code
+                  {t("profile.resend_code")}
                 </button>
               </div>
             </div>
@@ -677,14 +676,14 @@ export function ProfileSettings() {
                 disabled={otpValue.some(v => v === "")}
                 className="w-full rounded-xl bg-indigo-600 px-4 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
               >
-                Verify & {is2FAEnabled ? "Disable" : "Enable"}
+                {t("profile.verify_action", { action: is2FAEnabled ? (i18n.language === 'bn' ? 'নিষ্ক্রিয় করুন' : 'Disable') : (i18n.language === 'bn' ? 'সক্রিয় করুন' : 'Enable') })}
               </button>
               <button
                 type="button"
                 onClick={() => setShow2FAModal(false)}
                 className="w-full rounded-xl border border-gray-200 px-4 py-4 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all active:scale-[0.98]"
               >
-                Cancel
+                {t("profile.cancel")}
               </button>
             </div>
           </div>

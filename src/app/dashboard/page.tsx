@@ -7,8 +7,9 @@ import { ComingSoon } from "@/app/dashboard/_components/coming-soon";
 import { TemplateManagement } from "@/app/dashboard/_components/template-management";
 import { RecipientManagement } from "@/app/dashboard/_components/recipient-management";
 import { ProfileSettings } from "@/app/dashboard/_components/profile-settings";
+import { WelcomeHeader } from "@/app/dashboard/_components/welcome-header";
 import { redirect } from "next/navigation";
-import { FiCalendar, FiChevronDown, FiMail } from "react-icons/fi";
+import { FiMail } from "react-icons/fi";
 
 export default async function DashboardPage({
   searchParams,
@@ -37,8 +38,6 @@ export default async function DashboardPage({
   if (view === "emails") {
     return (
       <ComingSoon
-        title="Coming Soon"
-        subtitle="This feature is under development. We're working hard to bring you a powerful email builder."
         icon={FiMail}
       />
     );
@@ -105,21 +104,7 @@ export default async function DashboardPage({
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">Dashboard</h1>
-          <p className="mt-1.5 text-sm font-medium text-gray-500">
-            Welcome back, {user?.user_metadata?.full_name?.split(' ')[0] || 'User'}! Here&apos;s what&apos;s happening with your certificates.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-600 shadow-sm transition-all hover:bg-gray-50">
-            <FiCalendar className="h-4 w-4 text-gray-400" />
-            May 18 - May 24, 2024
-            <FiChevronDown className="h-4 w-4 text-gray-400" />
-          </button>
-        </div>
-      </div>
+      <WelcomeHeader userName={user?.user_metadata?.full_name?.split(' ')[0] || 'User'} />
 
       {/* Stats Section */}
       <StatsCards

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Papa from "papaparse";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 
 type PreviewRow = Record<string, string>;
 
@@ -27,6 +28,7 @@ function parseCsv(file: File): Promise<ParseResult> {
 }
 
 export function CsvUploadPanel() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [headers, setHeaders] = useState<string[]>([]);
@@ -50,7 +52,7 @@ export function CsvUploadPanel() {
       setRows(parsed.rows);
     } catch (parseError) {
       const message =
-        parseError instanceof Error ? parseError.message : "Failed to parse CSV file.";
+        parseError instanceof Error ? parseError.message : t("dashboard.recipients.parse_error");
       setError(message);
     }
   };
@@ -76,7 +78,7 @@ export function CsvUploadPanel() {
       };
 
       if (!response.ok || !payload.success) {
-        throw new Error(payload.error ?? "CSV upload failed.");
+        throw new Error(payload.error ?? t("dashboard.csv_upload.upload_failed"));
       }
 
       router.refresh();
@@ -85,7 +87,7 @@ export function CsvUploadPanel() {
       setRows([]);
     } catch (uploadError) {
       const message =
-        uploadError instanceof Error ? uploadError.message : "Failed to upload CSV file.";
+        uploadError instanceof Error ? uploadError.message : t("dashboard.csv_upload.upload_error");
       setError(message);
     } finally {
       setIsUploading(false);
@@ -96,8 +98,8 @@ export function CsvUploadPanel() {
     <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">CSV Management</h2>
-          <p className="text-sm text-gray-500">Upload a CSV and preview records before use.</p>
+          <h2 className="text-lg font-semibold text-gray-900">{t("dashboard.csv_upload.title")}</h2>
+          <p className="text-sm text-gray-500">{t("dashboard.csv_upload.subtitle")}</p>
         </div>
         <button
           type="button"
@@ -105,12 +107,12 @@ export function CsvUploadPanel() {
           onClick={() => void handleUpload()}
           className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isUploading ? "Uploading..." : "Upload CSV"}
+          {isUploading ? t("dashboard.recipients.uploading") : t("dashboard.recipients.upload_csv")}
         </button>
       </div>
 
       <label className="mt-5 block">
-        <span className="mb-2 block text-sm font-medium text-gray-700">Select CSV file</span>
+        <span className="mb-2 block text-sm font-medium text-gray-700">{t("dashboard.csv_upload.select_file")}</span>
         <input
           type="file"
           accept=".csv,text/csv"
@@ -148,7 +150,7 @@ export function CsvUploadPanel() {
             </table>
           </div>
           <p className="bg-gray-50 px-3 py-2 text-xs text-gray-500">
-            Showing the first {rows.length} rows for preview.
+            {t("dashboard.csv_upload.preview_info", { count: rows.length })}
           </p>
         </div>
       ) : null}

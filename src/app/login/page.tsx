@@ -4,12 +4,14 @@ import { FormEvent, useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PasswordInput } from "@/components/ui/password-input";
+import { useTranslation } from "react-i18next";
 
 type MessageType = "success" | "error";
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,25 +45,25 @@ function LoginContent() {
 
   useEffect(() => {
     if (verified === "1") {
-      setMessage("Email verified successfully. You can sign in now.");
+      setMessage(t("auth.verified_success"));
       setMessageType("success");
       return;
     }
 
     if (loginError === "verify_email_required") {
-      setMessage("Please verify your email before signing in.");
+      setMessage(t("auth.verify_required"));
       setMessageType("error");
       return;
     }
 
     if (loginError === "auth_callback_failed") {
-      setMessage("Could not complete email confirmation. Please request a new code.");
+      setMessage(t("auth.callback_failed"));
       setMessageType("error");
       return;
     }
 
     setMessage(null);
-  }, [loginError, verified]);
+  }, [loginError, verified, t]);
 
   const onEmailAuth = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -78,14 +80,14 @@ function LoginContent() {
 
       const data = (await res.json()) as { success?: boolean; error?: string };
       if (!res.ok || !data.success) {
-        throw new Error(data.error ?? "Sign in failed.");
+        throw new Error(data.error ?? t("auth.signin_failed"));
       }
 
       router.replace(nextPath);
       router.refresh();
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Sign in failed.";
+        error instanceof Error ? error.message : t("auth.signin_failed");
       setMessage(errorMessage);
       setMessageType("error");
     } finally {
@@ -108,14 +110,14 @@ function LoginContent() {
 
   return (
     <div className="mx-auto mt-20 max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <h1 className="text-2xl font-semibold text-gray-900 text-center">Welcome back</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 text-center">{t("auth.welcome_back")}</h1>
       <p className="mt-1 text-sm text-gray-500 text-center">
-        Sign in to continue to your dashboard.
+        {t("auth.signin_subtitle")}
       </p>
 
       <form onSubmit={onEmailAuth} className="space-y-4">
         <label className="block space-y-1">
-          <span className="text-sm font-medium text-gray-700">Email</span>
+          <span className="text-sm font-medium text-gray-700">{t("auth.email")}</span>
           <input
             type="email"
             placeholder="you@example.com"
@@ -126,9 +128,9 @@ function LoginContent() {
           />
         </label>
         <div className="space-y-1">
-          <span className="text-sm font-medium text-gray-700">Password</span>
+          <span className="text-sm font-medium text-gray-700">{t("auth.password")}</span>
           <PasswordInput
-            placeholder="Your password"
+            placeholder={t("auth.password")}
             minLength={8}
             required
             value={password}
@@ -144,10 +146,10 @@ function LoginContent() {
               onChange={(e) => setRememberMe(e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
             />
-            <span className="text-gray-600">Remember me</span>
+            <span className="text-gray-600">{t("auth.remember_me")}</span>
           </label>
           <Link href="/forgot-password" className="text-indigo-600 hover:text-indigo-500">
-            Forgot password?
+            {t("auth.forgot_password")}
           </Link>
         </div>
 
@@ -158,14 +160,14 @@ function LoginContent() {
           disabled={isSubmitting}
           className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {isSubmitting ? "Signing in..." : "Sign in"}
+          {isSubmitting ? t("auth.signing_in") : t("auth.signin")}
         </button>
       </form>
 
       <p className="mt-4 text-sm text-gray-600 text-center">
-        New here?{" "}
+        {t("auth.new_here")}{" "}
         <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-          Create an account
+          {t("auth.create_account")}
         </Link>
       </p>
 

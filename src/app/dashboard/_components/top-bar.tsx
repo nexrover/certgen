@@ -10,11 +10,15 @@ import {
   Zap, 
   Languages, 
   HelpCircle, 
-  LogOut 
+  LogOut,
+  Check,
+  Search as SearchIcon,
+  ChevronLeft
 } from "lucide-react";
 import Image from "next/image";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 
 export function TopBar() {
   const { userProfile, loading } = useUserProfile();
@@ -22,6 +26,39 @@ export function TopBar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t, i18n } = useTranslation();
+  
+  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
+  const [languageSearch, setLanguageSearch] = useState("");
+
+  const languages = [
+    { name: "English", code: "en", flag: "🇺🇸" },
+    { name: "Bengali", code: "bn", flag: "🇧🇩" },
+    { name: "Spanish", code: "es", flag: "🇪🇸" },
+    { name: "French", code: "fr", flag: "🇫🇷" },
+    { name: "German", code: "de", flag: "🇩🇪" },
+    { name: "Hindi", code: "hi", flag: "🇮🇳" },
+    { name: "Arabic", code: "ar", flag: "🇸🇦" },
+    { name: "Chinese", code: "zh", flag: "🇨🇳" },
+    { name: "Japanese", code: "ja", flag: "🇯🇵" },
+    { name: "Portuguese", code: "pt", flag: "🇵🇹" },
+    { name: "Russian", code: "ru", flag: "🇷🇺" },
+    { name: "Italian", code: "it", flag: "🇮🇹" },
+    { name: "Korean", code: "ko", flag: "🇰🇷" },
+    { name: "Turkish", code: "tr", flag: "🇹🇷" },
+    { name: "Dutch", code: "nl", flag: "🇳🇱" },
+    { name: "Vietnamese", code: "vi", flag: "🇻🇳" },
+  ];
+
+  const filteredLanguages = languages.filter(lang => 
+    lang.name.toLowerCase().includes(languageSearch.toLowerCase())
+  );
+
+  const handleLanguageChange = (code: string) => {
+    i18n.changeLanguage(code);
+    setIsLanguageMenuOpen(false);
+    setIsDropdownOpen(false);
+  };
 
   const displayName = userProfile?.name || "User Name";
   const firstLetter = displayName.charAt(0).toUpperCase();
@@ -118,45 +155,126 @@ export function TopBar() {
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl border border-gray-200 bg-white p-2 shadow-xl ring-1 ring-black/5 animate-in fade-in zoom-in duration-100">
-              <div className="space-y-1">
-                <button 
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  <Zap className="h-4 w-4" />
-                  Upgrade Plan
-                </button>
-                <div className="h-px bg-gray-100 my-1" />
-                <button 
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                  onClick={handleProfileClick}
-                >
-                  <User className="h-4 w-4" />
-                  Profile
-                </button>
-                <button 
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  <Languages className="h-4 w-4" />
-                  Language
-                </button>
-                <button 
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  <HelpCircle className="h-4 w-4" />
-                  Help
-                </button>
-                <div className="h-px bg-gray-100 my-1" />
-                <button 
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-4 w-4" />
-                  Log Out
-                </button>
+            <div className="absolute right-0 mt-2 flex gap-2 items-start pointer-events-none">
+              {/* Main Profile Dropdown */}
+              <div className="w-56 origin-top-right rounded-xl border border-gray-200 bg-white p-2 shadow-xl ring-1 ring-black/5 animate-in fade-in zoom-in duration-100 pointer-events-auto">
+                <div className="space-y-1">
+                  <button 
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    <Zap className="h-4 w-4" />
+                    {t('common.upgrade_plan')}
+                  </button>
+                  <div className="h-px bg-gray-100 my-1" />
+                  <button 
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={handleProfileClick}
+                  >
+                    <User className="h-4 w-4" />
+                    {t('common.profile')}
+                  </button>
+                  
+                  {/* Language Selection with Nested Flyout */}
+                  <div className="relative">
+                    <button 
+                      className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                        isLanguageMenuOpen ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsLanguageMenuOpen(!isLanguageMenuOpen);
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Languages className="h-4 w-4" />
+                        {t('common.language')}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                        {languages.find(l => l.code === i18n.language)?.name || 'English'}
+                        <ChevronLeft className={`h-3 w-3 transition-transform ${isLanguageMenuOpen ? 'rotate-180' : ''}`} />
+                      </div>
+                    </button>
+
+                    {/* Language Flyout - Positioned relative to the Language button */}
+                    {isLanguageMenuOpen && (
+                      <div className="absolute right-[calc(100%+8px)] top-0 w-64 rounded-xl border border-gray-200 bg-white p-2 shadow-xl ring-1 ring-black/5 animate-in fade-in slide-in-from-right-4 duration-200 pointer-events-auto">
+                        <div className="flex items-center justify-between px-2 py-1.5 border-b border-gray-50 mb-2">
+                          <span className="text-sm font-semibold text-gray-900">Select Language</span>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsLanguageMenuOpen(false);
+                            }}
+                            className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                          >
+                            <ChevronLeft className="h-4 w-4 text-gray-500 rotate-180" />
+                          </button>
+                        </div>
+                        
+                        <div className="relative px-2 mb-2">
+                          <span className="absolute inset-y-0 left-5 flex items-center text-gray-400">
+                            <SearchIcon className="h-3.5 w-3.5" />
+                          </span>
+                          <input
+                            type="text"
+                            className="w-full rounded-lg border border-gray-100 bg-gray-50 py-1.5 pl-8 pr-3 text-xs placeholder-gray-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+                            placeholder="Search language..."
+                            value={languageSearch}
+                            onChange={(e) => setLanguageSearch(e.target.value)}
+                            autoFocus
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+
+                        <div className="max-h-[280px] overflow-y-auto px-1 space-y-0.5 custom-scrollbar">
+                          {filteredLanguages.length > 0 ? (
+                            filteredLanguages.map((lang) => (
+                              <button
+                                key={lang.code}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleLanguageChange(lang.code);
+                                }}
+                                className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                                  i18n.language === lang.code 
+                                    ? 'bg-indigo-50 text-indigo-700 font-medium' 
+                                    : 'text-gray-700 hover:bg-gray-50'
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="text-lg">{lang.flag}</span>
+                                  <span>{lang.name}</span>
+                                </div>
+                                {i18n.language === lang.code && <Check className="h-4 w-4" />}
+                              </button>
+                            ))
+                          ) : (
+                            <div className="px-3 py-6 text-center text-xs text-gray-400">
+                              No languages found
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <button 
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                    {t('common.help')}
+                  </button>
+                  <div className="h-px bg-gray-100 my-1" />
+                  <button 
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {t('common.logout')}
+                  </button>
+                </div>
               </div>
             </div>
           )}

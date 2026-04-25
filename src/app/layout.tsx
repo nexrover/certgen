@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { I18nProvider } from "@/components/i18n-provider";
 
 export const metadata: Metadata = {
   title: "CertGen - Certificate Generator",
@@ -15,8 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {/* <Nav /> */}
-        <main className="">{children}</main>
+        <I18nProvider>
+          <main className="">{children}</main>
+        </I18nProvider>
       </body>
     </html>
   );

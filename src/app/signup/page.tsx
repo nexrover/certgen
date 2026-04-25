@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { validateSignupPassword } from "@/lib/auth/password-policy";
 import { PasswordInput } from "@/components/ui/password-input";
+import { useTranslation } from "react-i18next";
 
 declare global {
   interface Window {
@@ -26,6 +27,7 @@ declare global {
 
 export default function SignupPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
   const skipCaptcha = process.env.NEXT_PUBLIC_SKIP_CAPTCHA === "true";
   const captchaEnabled = !skipCaptcha && !!siteKey;
@@ -72,7 +74,7 @@ export default function SignupPage() {
     }
 
     if (captchaEnabled && !captchaToken) {
-      setError("Please complete the CAPTCHA verification.");
+      setError(t("auth.captcha_error"));
       return;
     }
 
@@ -102,7 +104,7 @@ export default function SignupPage() {
           window.grecaptcha.reset(widgetIdRef.current);
           setCaptchaToken(null);
         }
-        throw new Error(data.error ?? "Could not create your account.");
+        throw new Error(data.error ?? t("auth.signup_failed"));
       }
 
       const em = data.data?.email ?? email;
@@ -111,7 +113,7 @@ export default function SignupPage() {
       const nextMessage =
         submissionError instanceof Error
           ? submissionError.message
-          : "Could not create your account. Please try again.";
+          : t("auth.signup_failed");
       setError(nextMessage);
     } finally {
       setIsSubmitting(false);
@@ -129,15 +131,15 @@ export default function SignupPage() {
         />
       ) : null}
 
-      <h1 className="text-2xl font-semibold text-gray-900 text-center">Create your account</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 text-center">{t("auth.create_your_account")}</h1>
       <p className="mt-1 text-sm text-gray-500 text-center">
-        Start by setting up your profile and credentials.
+        {t("auth.signup_subtitle")}
       </p>
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block space-y-1">
-            <span className="text-sm font-medium text-gray-700">First Name</span>
+            <span className="text-sm font-medium text-gray-700">{t("auth.first_name")}</span>
             <input
               type="text"
               required
@@ -147,7 +149,7 @@ export default function SignupPage() {
             />
           </label>
           <label className="block space-y-1">
-            <span className="text-sm font-medium text-gray-700">Last Name</span>
+            <span className="text-sm font-medium text-gray-700">{t("auth.last_name")}</span>
             <input
               type="text"
               required
@@ -159,7 +161,7 @@ export default function SignupPage() {
         </div>
 
         <label className="block space-y-1">
-          <span className="text-sm font-medium text-gray-700">Email</span>
+          <span className="text-sm font-medium text-gray-700">{t("auth.email")}</span>
           <input
             type="email"
             required
@@ -170,14 +172,14 @@ export default function SignupPage() {
         </label>
 
         <div className="space-y-1">
-          <span className="text-sm font-medium text-gray-700">Password</span>
+          <span className="text-sm font-medium text-gray-700">{t("auth.password")}</span>
           <PasswordInput
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
           <span className="text-xs text-gray-500">
-            Min 8 characters, one uppercase letter, one number, one symbol.
+            {t("auth.password_hint")}
           </span>
         </div>
 
@@ -193,16 +195,16 @@ export default function SignupPage() {
           disabled={isSubmitting || (captchaEnabled && !captchaToken)}
           className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {isSubmitting ? "Creating account..." : "Create account"}
+          {isSubmitting ? t("auth.creating_account") : t("auth.create_account_btn")}
         </button>
       </form>
 
       {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
 
       <p className="mt-4 text-sm text-gray-600 text-center">
-        Already registered?{" "}
+        {t("auth.already_registered")}{" "}
         <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-          Sign in
+          {t("auth.signin")}
         </Link>
       </p>
 
