@@ -54,6 +54,16 @@ export function ProfileSettings() {
   const [isLoadingTab, setIsLoadingTab] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(DEFAULT_AVATARS[0]);
 
+  // Step 3 States
+  const [passwordStep, setPasswordStep] = useState(0);
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [otpValue, setOtpValue] = useState(["", "", "", "", "", ""]);
+  const [countdown, setCountdown] = useState(300); // 5 minutes
+  const [otpMethod, setOtpMethod] = useState<"email" | "phone">("email");
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -68,6 +78,35 @@ export function ProfileSettings() {
   });
 
   const { isDirty } = form.formState;
+
+  // 2FA Countdown
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (show2FAModal && countdown > 0) {
+      timer = setInterval(() => setCountdown((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [show2FAModal, countdown]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length <= 1) {
+      const newOtp = [...otpValue];
+      newOtp[index] = value;
+      setOtpValue(newOtp);
+      
+      // Auto-focus next
+      if (value && index < 5) {
+        const nextInput = document.getElementById(`otp-${index + 1}`);
+        nextInput?.focus();
+      }
+    }
+  };
 
   // Tab switching with loading state
   useEffect(() => {
@@ -325,16 +364,148 @@ export function ProfileSettings() {
                 </div>
               )}
 
-              {/* Other tabs remain largely the same but with premium styling */}
+              {/* Account Settings Tab */}
               {activeTab === "account" && (
-                <div className="space-y-10">
-                  <div className="p-6 rounded-2xl bg-amber-50/50 border border-amber-100 flex gap-4">
-                    <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
+                <div className="space-y-12">
+                  {/* Change Password Section */}
+                  <div className="space-y-6">
                     <div>
-                      <h4 className="text-sm font-bold text-amber-900">Security Warning</h4>
-                      <p className="text-sm text-amber-700 mt-1">
-                        Changing your email address will require you to re-verify your account.
-                      </p>
+                      <h3 className="text-lg font-bold text-gray-900">Change Password</h3>
+                      <p className="text-sm text-gray-500">Update your password to keep your account secure.</p>
+                    </div>
+
+                    <div className="max-w-md space-y-4 rounded-2xl border border-gray-100 bg-gray-50/30 p-6">
+                      {passwordStep === 0 ? (
+                        <div className="space-y-4 animate-in fade-in duration-300">
+                          <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Current Password</label>
+                            <input
+                              type="password"
+                              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all"
+                              placeholder="••••••••"
+                              onChange={(e) => setCurrentPwd(e.target.value)}
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => currentPwd === "password" ? setPasswordStep(1) : alert("Invalid current password (hint: 'password')")}
+                            className="w-full rounded-xl bg-white border border-gray-200 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+                          >
+                            Verify Current Password
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
+                          <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">New Password</label>
+                            <input
+                              type="password"
+                              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all"
+                              placeholder="••••••••"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Confirm New Password</label>
+                            <input
+                              type="password"
+                              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all"
+                              placeholder="••••••••"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setPasswordStep(0)}
+                              className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all"
+                            >
+                              Back
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                alert("Password updated successfully!");
+                                setPasswordStep(0);
+                              }}
+                              className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                            >
+                              Update
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 2FA Section */}
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">Two-Factor Authentication (2FA)</h3>
+                        <p className="text-sm text-gray-500">Add an extra layer of security to your account.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShow2FAModal(true)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ${
+                          is2FAEnabled ? "bg-indigo-600" : "bg-gray-200"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                            is2FAEnabled ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {is2FAEnabled && (
+                      <div className="rounded-2xl bg-indigo-50/50 border border-indigo-100 p-6 flex items-center gap-4 animate-in fade-in duration-500">
+                        <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                          <Shield className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-indigo-900">2FA is currently active</p>
+                          <p className="text-sm text-indigo-700">Verifications are sent to your registered email.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Danger Zone */}
+                  <div className="pt-8 border-t border-gray-100 space-y-6">
+                    <div className="flex items-center gap-2 text-red-600">
+                      <AlertCircle className="h-5 w-5" />
+                      <h3 className="text-lg font-bold">Danger Zone</h3>
+                    </div>
+
+                    <div className="rounded-2xl border border-red-100 bg-red-50/30 p-8 space-y-6">
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-900">Delete Account</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Once you delete your account, there is no going back. Please be certain.
+                        </p>
+                      </div>
+
+                      <div className="space-y-4">
+                        <p className="text-xs font-bold text-red-700 uppercase tracking-wider">
+                          Type your username <span className="underline italic">"{form.getValues("username")}"</span> to confirm:
+                        </p>
+                        <input
+                          type="text"
+                          spellCheck="false"
+                          onPaste={(e) => e.preventDefault()}
+                          onChange={(e) => setDeleteConfirm(e.target.value)}
+                          className="w-full max-w-md rounded-xl border border-red-200 bg-white px-4 py-3 text-sm focus:border-red-500 focus:ring-4 focus:ring-red-50 outline-none transition-all placeholder-gray-400"
+                          placeholder="Confirm username"
+                        />
+                        <button
+                          type="button"
+                          disabled={deleteConfirm !== form.getValues("username")}
+                          className="w-full max-w-md rounded-xl bg-red-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-red-100 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                          Delete Account Permanently
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -386,6 +557,101 @@ export function ProfileSettings() {
                 className="w-full rounded-xl border border-gray-200 px-4 py-3.5 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all active:scale-[0.98]"
               >
                 Go Back
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2FA Verification Modal */}
+      {show2FAModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 space-y-8 animate-in zoom-in duration-300">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="h-16 w-16 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                <Shield className="h-8 w-8" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {is2FAEnabled ? "Disable 2FA" : "Enable 2FA"}
+                </h2>
+                <p className="text-gray-500 mt-2">
+                  To {is2FAEnabled ? "disable" : "enable"} two-factor authentication, please verify your identity.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex justify-center gap-4 p-1 rounded-xl bg-gray-100/50">
+                <button
+                  type="button"
+                  onClick={() => setOtpMethod("email")}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                    otpMethod === "email" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Email OTP
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOtpMethod("phone")}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                    otpMethod === "phone" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Phone OTP
+                </button>
+              </div>
+
+              <div className="flex justify-between gap-2">
+                {otpValue.map((digit, i) => (
+                  <input
+                    key={i}
+                    id={`otp-${i}`}
+                    type="text"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                    className="h-14 w-12 rounded-xl border-2 border-gray-100 bg-gray-50/50 text-center text-xl font-bold text-gray-900 focus:border-indigo-500 focus:bg-white outline-none transition-all"
+                  />
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between text-xs">
+                <p className="text-gray-500 font-medium">
+                  Expire in <span className="text-indigo-600 font-bold">{formatTime(countdown)}</span>
+                </p>
+                <button 
+                  type="button"
+                  onClick={() => setCountdown(300)}
+                  className="text-indigo-600 font-bold hover:underline"
+                >
+                  Resend Code
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setIs2FAEnabled(!is2FAEnabled);
+                  setShow2FAModal(false);
+                  setOtpValue(["", "", "", "", "", ""]);
+                  setCountdown(300);
+                  alert(`2FA has been ${!is2FAEnabled ? "enabled" : "disabled"} successfully!`);
+                }}
+                disabled={otpValue.some(v => v === "")}
+                className="w-full rounded-xl bg-indigo-600 px-4 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+              >
+                Verify & {is2FAEnabled ? "Disable" : "Enable"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShow2FAModal(false)}
+                className="w-full rounded-xl border border-gray-200 px-4 py-4 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all active:scale-[0.98]"
+              >
+                Cancel
               </button>
             </div>
           </div>
