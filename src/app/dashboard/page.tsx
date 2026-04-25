@@ -6,6 +6,7 @@ import { QuickActions } from "@/app/dashboard/_components/quick-actions";
 import { ComingSoon } from "@/app/dashboard/_components/coming-soon";
 import { TemplateManagement } from "@/app/dashboard/_components/template-management";
 import { RecipientManagement } from "@/app/dashboard/_components/recipient-management";
+import { ProfileSettings } from "@/app/dashboard/_components/profile-settings";
 import { redirect } from "next/navigation";
 import { FiCalendar, FiChevronDown, FiMail } from "react-icons/fi";
 
@@ -23,6 +24,14 @@ export default async function DashboardPage({
 
   if (!userId) {
     redirect("/login");
+  }
+
+  if (view === "profile") {
+    return (
+      <div className="min-h-[calc(100vh-10rem)]">
+        <ProfileSettings />
+      </div>
+    );
   }
 
   if (view === "emails") {
