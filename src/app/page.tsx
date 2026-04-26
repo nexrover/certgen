@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 export default function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -12,11 +13,25 @@ export default function HomePage() {
     };
 
     window.addEventListener('scroll', handleScroll);
+    
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('deleted') === 'true') {
+      setToastMessage("Your account has been successfully deleted.");
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setTimeout(() => setToastMessage(null), 5000);
+    }
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-text font-sans transition-colors duration-300">
+      {toastMessage && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 bg-gray-900 text-white px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-4 fade-in duration-300">
+          <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+          <span className="text-sm font-medium">{toastMessage}</span>
+        </div>
+      )}
       <div className="w-full px-4 md:px-6 fixed top-0 z-50 pt-4 md:pt-6 transition-all duration-300">
         <nav
           className={`mx-auto max-w-6xl flex justify-between items-center px-4 py-3 md:px-6 md:py-3 transition-all duration-300 rounded-full bg-white/90 border border-white/50 backdrop-blur-xl ${isScrolled

@@ -401,6 +401,8 @@ function AccountTab() {
   }, [twoFaStep]);
 
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const hasLength = newPwd.length >= 8;
   const hasCase = /[a-z]/.test(newPwd) && /[A-Z]/.test(newPwd);
@@ -825,30 +827,91 @@ function AccountTab() {
             <div className="space-y-4">
               <p className="text-[10px] font-black text-red-600 uppercase tracking-widest flex items-center gap-2">
                 <span className="w-1 h-1 rounded-full bg-red-600" />
-                TYPE &quot;CONFIRM&quot; TO PROCEED:
+                TYPE &quot;DELETE_CONFIRM&quot; TO PROCEED:
               </p>
               <input
                 type="text"
                 spellCheck="false"
+                autoComplete="off"
+                onPaste={(e) => e.preventDefault()}
+                onCopy={(e) => e.preventDefault()}
                 value={deleteConfirm}
                 onChange={e => setDeleteConfirm(e.target.value)}
                 className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-red-500 focus:ring-4 focus:ring-red-50 outline-none transition-all placeholder:text-gray-300 font-medium"
-                placeholder="confirm"
+                placeholder="DELETE_CONFIRM"
               />
             </div>
           </div>
           <button
             type="button"
-            disabled={deleteConfirm !== "confirm"}
-            className={`w-full py-5 text-sm font-bold text-white transition-all ${deleteConfirm === "confirm"
+            disabled={deleteConfirm !== "DELETE_CONFIRM" || isDeleting}
+            onClick={() => setShowDeleteModal(true)}
+            className={`w-full py-5 text-sm font-bold text-white transition-all ${deleteConfirm === "DELETE_CONFIRM" && !isDeleting
                 ? "bg-red-500 hover:bg-red-600"
                 : "bg-red-300 cursor-not-allowed"
               }`}
           >
-            Delete Account Permanently
+            {isDeleting ? "Loading..." : "Delete Account Permanently"}
           </button>
         </div>
       </div>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-8 text-center space-y-6">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">Are you absolutely sure?</h3>
+              <p className="text-sm text-gray-500 mt-2">
+                This action is irreversible. All your certificate data will be permanently lost and cannot be recovered.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+                className="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setIsDeleting(true);
+                  try {
+                    const res = await fetch("/api/auth/delete-account", {
+                      method: "DELETE",
+                    });
+                    if (!res.ok) {
+                      const data = await res.json();
+                      throw new Error(data.error || "Failed to delete account");
+                    }
+                    const supabase = createClient();
+                    await supabase.auth.signOut();
+                    window.location.href = "/?deleted=true";
+                  } catch (error) {
+                    alert(error instanceof Error ? error.message : "Something went wrong");
+                    setIsDeleting(false);
+                    setShowDeleteModal(false);
+                  }
+                }}
+                disabled={isDeleting}
+                className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-sm font-bold text-white hover:bg-red-700 shadow-lg shadow-red-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                    Deleting...
+                  </>
+                ) : (
+                  "Yes, Delete My Account"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

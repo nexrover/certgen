@@ -12,7 +12,7 @@ const BodySchema = z.object({
 export async function POST(request: Request) {
   try {
     const body = BodySchema.parse(await request.json());
-    
+
     let userId: string | undefined;
     let targetContact = body.contact;
 
