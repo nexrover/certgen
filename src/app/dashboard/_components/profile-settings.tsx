@@ -367,8 +367,82 @@ function AccountTab() {
   const [showCurrentPwd, setShowCurrentPwd] = useState(false);
   const [showNewPwd, setShowNewPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [verifyError, setVerifyError] = useState("");
+
+  const [isChanging, setIsChanging] = useState(false);
+  const [changeError, setChangeError] = useState("");
+  const [changeSuccess, setChangeSuccess] = useState(false);
+
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+
+  const hasLength = newPwd.length >= 8;
+  const hasCase = /[a-z]/.test(newPwd) && /[A-Z]/.test(newPwd);
+  const hasComplexity = /[0-9]/.test(newPwd) || /[^a-zA-Z0-9]/.test(newPwd);
+
+  const handleVerify = async () => {
+    if (!currentPwd) return;
+    setVerifyError("");
+    setIsVerifying(true);
+    try {
+      const res = await fetch("/api/auth/verify-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: currentPwd })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setVerifyError(data.error || "Incorrect current password");
+      } else {
+        setIsVerified(true);
+      }
+    } catch (err) {
+      setVerifyError("Something went wrong");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!hasLength || !hasCase || !hasComplexity) {
+      setChangeError("Password does not meet requirements");
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      setChangeError("Passwords do not match");
+      return;
+    }
+    setChangeError("");
+    setIsChanging(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword: newPwd })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setChangeError(data.error || "Failed to update password");
+      } else {
+        setChangeSuccess(true);
+        setTimeout(() => {
+          setChangeSuccess(false);
+          setPasswordStep(0);
+          setIsVerified(false);
+          setCurrentPwd("");
+          setNewPwd("");
+          setConfirmPwd("");
+        }, 3000);
+      }
+    } catch (err) {
+      setChangeError("Something went wrong");
+    } finally {
+      setIsChanging(false);
+    }
+  };
 
   return (
     <div className="space-y-10">
@@ -401,7 +475,8 @@ function AccountTab() {
                     type={showCurrentPwd ? "text" : "password"}
                     value={currentPwd}
                     onChange={e => setCurrentPwd(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300 font-medium"
+                    disabled={isVerified}
+                    className={`w-full rounded-xl border ${verifyError ? 'border-red-300' : 'border-gray-200'} bg-white px-4 py-4 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300 font-medium ${isVerified ? 'opacity-50 cursor-not-allowed' : ''}`}
                     placeholder="••••••••••••"
                   />
                   <button
@@ -412,68 +487,89 @@ function AccountTab() {
                     {showCurrentPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-              </div>
-
-              {/* New Password */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-1">New Password</label>
-                <div className="relative">
-                  <input
-                    type={showNewPwd ? "text" : "password"}
-                    value={newPwd}
-                    onChange={e => setNewPwd(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300 font-medium"
-                    placeholder="••••••••••••"
-                  />
+                {verifyError && <p className="text-sm text-red-500 ml-1 mt-1 font-medium">{verifyError}</p>}
+                {!isVerified && (
                   <button
                     type="button"
-                    onClick={() => setShowNewPwd(!showNewPwd)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    onClick={handleVerify}
+                    disabled={isVerifying || !currentPwd}
+                    className="mt-3 w-full sm:w-auto px-6 py-2.5 rounded-xl bg-indigo-50 text-indigo-600 text-sm font-bold hover:bg-indigo-100 transition-colors disabled:opacity-50"
                   >
-                    {showNewPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {isVerifying ? "Verifying..." : "Verify"}
                   </button>
-                </div>
+                )}
               </div>
 
-              {/* Confirm New Password */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 ml-1">Confirm New Password</label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPwd ? "text" : "password"}
-                    value={confirmPwd}
-                    onChange={e => setConfirmPwd(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300 font-medium"
-                    placeholder="••••••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPwd(!showConfirmPwd)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    {showConfirmPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
-              </div>
+              {isVerified && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                  {/* New Password */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">New Password</label>
+                    <div className="relative">
+                      <input
+                        type={showNewPwd ? "text" : "password"}
+                        value={newPwd}
+                        onChange={e => setNewPwd(e.target.value)}
+                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300 font-medium"
+                        placeholder="••••••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPwd(!showNewPwd)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showNewPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
 
-              {/* Password Requirements */}
-              <div className="space-y-3 pt-2">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Password requirements:</p>
-                <ul className="space-y-2">
-                  {[
-                    "At least 8 characters",
-                    "Include uppercase and lowercase letters",
-                    "Include at least one number or special character"
-                  ].map((req, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                      <div className="h-4 w-4 rounded-full bg-green-100 flex items-center justify-center">
-                        <Check className="h-2.5 w-2.5 text-green-600" />
-                      </div>
-                      {req}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                  {/* Confirm New Password */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-700 ml-1">Confirm New Password</label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPwd ? "text" : "password"}
+                        value={confirmPwd}
+                        onChange={e => setConfirmPwd(e.target.value)}
+                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300 font-medium"
+                        placeholder="••••••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPwd(!showConfirmPwd)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showConfirmPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Password Requirements */}
+                  <div className="space-y-3 pt-2">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Password requirements:</p>
+                    <ul className="space-y-2">
+                      <li className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className={`h-4 w-4 rounded-full flex items-center justify-center transition-colors ${hasLength ? 'bg-green-100' : 'bg-gray-100'}`}>
+                          <Check className={`h-2.5 w-2.5 transition-colors ${hasLength ? 'text-green-600' : 'text-gray-400'}`} />
+                        </div>
+                        At least 8 characters
+                      </li>
+                      <li className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className={`h-4 w-4 rounded-full flex items-center justify-center transition-colors ${hasCase ? 'bg-green-100' : 'bg-gray-100'}`}>
+                          <Check className={`h-2.5 w-2.5 transition-colors ${hasCase ? 'text-green-600' : 'text-gray-400'}`} />
+                        </div>
+                        Include uppercase and lowercase letters
+                      </li>
+                      <li className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className={`h-4 w-4 rounded-full flex items-center justify-center transition-colors ${hasComplexity ? 'bg-green-100' : 'bg-gray-100'}`}>
+                          <Check className={`h-2.5 w-2.5 transition-colors ${hasComplexity ? 'text-green-600' : 'text-gray-400'}`} />
+                        </div>
+                        Include at least one number or special character
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Right Column: Tips Card */}
@@ -501,15 +597,20 @@ function AccountTab() {
             </div>
           </div>
 
-          <div className="flex justify-end pt-4">
-            <button
-              type="button"
-              onClick={() => { alert("Password updated!"); setPasswordStep(0); }}
-              className="rounded-xl bg-indigo-600 px-8 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95"
-            >
-              Update Password
-            </button>
-          </div>
+          {isVerified && (
+            <div className="flex flex-col sm:flex-row justify-end items-center gap-4 pt-4 border-t border-gray-100 mt-4">
+              {changeError && <p className="text-sm font-medium text-red-500">{changeError}</p>}
+              {changeSuccess && <p className="text-sm font-medium text-green-600 bg-green-50 px-4 py-2 rounded-xl">Password updated successfully!</p>}
+              <button
+                type="button"
+                onClick={handleUpdatePassword}
+                disabled={isChanging || changeSuccess}
+                className="w-full sm:w-auto rounded-xl bg-indigo-600 px-8 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isChanging ? "Updating..." : "Update Password"}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
