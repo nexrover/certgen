@@ -17,13 +17,13 @@ import {
   AlertCircle
 } from "lucide-react";
 import Image from "next/image";
-import { useUserProfile } from "@/hooks/use-user-profile";
+import { useUserProfileContext } from "@/lib/user-profile-context";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { createClient } from "@/lib/supabase/client";
 
 export function TopBar() {
-  const { userProfile, loading } = useUserProfile();
+  const { userProfile, loading } = useUserProfileContext();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -156,6 +156,7 @@ export function TopBar() {
                   width={40}
                   height={40}
                   className="h-full w-full object-cover"
+                  unoptimized
                 />
               ) : (
                 <span className="text-sm font-bold text-indigo-600">{firstLetter}</span>

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardSidebar } from "@/app/dashboard/_components/dashboard-sidebar";
 import { TopBar } from "@/app/dashboard/_components/top-bar";
+import { UserProfileProvider } from "@/lib/user-profile-context";
 
 export default async function DashboardLayout({
   children,
@@ -25,16 +26,18 @@ export default async function DashboardLayout({
   console.log("[DashboardLayout] user.user_metadata:", JSON.stringify(user.user_metadata));
 
   return (
-    <div className="flex h-screen bg-[#F9FAFB] overflow-hidden">
-      <DashboardSidebar userEmail={user.email} />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar />
-        <main className="flex-1 overflow-y-auto p-8">
-          <div className="mx-auto max-w-7xl">
-            {children}
-          </div>
-        </main>
+    <UserProfileProvider>
+      <div className="flex h-screen bg-[#F9FAFB] overflow-hidden">
+        <DashboardSidebar userEmail={user.email} />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <TopBar />
+          <main className="flex-1 overflow-y-auto p-8">
+            <div className="mx-auto max-w-7xl">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </UserProfileProvider>
   );
 }
