@@ -207,24 +207,6 @@ function GeneralTab({ onCancel }: { onCancel: () => void }) {
 
   return (
     <div className="space-y-8">
-      {/* Top action row */}
-      <div className="flex items-center justify-end gap-3">
-        <button
-          onClick={onCancel}
-          className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-60 transition-all"
-        >
-          <Save className="h-4 w-4" />
-          {isSaving ? "Saving..." : "Save"}
-        </button>
-      </div>
-
       {error && (
         <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           <AlertCircle className="h-4 w-4 shrink-0" />
@@ -300,54 +282,64 @@ function GeneralTab({ onCancel }: { onCancel: () => void }) {
         </div>
 
         {/* RIGHT: Personal info */}
-        <div className="space-y-6">
-          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">Personal Information</h3>
+        <div className="space-y-8">
+          <div className="pb-2 border-b border-gray-100">
+            <h3 className="text-lg font-bold text-gray-900">Personal Information</h3>
+            <p className="text-sm text-gray-500 mt-1">Update your personal details and how others see you.</p>
+          </div>
+
+          <div className="space-y-6">
 
           {/* First Name + Last Name */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">First Name</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide">First Name</label>
               <input
                 value={firstName}
                 onChange={e => setFirstName(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all"
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300"
                 placeholder="John"
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Last Name</label>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide">Last Name</label>
               <input
                 value={lastName}
                 onChange={e => setLastName(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all"
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300"
                 placeholder="Doe"
               />
             </div>
           </div>
 
           {/* Email */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide flex items-center gap-1.5">
               <Mail className="h-3 w-3" /> Email Address
             </label>
-            <input
-              value={email}
-              readOnly
-              className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm text-gray-400 cursor-not-allowed outline-none"
-              placeholder="john@example.com"
-            />
-            <p className="text-[11px] text-gray-400 ml-1">Email cannot be changed here.</p>
+            <div className="relative">
+              <input
+                value={email}
+                readOnly
+                className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-3.5 text-sm text-gray-400 cursor-not-allowed outline-none font-medium"
+                placeholder="john@example.com"
+              />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                <Shield className="h-4 w-4 text-gray-300" />
+              </div>
+            </div>
+            <p className="text-[11px] text-gray-400 ml-1">Email address is managed through your authentication provider.</p>
           </div>
 
           {/* Phone */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide flex items-center gap-1.5">
               <Phone className="h-3 w-3" /> Phone Number
             </label>
             <input
               value={phone}
               onChange={e => setPhone(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all"
+              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300"
               placeholder="+1 (555) 000-0000"
             />
           </div>
@@ -362,6 +354,7 @@ function GeneralTab({ onCancel }: { onCancel: () => void }) {
         />
       )}
     </div>
+  </div>
   );
 }
 
@@ -372,58 +365,94 @@ function AccountTab() {
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   return (
-    <div className="max-w-2xl space-y-12">
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-lg font-bold text-gray-900">Password &amp; Security</h3>
+    <div className="space-y-10">
+      {/* Password & Security */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-10 border-b border-gray-100">
+        <div className="max-w-md">
+          <h3 className="text-xl font-bold text-gray-900">Password & Security</h3>
           <p className="text-sm text-gray-500 mt-1">Keep your account safe by updating your password regularly.</p>
         </div>
-        <div className="space-y-4 rounded-xl border border-gray-100 bg-white p-8 shadow-sm">
-          {passwordStep === 0 ? (
-            <div className="space-y-4">
+        <button 
+          onClick={() => setPasswordStep(1)}
+          className="px-6 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+        >
+          Change password
+        </button>
+      </div>
+
+      {/* Password Change Form Overlay if step > 0 */}
+      {passwordStep === 1 && (
+        <div className="rounded-2xl border border-indigo-100 bg-indigo-50/20 p-8 space-y-6 animate-in slide-in-from-top-4 duration-300">
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-500 uppercase ml-1">Current Password</label>
-                <input type="password" className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:border-indigo-500 focus:bg-white outline-none transition-all" placeholder="••••••••" onChange={e => setCurrentPwd(e.target.value)} />
+                <input type="password" title="Current Password" value={currentPwd} onChange={e => setCurrentPwd(e.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm focus:border-indigo-500 outline-none transition-all" placeholder="••••••••" />
               </div>
-              <button type="button" onClick={() => currentPwd === "password" ? setPasswordStep(1) : alert("Invalid password (hint: 'password')")} className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">Verify to Change Password</button>
-            </div>
-          ) : (
-            <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2"><label className="text-xs font-bold text-gray-500 uppercase ml-1">New Password</label><input type="password" className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none" placeholder="••••••••" /></div>
-                <div className="space-y-2"><label className="text-xs font-bold text-gray-500 uppercase ml-1">Confirm New Password</label><input type="password" className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none" placeholder="••••••••" /></div>
+              <div className="flex items-end">
+                <button type="button" onClick={() => setPasswordStep(0)} className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Cancel</button>
               </div>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setPasswordStep(0)} className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50">Cancel</button>
-                <button type="button" onClick={() => { alert("Password updated!"); setPasswordStep(0); }} className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-700">Update Password</button>
-              </div>
-            </div>
-          )}
+           </div>
         </div>
+      )}
+
+      {/* Two-Factor Authentication */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-10 border-b border-gray-100">
+        <div className="max-w-md">
+          <h3 className="text-xl font-bold text-gray-900">Two-Factor Authentication</h3>
+          <p className="text-sm text-gray-500 mt-1">Extra security for your login sessions.</p>
+        </div>
+        <button 
+          onClick={() => setIs2FAEnabled(!is2FAEnabled)}
+          className={`px-8 py-2.5 rounded-xl border text-sm font-bold transition-all shadow-sm ${
+            is2FAEnabled 
+            ? "bg-indigo-600 border-indigo-600 text-white shadow-indigo-100" 
+            : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+          }`}
+        >
+          {is2FAEnabled ? "On" : "OFF"}
+        </button>
       </div>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div><h3 className="text-lg font-bold text-gray-900">Two-Factor Authentication</h3><p className="text-sm text-gray-500 mt-1">Extra security for your login sessions.</p></div>
-          <button type="button" onClick={() => setIs2FAEnabled(!is2FAEnabled)} className={`relative inline-flex h-6 w-11 rounded-full border-2 border-transparent transition-all ${is2FAEnabled ? "bg-indigo-600" : "bg-gray-200"}`}>
-            <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ${is2FAEnabled ? "translate-x-5" : "translate-x-0"}`} />
+
+      {/* Danger Zone */}
+      <div className="space-y-6 pt-2">
+        <div className="flex items-center gap-2 text-red-600">
+          <AlertCircle className="h-5 w-5" />
+          <h3 className="text-lg font-bold">Danger Zone</h3>
+        </div>
+        
+        <div className="rounded-2xl border border-red-50 bg-white shadow-sm max-w-2xl overflow-hidden ring-1 ring-red-50">
+          <div className="p-8 space-y-6">
+            <div>
+              <h4 className="text-base font-bold text-gray-900">Delete Your Account</h4>
+              <p className="text-sm text-gray-500 mt-1 leading-relaxed">Once deleted, all your certificate data is permanently lost. This action is irreversible.</p>
+            </div>
+            
+            <div className="space-y-4">
+              <p className="text-[10px] font-black text-red-600 uppercase tracking-widest flex items-center gap-2">
+                <span className="w-1 h-1 rounded-full bg-red-600" />
+                TYPE &quot;CONFIRM&quot; TO PROCEED:
+              </p>
+              <input 
+                type="text" 
+                spellCheck="false" 
+                value={deleteConfirm}
+                onChange={e => setDeleteConfirm(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-red-500 focus:ring-4 focus:ring-red-50 outline-none transition-all placeholder:text-gray-300 font-medium" 
+                placeholder="confirm" 
+              />
+            </div>
+          </div>
+          <button 
+            type="button" 
+            disabled={deleteConfirm !== "confirm"}
+            className={`w-full py-5 text-sm font-bold text-white transition-all ${
+              deleteConfirm === "confirm" 
+              ? "bg-red-500 hover:bg-red-600" 
+              : "bg-red-300 cursor-not-allowed"
+            }`}
+          >
+            Delete Account Permanently
           </button>
-        </div>
-        {is2FAEnabled && (
-          <div className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-6 flex items-center gap-4">
-            <Shield className="h-6 w-6 text-indigo-600" />
-            <div><p className="text-sm font-bold text-indigo-900">2FA is currently active</p><p className="text-xs text-indigo-700 mt-1">Verification codes are being sent to your registered email.</p></div>
-          </div>
-        )}
-      </div>
-      <div className="pt-8 border-t border-gray-100 space-y-6">
-        <div className="flex items-center gap-2 text-red-600"><AlertCircle className="h-5 w-5" /><h3 className="text-lg font-bold">Danger Zone</h3></div>
-        <div className="rounded-xl border border-red-100 bg-red-50/20 p-8 space-y-6 shadow-sm">
-          <div><h4 className="text-sm font-bold text-gray-900">Delete Your Account</h4><p className="text-sm text-gray-500 mt-1">Once deleted, all your certificate data is permanently lost.</p></div>
-          <div className="space-y-4">
-            <p className="text-[10px] font-bold text-red-700 uppercase tracking-widest">Type &quot;confirm&quot; to proceed:</p>
-            <input type="text" spellCheck="false" onChange={e => setDeleteConfirm(e.target.value)} className="w-full rounded-xl border border-red-200 bg-white px-4 py-3 text-sm focus:border-red-500 outline-none transition-all" placeholder="confirm" />
-            <button type="button" disabled={deleteConfirm !== "confirm"} className="w-full rounded-xl bg-red-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-red-100 hover:bg-red-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all">Delete Account Permanently</button>
-          </div>
         </div>
       </div>
     </div>
@@ -534,29 +563,44 @@ export function ProfileSettings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t("dashboard.profile.title")}</h1>
-        <p className="text-sm text-gray-500 mt-1">{t("dashboard.profile.subtitle")}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">{t("dashboard.profile.title")}</h1>
+          <p className="text-base text-gray-500 mt-1">{t("dashboard.profile.subtitle")}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleCancel}
+            className="rounded-xl border border-gray-200 bg-white px-6 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+          >
+            Cancel
+          </button>
+          <button
+            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-8 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all hover:-translate-y-0.5 active:translate-y-0"
+          >
+            Save
+          </button>
+        </div>
       </div>
 
       {/* Card with tabs */}
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
         {/* Tab bar */}
-        <div className="border-b border-gray-200 bg-gray-50/50 px-4">
-          <nav className="flex gap-4 overflow-x-auto">
+        <div className="border-b border-gray-200 bg-gray-50/30 px-6">
+          <nav className="flex gap-8 overflow-x-auto">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 py-4 px-2 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2.5 py-5 px-1 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "border-indigo-600 text-indigo-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    : "border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300"
                 }`}
               >
-                <tab.icon className="h-4 w-4" />
+                <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? "text-indigo-600" : "text-gray-400"}`} />
                 {tab.label}
               </button>
             ))}
