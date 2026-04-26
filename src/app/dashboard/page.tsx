@@ -104,7 +104,7 @@ export default async function DashboardPage({
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
-      <WelcomeHeader userName={user?.user_metadata?.full_name?.split(' ')[0] || 'User'} />
+      <WelcomeHeader userName={user?.user_metadata?.first_name || user?.user_metadata?.full_name?.split(' ')[0] || 'User'} />
 
       {/* Stats Section */}
       <StatsCards
