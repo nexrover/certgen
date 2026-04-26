@@ -385,6 +385,7 @@ function AccountTab() {
   const [twoFaLoading, setTwoFaLoading] = useState(false);
   const [twoFaError, setTwoFaError] = useState("");
   const [twoFaTimeLeft, setTwoFaTimeLeft] = useState(300);
+  const [twoFaSuccessMsg, setTwoFaSuccessMsg] = useState("");
   
   const is2FAEnabled = userProfile?.is2FaEnabled || false;
 
@@ -640,7 +641,13 @@ function AccountTab() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-10 border-b border-gray-100">
         <div className="max-w-md">
           <h3 className="text-xl font-bold text-gray-900">Two-Factor Authentication</h3>
-          <p className="text-sm text-gray-500 mt-1">Extra security for your login sessions.</p>
+          <p className="text-sm text-gray-500 mt-1 mb-3">Extra security for your login sessions.</p>
+          {twoFaSuccessMsg && (
+            <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm font-medium text-green-700 animate-in fade-in slide-in-from-top-2">
+              <Shield className="h-4 w-4 shrink-0" />
+              {twoFaSuccessMsg}
+            </div>
+          )}
         </div>
         <button
           onClick={() => {
@@ -755,7 +762,8 @@ function AccountTab() {
                       updateProfile({ is2FaEnabled: !is2FAEnabled, twoFactorContact: is2FAEnabled ? null : twoFaContact });
                       setTwoFaStep(0);
                       setTwoFaCode("");
-                      alert(`2FA successfully ${is2FAEnabled ? "disabled" : "enabled"}!`);
+                      setTwoFaSuccessMsg(`2FA successfully ${is2FAEnabled ? "disabled" : "enabled"}!`);
+                      setTimeout(() => setTwoFaSuccessMsg(""), 3000);
                     } catch(e: any) {
                       setTwoFaError(e.message);
                     } finally {
