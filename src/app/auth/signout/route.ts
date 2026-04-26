@@ -7,7 +7,7 @@ export async function POST(request: Request) {
 
   await supabase.auth.signOut();
 
-  return NextResponse.redirect(new URL("/login", requestUrl.origin), {
+  return NextResponse.redirect(new URL("/", requestUrl.origin), {
     status: 303,
   });
 }

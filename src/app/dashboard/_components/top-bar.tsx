@@ -12,13 +12,15 @@ import {
   HelpCircle, 
   LogOut,
   Check,
-  Search as SearchIcon,
-  ChevronLeft
+  ChevronLeft,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import Image from "next/image";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { createClient } from "@/lib/supabase/client";
 
 export function TopBar() {
   const { userProfile, loading } = useUserProfile();
@@ -27,6 +29,8 @@ export function TopBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t, i18n } = useTranslation();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const [languageSearch, setLanguageSearch] = useState("");
@@ -80,9 +84,30 @@ export function TopBar() {
     setIsDropdownOpen(false);
   };
 
+  const initiateLogout = () => {
+    setShowLogoutConfirm(true);
+    setIsDropdownOpen(false);
+  };
+
   const handleLogout = async () => {
-    await fetch("/api/auth/signout", { method: "POST" });
-    router.push("/login");
+    setIsLoggingOut(true);
+    try {
+      // Call server-side signout to clear cookies
+      await fetch("/api/auth/signout", { method: "POST" });
+      
+      // Call client-side signout to clear any local supabase state
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      
+      // Clear local storage as requested
+      localStorage.clear();
+      
+      // Redirect to Landing Page
+      router.push("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -214,7 +239,7 @@ export function TopBar() {
                         
                         <div className="relative px-2 mb-2">
                           <span className="absolute inset-y-0 left-5 flex items-center text-gray-400">
-                            <SearchIcon className="h-3.5 w-3.5" />
+                            <Search className="h-3.5 w-3.5" />
                           </span>
                           <input
                             type="text"
@@ -269,7 +294,7 @@ export function TopBar() {
                   <div className="h-px bg-gray-100 my-1" />
                   <button 
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                    onClick={handleLogout}
+                    onClick={initiateLogout}
                   >
                     <LogOut className="h-4 w-4" />
                     {t('common.logout')}
@@ -280,6 +305,53 @@ export function TopBar() {
           )}
         </div>
       </div>
+
+      {isLoggingOut && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <span className="text-sm font-medium text-gray-700">{t("common.logging_out")}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">{t("common.logout_confirm_title")}</h3>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 mb-6">
+                {t("common.logout_confirm_desc")}
+              </p>
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {t("common.cancel")}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLogoutConfirm(false);
+                    handleLogout();
+                  }}
+                  className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-all shadow-sm"
+                >
+                  {t("common.confirm")}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

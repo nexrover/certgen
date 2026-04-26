@@ -15,10 +15,15 @@
     "edit": "Edit",
     "delete": "Delete",
     "add": "Add",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
     "coming_soon": "Coming Soon",
     "coming_soon_desc": "This feature is under development. We're working hard to bring you a powerful email builder.",
     "retry": "Retry",
-    "notify_me": "Notify Me"
+    "notify_me": "Notify Me",
+    "logging_out": "Logging out...",
+    "logout_confirm_title": "Log Out",
+    "logout_confirm_desc": "Are you sure you want to log out?"
   },
   "sidebar": {
     "dashboard": "Dashboard",
