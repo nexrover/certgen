@@ -78,9 +78,14 @@ function LoginContent() {
         body: JSON.stringify({ email, password, rememberMe }),
       });
 
-      const data = (await res.json()) as { success?: boolean; error?: string };
+      const data = (await res.json()) as { success?: boolean; error?: string; require2fa?: boolean };
       if (!res.ok || !data.success) {
         throw new Error(data.error ?? t("auth.signin_failed"));
+      }
+
+      if (data.require2fa) {
+        router.push(`/verify-2fa?next=${encodeURIComponent(nextPath)}`);
+        return;
       }
 
       router.replace(nextPath);

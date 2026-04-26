@@ -9,6 +9,8 @@ export interface UserProfile {
   email: string | null;
   phone: string | null;
   avatarUrl: string | null;
+  is2FaEnabled: boolean;
+  twoFactorContact: string | null;
 }
 
 interface UserProfileContextType {
@@ -47,6 +49,8 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
           email: user.email || null,
           phone: user.user_metadata?.phone || null,
           avatarUrl: user.user_metadata?.avatar_url || null,
+          is2FaEnabled: user.user_metadata?.is_2fa_enabled || false,
+          twoFactorContact: user.user_metadata?.two_factor_contact || null,
         });
       }
     } catch (error) {

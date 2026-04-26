@@ -360,6 +360,8 @@ function GeneralTab({ onCancel }: { onCancel: () => void }) {
 
 /* ─── Stub tabs ───────────────────────────────────────── */
 function AccountTab() {
+  const { userProfile, updateProfile } = useUserProfileContext();
+
   const [passwordStep, setPasswordStep] = useState(0);
   const [currentPwd, setCurrentPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
@@ -376,7 +378,27 @@ function AccountTab() {
   const [changeError, setChangeError] = useState("");
   const [changeSuccess, setChangeSuccess] = useState(false);
 
-  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  // 2FA states
+  const [twoFaStep, setTwoFaStep] = useState<0 | 1 | 2>(0); // 0: Idle, 1: Enter Contact, 2: Enter OTP
+  const [twoFaContact, setTwoFaContact] = useState(userProfile?.twoFactorContact || "");
+  const [twoFaCode, setTwoFaCode] = useState("");
+  const [twoFaLoading, setTwoFaLoading] = useState(false);
+  const [twoFaError, setTwoFaError] = useState("");
+  const [twoFaTimeLeft, setTwoFaTimeLeft] = useState(300);
+  
+  const is2FAEnabled = userProfile?.is2FaEnabled || false;
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (twoFaStep === 2) {
+      setTwoFaTimeLeft(300);
+      timer = setInterval(() => {
+        setTwoFaTimeLeft(prev => Math.max(0, prev - 1));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [twoFaStep]);
+
   const [deleteConfirm, setDeleteConfirm] = useState("");
 
   const hasLength = newPwd.length >= 8;
@@ -621,7 +643,20 @@ function AccountTab() {
           <p className="text-sm text-gray-500 mt-1">Extra security for your login sessions.</p>
         </div>
         <button
-          onClick={() => setIs2FAEnabled(!is2FAEnabled)}
+          onClick={() => {
+            if (is2FAEnabled) {
+              setTwoFaStep(2);
+              setTwoFaLoading(true);
+              fetch("/api/auth/2fa/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ purpose: "disable" })
+              }).finally(() => setTwoFaLoading(false));
+            } else {
+              setTwoFaStep(1);
+            }
+          }}
+          disabled={twoFaLoading}
           className={`px-8 py-2.5 rounded-xl border text-sm font-bold transition-all shadow-sm ${is2FAEnabled
               ? "bg-indigo-600 border-indigo-600 text-white shadow-indigo-100"
               : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
@@ -630,6 +665,140 @@ function AccountTab() {
           {is2FAEnabled ? "On" : "OFF"}
         </button>
       </div>
+
+      {twoFaStep > 0 && (
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+          <h4 className="text-lg font-bold text-gray-900 mb-4">
+            {is2FAEnabled ? "Disable Two-Factor Authentication" : "Enable Two-Factor Authentication"}
+          </h4>
+          
+          {twoFaError && <p className="text-sm text-red-600 mb-4 p-3 bg-red-50 rounded-lg">{twoFaError}</p>}
+          
+          {twoFaStep === 1 && !is2FAEnabled && (
+            <div className="space-y-4">
+              <label className="text-sm font-bold text-gray-700 block">Valid Email or Phone Number</label>
+              <input
+                type="text"
+                value={twoFaContact}
+                onChange={e => setTwoFaContact(e.target.value)}
+                className="w-full max-w-md rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none"
+                placeholder="email@example.com or +15550000"
+              />
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={() => setTwoFaStep(0)}
+                  className="px-6 py-2 rounded-xl text-gray-700 font-bold hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    setTwoFaError("");
+                    setTwoFaLoading(true);
+                    try {
+                      const res = await fetch("/api/auth/2fa/send", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ purpose: "enable", contact: twoFaContact })
+                      });
+                      if (!res.ok) throw new Error("Failed to send OTP");
+                      setTwoFaStep(2);
+                    } catch(e: any) {
+                      setTwoFaError(e.message);
+                    } finally {
+                      setTwoFaLoading(false);
+                    }
+                  }}
+                  disabled={twoFaLoading || !twoFaContact}
+                  className="px-6 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-100 disabled:opacity-50"
+                >
+                  {twoFaLoading ? "Sending..." : "Verify"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {twoFaStep === 2 && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Enter the 6-digit code sent to your {is2FAEnabled ? 'registered contact' : 'contact'}.
+              </p>
+              <input
+                type="text"
+                maxLength={6}
+                value={twoFaCode}
+                onChange={e => setTwoFaCode(e.target.value.replace(/\D/g, ''))}
+                className="w-full max-w-xs rounded-xl border border-gray-200 px-4 py-3 text-2xl tracking-[0.5em] text-center font-bold focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none"
+                placeholder="000000"
+              />
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={() => { setTwoFaStep(0); setTwoFaCode(""); }}
+                  className="px-6 py-2 rounded-xl text-gray-700 font-bold hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    setTwoFaError("");
+                    setTwoFaLoading(true);
+                    try {
+                      const purpose = is2FAEnabled ? "disable" : "enable";
+                      const res = await fetch("/api/auth/2fa/verify", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ purpose, contact: twoFaContact, code: twoFaCode })
+                      });
+                      const data = await res.json();
+                      if (!res.ok) throw new Error(data.error || "Invalid code");
+                      
+                      updateProfile({ is2FaEnabled: !is2FAEnabled, twoFactorContact: is2FAEnabled ? null : twoFaContact });
+                      setTwoFaStep(0);
+                      setTwoFaCode("");
+                      alert(`2FA successfully ${is2FAEnabled ? "disabled" : "enabled"}!`);
+                    } catch(e: any) {
+                      setTwoFaError(e.message);
+                    } finally {
+                      setTwoFaLoading(false);
+                    }
+                  }}
+                  disabled={twoFaLoading || twoFaCode.length !== 6}
+                  className="px-6 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-100 disabled:opacity-50"
+                >
+                  {twoFaLoading ? "Verifying..." : "Confirm"}
+                </button>
+              </div>
+              <div className="text-center mt-4 text-sm text-gray-500">
+                {twoFaTimeLeft > 0 ? (
+                  <span>Code expires in <strong className="text-gray-900 font-bold">{Math.floor(twoFaTimeLeft / 60)}:{(twoFaTimeLeft % 60).toString().padStart(2, '0')}</strong></span>
+                ) : (
+                  <button 
+                    type="button" 
+                    onClick={async () => {
+                      setTwoFaTimeLeft(300);
+                      setTwoFaError("");
+                      try {
+                        const res = await fetch("/api/auth/2fa/send", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ purpose: is2FAEnabled ? "disable" : "enable", contact: twoFaContact })
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || "Failed to resend");
+                      } catch(e: any) {
+                        setTwoFaError(e.message);
+                      }
+                    }}
+                    className="font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                  >
+                    Resend Code
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Danger Zone */}
       <div className="space-y-6 pt-2">
