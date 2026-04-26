@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Image from "next/image";
-import { User, Mail, CreditCard, Bell, Shield, Save, AlertCircle, Phone, Upload, Download, Zap, Camera, X, ZoomIn, ZoomOut } from "lucide-react";
+import { User, Mail, CreditCard, Bell, Shield, Save, AlertCircle, Phone, Upload, Download, Zap, Camera, X, ZoomIn, ZoomOut, Eye, EyeOff, Lock, Check } from "lucide-react";
 import { useUserProfileContext } from "@/lib/user-profile-context";
 import { createClient } from "@/lib/supabase/client";
 import Cropper from "react-easy-crop";
@@ -107,25 +107,25 @@ function Skeleton({ className }: { className?: string }) {
 function GeneralTab({ onCancel }: { onCancel: () => void }) {
   const { userProfile, updateProfile } = useUserProfileContext();
   const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName]   = useState("");
-  const [email, setEmail]         = useState("");
-  const [phone, setPhone]         = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
-  const [isSaving, setIsSaving]   = useState(false);
-  const [error, setError]         = useState<string | null>(null);
-  const [success, setSuccess]     = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill from context
   useEffect(() => {
     if (userProfile) {
       setFirstName(userProfile.firstName || "");
-      setLastName(userProfile.lastName   || "");
-      setEmail(userProfile.email         || "");
-      setPhone(userProfile.phone         || "");
+      setLastName(userProfile.lastName || "");
+      setEmail(userProfile.email || "");
+      setPhone(userProfile.phone || "");
       setAvatarUrl(userProfile.avatarUrl || null);
     }
   }, [userProfile]);
@@ -140,7 +140,7 @@ function GeneralTab({ onCancel }: { onCancel: () => void }) {
     if (file.size > 2 * 1024 * 1024) {
       setError("File must be under 2 MB"); return;
     }
-    
+
     const reader = new FileReader();
     reader.onload = () => {
       setTempImageUrl(reader.result as string);
@@ -171,7 +171,7 @@ function GeneralTab({ onCancel }: { onCancel: () => void }) {
       // Upload avatar if new file selected
       if (avatarFile) {
         const supabase = createClient();
-        const ext  = avatarFile.name.split(".").pop();
+        const ext = avatarFile.name.split(".").pop();
         const path = `avatars/${Date.now()}.${ext}`;
         const { error: upErr } = await supabase.storage
           .from("avatars")
@@ -290,71 +290,71 @@ function GeneralTab({ onCancel }: { onCancel: () => void }) {
 
           <div className="space-y-6">
 
-          {/* First Name + Last Name */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide">First Name</label>
-              <input
-                value={firstName}
-                onChange={e => setFirstName(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300"
-                placeholder="John"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide">Last Name</label>
-              <input
-                value={lastName}
-                onChange={e => setLastName(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300"
-                placeholder="Doe"
-              />
-            </div>
-          </div>
-
-          {/* Email */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide flex items-center gap-1.5">
-              <Mail className="h-3 w-3" /> Email Address
-            </label>
-            <div className="relative">
-              <input
-                value={email}
-                readOnly
-                className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-3.5 text-sm text-gray-400 cursor-not-allowed outline-none font-medium"
-                placeholder="john@example.com"
-              />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                <Shield className="h-4 w-4 text-gray-300" />
+            {/* First Name + Last Name */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide">First Name</label>
+                <input
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300"
+                  placeholder="John"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide">Last Name</label>
+                <input
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300"
+                  placeholder="Doe"
+                />
               </div>
             </div>
-            <p className="text-[11px] text-gray-400 ml-1">Email address is managed through your authentication provider.</p>
-          </div>
 
-          {/* Phone */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide flex items-center gap-1.5">
-              <Phone className="h-3 w-3" /> Phone Number
-            </label>
-            <input
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300"
-              placeholder="+1 (555) 000-0000"
-            />
+            {/* Email */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide flex items-center gap-1.5">
+                <Mail className="h-3 w-3" /> Email Address
+              </label>
+              <div className="relative">
+                <input
+                  value={email}
+                  readOnly
+                  className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-3.5 text-sm text-gray-400 cursor-not-allowed outline-none font-medium"
+                  placeholder="john@example.com"
+                />
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <Shield className="h-4 w-4 text-gray-300" />
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-400 ml-1">Email address is managed through your authentication provider.</p>
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide flex items-center gap-1.5">
+                <Phone className="h-3 w-3" /> Phone Number
+              </label>
+              <input
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300"
+                placeholder="+1 (555) 000-0000"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {tempImageUrl && (
-        <CropperModal
-          image={tempImageUrl}
-          onCropComplete={handleCropComplete}
-          onCancel={() => setTempImageUrl(null)}
-        />
-      )}
+        {tempImageUrl && (
+          <CropperModal
+            image={tempImageUrl}
+            onCropComplete={handleCropComplete}
+            onCancel={() => setTempImageUrl(null)}
+          />
+        )}
+      </div>
     </div>
-  </div>
   );
 }
 
@@ -362,8 +362,14 @@ function GeneralTab({ onCancel }: { onCancel: () => void }) {
 function AccountTab() {
   const [passwordStep, setPasswordStep] = useState(0);
   const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [showCurrentPwd, setShowCurrentPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+
   return (
     <div className="space-y-10">
       {/* Password & Security */}
@@ -372,26 +378,138 @@ function AccountTab() {
           <h3 className="text-xl font-bold text-gray-900">Password & Security</h3>
           <p className="text-sm text-gray-500 mt-1">Keep your account safe by updating your password regularly.</p>
         </div>
-        <button 
-          onClick={() => setPasswordStep(1)}
+        <button
+          onClick={() => setPasswordStep(passwordStep === 1 ? 0 : 1)}
           className="px-6 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
         >
-          Change password
+          {passwordStep === 1 ? "Cancel" : "Change password"}
         </button>
       </div>
 
       {/* Password Change Form Overlay if step > 0 */}
       {passwordStep === 1 && (
-        <div className="rounded-2xl border border-indigo-100 bg-indigo-50/20 p-8 space-y-6 animate-in slide-in-from-top-4 duration-300">
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
+            {/* Left Column: Inputs & Requirements */}
+            <div className="lg:col-span-3 space-y-6">
+              {/* Current Password */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 uppercase ml-1">Current Password</label>
-                <input type="password" title="Current Password" value={currentPwd} onChange={e => setCurrentPwd(e.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm focus:border-indigo-500 outline-none transition-all" placeholder="••••••••" />
+                <label className="text-sm font-bold text-gray-700 ml-1">Current Password</label>
+                <div className="relative">
+                  <input
+                    type={showCurrentPwd ? "text" : "password"}
+                    value={currentPwd}
+                    onChange={e => setCurrentPwd(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300 font-medium"
+                    placeholder="••••••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPwd(!showCurrentPwd)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showCurrentPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
-              <div className="flex items-end">
-                <button type="button" onClick={() => setPasswordStep(0)} className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">Cancel</button>
+
+              {/* New Password */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700 ml-1">New Password</label>
+                <div className="relative">
+                  <input
+                    type={showNewPwd ? "text" : "password"}
+                    value={newPwd}
+                    onChange={e => setNewPwd(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300 font-medium"
+                    placeholder="••••••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPwd(!showNewPwd)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showNewPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
-           </div>
+
+              {/* Confirm New Password */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700 ml-1">Confirm New Password</label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPwd ? "text" : "password"}
+                    value={confirmPwd}
+                    onChange={e => setConfirmPwd(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-300 font-medium"
+                    placeholder="••••••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPwd(!showConfirmPwd)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showConfirmPwd ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Password Requirements */}
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Password requirements:</p>
+                <ul className="space-y-2">
+                  {[
+                    "At least 8 characters",
+                    "Include uppercase and lowercase letters",
+                    "Include at least one number or special character"
+                  ].map((req, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="h-4 w-4 rounded-full bg-green-100 flex items-center justify-center">
+                        <Check className="h-2.5 w-2.5 text-green-600" />
+                      </div>
+                      {req}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Right Column: Tips Card */}
+            <div className="lg:col-span-2">
+              <div className="rounded-2xl bg-indigo-50/50 border border-indigo-100 p-8 space-y-6">
+                <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
+                  <Lock className="h-5 w-5" />
+                </div>
+                <div className="space-y-4">
+                  <h4 className="font-bold text-gray-900">Tips for a strong password</h4>
+                  <ul className="space-y-3">
+                    {[
+                      "Use a mix of letters, numbers & symbols",
+                      "Avoid using personal information",
+                      "Don't reuse old passwords"
+                    ].map((tip, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                        <Check className="h-4 w-4 text-indigo-500 mt-0.5 shrink-0" />
+                        <span>{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <button
+              type="button"
+              onClick={() => { alert("Password updated!"); setPasswordStep(0); }}
+              className="rounded-xl bg-indigo-600 px-8 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95"
+            >
+              Update Password
+            </button>
+          </div>
         </div>
       )}
 
@@ -401,13 +519,12 @@ function AccountTab() {
           <h3 className="text-xl font-bold text-gray-900">Two-Factor Authentication</h3>
           <p className="text-sm text-gray-500 mt-1">Extra security for your login sessions.</p>
         </div>
-        <button 
+        <button
           onClick={() => setIs2FAEnabled(!is2FAEnabled)}
-          className={`px-8 py-2.5 rounded-xl border text-sm font-bold transition-all shadow-sm ${
-            is2FAEnabled 
-            ? "bg-indigo-600 border-indigo-600 text-white shadow-indigo-100" 
-            : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
-          }`}
+          className={`px-8 py-2.5 rounded-xl border text-sm font-bold transition-all shadow-sm ${is2FAEnabled
+              ? "bg-indigo-600 border-indigo-600 text-white shadow-indigo-100"
+              : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+            }`}
         >
           {is2FAEnabled ? "On" : "OFF"}
         </button>
@@ -419,37 +536,36 @@ function AccountTab() {
           <AlertCircle className="h-5 w-5" />
           <h3 className="text-lg font-bold">Danger Zone</h3>
         </div>
-        
+
         <div className="rounded-2xl border border-red-50 bg-white shadow-sm max-w-2xl overflow-hidden ring-1 ring-red-50">
           <div className="p-8 space-y-6">
             <div>
               <h4 className="text-base font-bold text-gray-900">Delete Your Account</h4>
               <p className="text-sm text-gray-500 mt-1 leading-relaxed">Once deleted, all your certificate data is permanently lost. This action is irreversible.</p>
             </div>
-            
+
             <div className="space-y-4">
               <p className="text-[10px] font-black text-red-600 uppercase tracking-widest flex items-center gap-2">
                 <span className="w-1 h-1 rounded-full bg-red-600" />
                 TYPE &quot;CONFIRM&quot; TO PROCEED:
               </p>
-              <input 
-                type="text" 
-                spellCheck="false" 
+              <input
+                type="text"
+                spellCheck="false"
                 value={deleteConfirm}
                 onChange={e => setDeleteConfirm(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-red-500 focus:ring-4 focus:ring-red-50 outline-none transition-all placeholder:text-gray-300 font-medium" 
-                placeholder="confirm" 
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm focus:border-red-500 focus:ring-4 focus:ring-red-50 outline-none transition-all placeholder:text-gray-300 font-medium"
+                placeholder="confirm"
               />
             </div>
           </div>
-          <button 
-            type="button" 
+          <button
+            type="button"
             disabled={deleteConfirm !== "confirm"}
-            className={`w-full py-5 text-sm font-bold text-white transition-all ${
-              deleteConfirm === "confirm" 
-              ? "bg-red-500 hover:bg-red-600" 
-              : "bg-red-300 cursor-not-allowed"
-            }`}
+            className={`w-full py-5 text-sm font-bold text-white transition-all ${deleteConfirm === "confirm"
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-red-300 cursor-not-allowed"
+              }`}
           >
             Delete Account Permanently
           </button>
@@ -552,10 +668,10 @@ export function ProfileSettings() {
   const [activeTab, setActiveTab] = useState("general");
 
   const tabs = [
-    { id: "general",       label: t("dashboard.profile.general"),       icon: User },
-    { id: "account",       label: t("dashboard.profile.account"),       icon: Mail },
+    { id: "general", label: t("dashboard.profile.general"), icon: User },
+    { id: "account", label: t("dashboard.profile.account"), icon: Mail },
     { id: "notifications", label: t("dashboard.profile.notifications"), icon: Bell },
-    { id: "billing",       label: t("dashboard.profile.billing"),       icon: CreditCard },
+    { id: "billing", label: t("dashboard.profile.billing"), icon: CreditCard },
   ];
 
   const handleCancel = () => {
@@ -594,11 +710,10 @@ export function ProfileSettings() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2.5 py-5 px-1 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${
-                  activeTab === tab.id
+                className={`flex items-center gap-2.5 py-5 px-1 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === tab.id
                     ? "border-indigo-600 text-indigo-600"
                     : "border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300"
-                }`}
+                  }`}
               >
                 <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? "text-indigo-600" : "text-gray-400"}`} />
                 {tab.label}
@@ -609,10 +724,10 @@ export function ProfileSettings() {
 
         {/* Tab body */}
         <div className="p-6 sm:p-8 min-h-[500px] animate-in fade-in duration-300">
-          {activeTab === "general"       && <GeneralTab onCancel={handleCancel} />}
-          {activeTab === "account"       && <AccountTab />}
+          {activeTab === "general" && <GeneralTab onCancel={handleCancel} />}
+          {activeTab === "account" && <AccountTab />}
           {activeTab === "notifications" && <NotificationsTab />}
-          {activeTab === "billing"       && <BillingTab />}
+          {activeTab === "billing" && <BillingTab />}
         </div>
       </div>
     </div>
