@@ -22,13 +22,30 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { createClient } from "@/lib/supabase/client";
 
+import { useSearch } from "@/lib/search-context";
+
 export function TopBar() {
   const { userProfile, loading } = useUserProfileContext();
+  const { searchQuery, setSearchQuery } = useSearch();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t, i18n } = useTranslation();
+  
+  // Keyboard shortcut Cmd+K or Ctrl+K to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
@@ -118,9 +135,12 @@ export function TopBar() {
             <Search className="h-4 w-4" />
           </span>
           <input
+            ref={searchInputRef}
             type="text"
             className="block w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-10 pr-3 text-sm placeholder-gray-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
-            placeholder="Search anything..."
+            placeholder={t("common.search_anything") || "Search anything..."}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <div className="absolute inset-y-0 right-0 flex items-center pr-3">
             <kbd className="hidden rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-gray-400 sm:inline-block">

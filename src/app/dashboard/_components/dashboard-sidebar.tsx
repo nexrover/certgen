@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   FiFileText,
   FiMail,
@@ -20,6 +20,8 @@ import { FaCrown } from "react-icons/fa6";
 import { HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useTranslation } from "react-i18next";
 
+import { useSearch } from "@/lib/search-context";
+
 interface DashboardSidebarProps {
   userEmail: string | undefined;
 }
@@ -27,16 +29,59 @@ interface DashboardSidebarProps {
 export function DashboardSidebar({}: DashboardSidebarProps) {
   const searchParams = useSearchParams();
   const { t } = useTranslation();
+  const { searchQuery } = useSearch();
   const activeView = searchParams.get("view") ?? "dashboard";
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(true);
-
-  const navItems = [
+  // Define structured menu items
+  const menuItems = [
     { label: t("sidebar.dashboard"), view: "dashboard", icon: HiOutlineSquares2X2 },
+    { 
+      label: t("sidebar.templates"), 
+      view: "templates-group", 
+      icon: FiLayout,
+      children: [
+        { label: t("sidebar.certificate"), view: "templates", icon: FiFileText },
+        { label: t("sidebar.email"), view: "emails", icon: FiMail },
+      ]
+    },
     { label: t("sidebar.recipients"), view: "csvs", icon: FiUsers },
     { label: t("sidebar.analysis"), view: "analysis", icon: FiBarChart2 },
     { label: t("sidebar.tutorial"), view: "tutorial", icon: FiBookOpen },
     { label: t("sidebar.setting"), view: "settings", icon: FiSettings },
-  ] as const;
+  ];
+
+  // Filtering Logic
+  const query = searchQuery.toLowerCase().trim();
+  
+  const filteredItems = menuItems.filter(item => {
+    // If no query, show everything
+    if (!query) return true;
+
+    // Check if main item matches
+    const mainMatches = item.label.toLowerCase().includes(query);
+    
+    // Check if any children match
+    const childMatches = item.children?.some(child => 
+      child.label.toLowerCase().includes(query)
+    );
+
+    return mainMatches || childMatches;
+  });
+
+  // Highlight function
+  const highlightMatch = (text: string) => {
+    if (!query) return text;
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return (
+      <span>
+        {parts.map((part, i) => 
+          part.toLowerCase() === query 
+            ? <span key={i} className="bg-yellow-100 text-yellow-800 rounded px-0.5">{part}</span> 
+            : part
+        )}
+      </span>
+    );
+  };
 
   return (
     <aside className="flex h-screen w-64 flex-col border-r border-gray-100 bg-white shadow-sm overflow-y-auto no-scrollbar">
@@ -46,19 +91,6 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
           <FiFileText className="h-6 w-6" />
         </div>
         <span className="text-xl font-bold tracking-tight text-gray-900">CertGen</span>
-      </div>
-
-      {/* Menu Search */}
-      <div className="px-4 mb-4 flex-shrink-0">
-        <div className="relative">
-          <FiSearch className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder={t("common.search_menu")}
-            className="w-full rounded-lg bg-gray-50 py-2 pl-9 pr-3 text-xs border-none focus:ring-1 focus:ring-indigo-100 transition-all"
-          />
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-300">⌘F</kbd>
-        </div>
       </div>
 
       {/* Action Button */}
@@ -76,75 +108,85 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
       <div className="flex-1 px-3 overflow-y-auto no-scrollbar">
         <p className="px-4 mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">{t("common.main_menu")}</p>
         <nav className="space-y-1">
-          {/* Dashboard Item */}
-          <Link
-            href="/dashboard?view=dashboard"
-            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${activeView === "dashboard"
-                ? "bg-indigo-50/80 text-indigo-700 shadow-sm"
-                : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-              }`}
-          >
-            <HiOutlineSquares2X2 className={`h-5 w-5 ${activeView === "dashboard" ? "text-indigo-600" : "text-gray-400"}`} />
-            {t("sidebar.dashboard")}
-          </Link>
+          {filteredItems.length > 0 ? (
+            filteredItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeView === item.view;
 
-          {/* Collapsible Templates Item */}
-          <div>
-            <button
-              onClick={() => setIsTemplatesOpen(!isTemplatesOpen)}
-              className={`flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all text-gray-500 hover:bg-gray-50 hover:text-gray-900`}
-            >
-              <div className="flex items-center gap-3">
-                <FiLayout className="h-5 w-5 text-gray-400" />
-                <span>{t("sidebar.templates")}</span>
-              </div>
-              {isTemplatesOpen ? <FiChevronDown className="h-4 w-4" /> : <FiChevronRight className="h-4 w-4" />}
-            </button>
+              // If it has children (like Templates)
+              if (item.children) {
+                // If searching, keep the group open if a child matches
+                const hasMatchingChild = query && item.children.some(c => c.label.toLowerCase().includes(query));
+                const shouldBeOpen = isTemplatesOpen || hasMatchingChild;
 
-            {isTemplatesOpen && (
-              <div className="mt-1 ml-4 space-y-1 border-l-2 border-gray-50 pl-2">
+                return (
+                  <div key={item.view}>
+                    <button
+                      onClick={() => setIsTemplatesOpen(!isTemplatesOpen)}
+                      className={`flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all text-gray-500 hover:bg-gray-50 hover:text-gray-900 ${
+                        item.label.toLowerCase().includes(query) ? "bg-indigo-50/30" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="h-5 w-5 text-gray-400" />
+                        <span>{highlightMatch(item.label)}</span>
+                      </div>
+                      {shouldBeOpen ? <FiChevronDown className="h-4 w-4" /> : <FiChevronRight className="h-4 w-4" />}
+                    </button>
+
+                    {shouldBeOpen && (
+                      <div className="mt-1 ml-4 space-y-1 border-l-2 border-gray-50 pl-2">
+                        {item.children
+                          .filter(child => !query || child.label.toLowerCase().includes(query) || item.label.toLowerCase().includes(query))
+                          .map((child) => {
+                            const ChildIcon = child.icon;
+                            const isChildActive = activeView === child.view;
+                            return (
+                              <Link
+                                key={child.view}
+                                href={`/dashboard?view=${child.view}`}
+                                className={`flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                                  isChildActive
+                                    ? "bg-indigo-50/60 text-indigo-700"
+                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                }`}
+                              >
+                                <ChildIcon className="h-4 w-4" />
+                                {highlightMatch(child.label)}
+                              </Link>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              // Simple Item
+              return (
                 <Link
-                  href="/dashboard?view=templates"
-                  className={`flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition-all ${activeView === "templates"
-                      ? "bg-indigo-50/60 text-indigo-700"
+                  key={item.view}
+                  href={`/dashboard?view=${item.view}`}
+                  className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                    isActive
+                      ? "bg-indigo-50/80 text-indigo-700 shadow-sm"
                       : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                    }`}
+                  } ${query && item.label.toLowerCase().includes(query) ? "ring-1 ring-indigo-100" : ""}`}
                 >
-                  <FiFileText className="h-4 w-4" />
-                  {t("sidebar.certificate")}
+                  <Icon className={`h-5 w-5 ${isActive ? "text-indigo-600" : "text-gray-400"}`} />
+                  {highlightMatch(item.label)}
                 </Link>
-                <Link
-                  href="/dashboard?view=emails"
-                  className={`flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition-all ${activeView === "emails"
-                      ? "bg-indigo-50/60 text-indigo-700"
-                      : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                    }`}
-                >
-                  <FiMail className="h-4 w-4" />
-                  {t("sidebar.email")}
-                </Link>
+              );
+            })
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+              <div className="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
+                <FiSearch className="h-6 w-6 text-gray-300" />
               </div>
-            )}
-          </div>
-
-          {/* Other Items */}
-          {navItems.filter(i => i.view !== 'dashboard').map((item) => {
-            const isActive = activeView === item.view;
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.view}
-                href={`/dashboard?view=${item.view}`}
-                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${isActive
-                    ? "bg-indigo-50/80 text-indigo-700 shadow-sm"
-                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-              >
-                <Icon className={`h-5 w-5 ${isActive ? "text-indigo-600" : "text-gray-400"}`} />
-                {item.label}
-              </Link>
-            );
-          })}
+              <p className="text-sm font-medium text-gray-900">{t("common.no_results_found") || "No results found"}</p>
+              <p className="text-xs text-gray-500 mt-1">Try searching for something else</p>
+            </div>
+          )}
         </nav>
       </div>
 

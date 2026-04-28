@@ -26,8 +26,8 @@ type SortKey = "newest" | "oldest" | "a-z" | "z-a";
 const getSortOptions = (t: any) => [
   { value: "newest", label: t("common.sort_newest", "Newest First") },
   { value: "oldest", label: t("common.sort_oldest", "Oldest First") },
-  { value: "a-z",    label: "A → Z" },
-  { value: "z-a",    label: "Z → A" },
+  { value: "a-z", label: "A → Z" },
+  { value: "z-a", label: "Z → A" },
 ];
 
 /* ─────────────────────── sub-components ───────────────────── */
