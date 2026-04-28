@@ -135,6 +135,38 @@ function UnsavedChangesModal({ onConfirm, onCancel }: UnsavedChangesModalProps) 
   );
 }
 
+function Toast({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[110] animate-in fade-in slide-in-from-top-4 duration-300">
+      <div
+        className={`flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl border bg-white ${
+          type === "success" ? "border-green-100" : "border-red-100"
+        }`}
+      >
+        <div
+          className={`h-11 w-11 rounded-xl flex items-center justify-center ${
+            type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
+          }`}
+        >
+          {type === "success" ? <Check className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
+        </div>
+        <div className="flex flex-col pr-4">
+          <p className="text-[15px] font-bold text-gray-900">{message}</p>
+          <p className="text-xs text-gray-500 font-medium">Your profile has been updated successfully.</p>
+        </div>
+        <button onClick={onClose} className="p-2 hover:bg-gray-50 rounded-xl transition-all active:scale-90">
+          <X className="h-4 w-4 text-gray-400" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ─── helpers ─────────────────────────────────────────── */
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse rounded-lg bg-gray-100 ${className}`} />;
@@ -218,7 +250,7 @@ function GeneralTab({ onCancel, onDirtyChange, saveRef }: {
   };
 
   const handleSave = async () => {
-    setIsSaving(true); setError(null); setSuccess(false);
+    setIsSaving(true); setError(null);
     try {
       let finalAvatarUrl = avatarUrl;
 
@@ -250,8 +282,6 @@ function GeneralTab({ onCancel, onDirtyChange, saveRef }: {
       setAvatarUrl(finalAvatarUrl);
       setAvatarFile(null);
       setPreviewUrl(null);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Something went wrong");
       throw e; // Re-throw for parent to catch if needed
@@ -276,12 +306,6 @@ function GeneralTab({ onCancel, onDirtyChange, saveRef }: {
         <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
-          <Save className="h-4 w-4 shrink-0" />
-          Profile saved successfully!
         </div>
       )}
 
@@ -1080,7 +1104,8 @@ export function ProfileSettings() {
   const [activeTab, setActiveTab] = useState("general");
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [pendingTarget, setPendingTarget] = useState<{ type: 'tab' | 'route', value: string } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [pendingTarget, setPendingTarget] = useState<{ type: "tab" | "route"; value: string } | null>(null);
   const saveRef = useRef<() => Promise<void>>(null);
 
   // 1. Browser Refresh/Close Guard
@@ -1153,8 +1178,9 @@ export function ProfileSettings() {
       try {
         await saveRef.current();
         setIsDirty(false);
+        setToast({ message: "Changes saved successfully!", type: "success" });
       } catch (err) {
-        console.error("Save failed", err);
+        setToast({ message: err instanceof Error ? err.message : "Save failed", type: "error" });
       } finally {
         setIsSaving(false);
       }
@@ -1252,12 +1278,10 @@ export function ProfileSettings() {
       </div>
 
       {/* Exit confirmation modal */}
-      {pendingTarget && (
-        <UnsavedChangesModal 
-          onConfirm={confirmExit} 
-          onCancel={cancelExit} 
-        />
-      )}
+      {pendingTarget && <UnsavedChangesModal onConfirm={confirmExit} onCancel={cancelExit} />}
+
+      {/* Floating Toast */}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 }
