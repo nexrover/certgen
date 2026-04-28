@@ -97,6 +97,43 @@ function CropperModal({ image, onCropComplete, onCancel }: CropperModalProps) {
   );
 }
 
+/* ─── Unsaved Changes Modal ──────────────────────────── */
+interface UnsavedChangesModalProps {
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function UnsavedChangesModal({ onConfirm, onCancel }: UnsavedChangesModalProps) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-8 text-center space-y-6">
+        <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
+          <AlertCircle className="w-8 h-8 text-amber-600" />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-gray-900">Unsaved Changes</h3>
+          <p className="text-sm text-gray-500 mt-2">
+            You have unsaved changes. Do you want to discard them and leave?
+          </p>
+        </div>
+        <div className="flex gap-3 pt-4">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all"
+          >
+            Stay Here
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-3 px-4 rounded-xl bg-amber-600 text-sm font-bold text-white hover:bg-amber-700 shadow-lg shadow-amber-100 transition-all"
+          >
+            Discard & Leave
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ─── helpers ─────────────────────────────────────────── */
 function Skeleton({ className }: { className?: string }) {
@@ -104,7 +141,11 @@ function Skeleton({ className }: { className?: string }) {
 }
 
 /* ─── General Tab ────────────────────────────────────── */
-function GeneralTab({ onCancel }: { onCancel: () => void }) {
+function GeneralTab({ onCancel, onDirtyChange, saveRef }: { 
+  onCancel: () => void, 
+  onDirtyChange: (isDirty: boolean) => void,
+  saveRef?: React.RefObject<(() => Promise<void>) | null>
+}) {
   const { userProfile, updateProfile } = useUserProfileContext();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -129,6 +170,19 @@ function GeneralTab({ onCancel }: { onCancel: () => void }) {
       setAvatarUrl(userProfile.avatarUrl || null);
     }
   }, [userProfile]);
+
+  // Track dirty state
+  useEffect(() => {
+    if (!userProfile) return;
+    const hasChanges = 
+      firstName !== (userProfile.firstName || "") ||
+      lastName !== (userProfile.lastName || "") ||
+      phone !== (userProfile.phone || "") ||
+      !!avatarFile ||
+      (avatarUrl !== (userProfile.avatarUrl || null));
+    
+    onDirtyChange(hasChanges);
+  }, [firstName, lastName, phone, avatarFile, avatarUrl, userProfile, onDirtyChange]);
 
   const displayAvatar = previewUrl || avatarUrl;
   const isBlob = !!previewUrl;
@@ -200,10 +254,21 @@ function GeneralTab({ onCancel }: { onCancel: () => void }) {
       setTimeout(() => setSuccess(false), 3000);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Something went wrong");
+      throw e; // Re-throw for parent to catch if needed
     } finally {
       setIsSaving(false);
     }
   };
+
+  // Expose save method to parent
+  useEffect(() => {
+    if (saveRef) {
+      (saveRef as any).current = handleSave;
+    }
+    return () => {
+      if (saveRef) (saveRef as any).current = null;
+    };
+  }, [handleSave, saveRef]);
 
   return (
     <div className="space-y-8">
@@ -359,7 +424,7 @@ function GeneralTab({ onCancel }: { onCancel: () => void }) {
 }
 
 /* ─── Stub tabs ───────────────────────────────────────── */
-function AccountTab() {
+function AccountTab({ onDirtyChange }: { onDirtyChange: (isDirty: boolean) => void }) {
   const { userProfile, updateProfile } = useUserProfileContext();
 
   const [passwordStep, setPasswordStep] = useState(0);
@@ -377,6 +442,12 @@ function AccountTab() {
   const [isChanging, setIsChanging] = useState(false);
   const [changeError, setChangeError] = useState("");
   const [changeSuccess, setChangeSuccess] = useState(false);
+
+  // Track dirty state for Account tab
+  useEffect(() => {
+    const isDirty = !!currentPwd || !!newPwd || !!confirmPwd || !!twoFaContact && twoFaContact !== (userProfile?.twoFactorContact || "");
+    onDirtyChange(isDirty);
+  }, [currentPwd, newPwd, confirmPwd, twoFaContact, userProfile, onDirtyChange]);
 
   // 2FA states
   const [twoFaStep, setTwoFaStep] = useState<0 | 1 | 2>(0); // 0: Idle, 1: Enter Contact, 2: Enter OTP
@@ -1007,6 +1078,88 @@ function BillingTab() {
 export function ProfileSettings() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("general");
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [pendingTarget, setPendingTarget] = useState<{ type: 'tab' | 'route', value: string } | null>(null);
+  const saveRef = useRef<() => Promise<void>>(null);
+
+  // 1. Browser Refresh/Close Guard
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = ""; // Standard way to show default browser alert
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
+  // 2. Client-side Navigation Guard (Internal Links & Search Params)
+  useEffect(() => {
+    const handleAnchorClick = (e: MouseEvent) => {
+      if (!isDirty) return;
+      
+      const target = e.target as HTMLElement;
+      const anchor = target.closest("a");
+      
+      if (anchor && anchor.href && anchor.host === window.location.host) {
+        const targetUrl = new URL(anchor.href);
+        const currentUrl = new URL(window.location.href);
+        
+        // Intercept if it's a different internal route or different query parameters
+        if (targetUrl.pathname !== currentUrl.pathname || targetUrl.search !== currentUrl.search) {
+          e.preventDefault();
+          setPendingTarget({ type: 'route', value: anchor.href });
+        }
+      }
+    };
+
+    window.addEventListener("click", handleAnchorClick, true);
+    return () => window.removeEventListener("click", handleAnchorClick, true);
+  }, [isDirty]);
+
+  const handleTabChange = (tabId: string) => {
+    if (tabId === activeTab) return;
+    if (isDirty) {
+      setPendingTarget({ type: 'tab', value: tabId });
+    } else {
+      setActiveTab(tabId);
+    }
+  };
+
+  const confirmExit = () => {
+    if (!pendingTarget) return;
+    
+    setIsDirty(false); // Clear dirty state to allow navigation
+    
+    if (pendingTarget.type === 'tab') {
+      setActiveTab(pendingTarget.value);
+    } else if (pendingTarget.value === 'back') {
+      window.history.back();
+    } else {
+      window.location.href = pendingTarget.value;
+    }
+    setPendingTarget(null);
+  };
+
+  const cancelExit = () => {
+    setPendingTarget(null);
+  };
+
+  const handleSave = async () => {
+    if (saveRef.current) {
+      setIsSaving(true);
+      try {
+        await saveRef.current();
+        setIsDirty(false);
+      } catch (err) {
+        console.error("Save failed", err);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
 
   const tabs = [
     { id: "general", label: t("dashboard.profile.general"), icon: User },
@@ -1016,7 +1169,11 @@ export function ProfileSettings() {
   ];
 
   const handleCancel = () => {
-    window.history.back();
+    if (isDirty) {
+      setPendingTarget({ type: 'route', value: 'back' });
+    } else {
+      window.history.back();
+    }
   };
 
   return (
@@ -1035,9 +1192,25 @@ export function ProfileSettings() {
             Cancel
           </button>
           <button
-            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-8 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all hover:-translate-y-0.5 active:translate-y-0"
+            onClick={handleSave}
+            disabled={!isDirty || isSaving}
+            className={`flex items-center gap-2 rounded-xl px-8 py-2.5 text-sm font-bold text-white transition-all shadow-lg ${
+              isDirty && !isSaving
+                ? "bg-indigo-600 shadow-indigo-100 hover:bg-indigo-700 hover:-translate-y-0.5 active:translate-y-0" 
+                : "bg-gray-300 cursor-not-allowed shadow-none"
+            }`}
           >
-            Save
+            {isSaving ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                {t("dashboard.profile.save_changes") || "Save Changes"}
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -1050,7 +1223,7 @@ export function ProfileSettings() {
             {tabs.map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center gap-2.5 py-5 px-1 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === tab.id
                     ? "border-indigo-600 text-indigo-600"
                     : "border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300"
@@ -1065,12 +1238,26 @@ export function ProfileSettings() {
 
         {/* Tab body */}
         <div className="p-6 sm:p-8 min-h-[500px] animate-in fade-in duration-300">
-          {activeTab === "general" && <GeneralTab onCancel={handleCancel} />}
-          {activeTab === "account" && <AccountTab />}
+          {activeTab === "general" && (
+            <GeneralTab 
+              onCancel={handleCancel} 
+              onDirtyChange={setIsDirty} 
+              saveRef={saveRef} 
+            />
+          )}
+          {activeTab === "account" && <AccountTab onDirtyChange={setIsDirty} />}
           {activeTab === "notifications" && <NotificationsTab />}
           {activeTab === "billing" && <BillingTab />}
         </div>
       </div>
+
+      {/* Exit confirmation modal */}
+      {pendingTarget && (
+        <UnsavedChangesModal 
+          onConfirm={confirmExit} 
+          onCancel={cancelExit} 
+        />
+      )}
     </div>
   );
 }
