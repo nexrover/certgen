@@ -1,14 +1,11 @@
 "use client";
 
 import { FormEvent, useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslation } from "react-i18next";
+import { useSearchParams } from "next/navigation";
 import { Shield } from "lucide-react";
 
 function Verify2FaContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const { t } = useTranslation();
 
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -44,8 +41,8 @@ function Verify2FaContent() {
         const data = await res.json();
         throw new Error(data.error || "Failed to resend");
       }
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Resend failed");
     }
   };
 
@@ -67,8 +64,8 @@ function Verify2FaContent() {
       }
 
       window.location.href = nextPath;
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Verification failed");
     } finally {
       setIsSubmitting(false);
     }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { validateSignupPassword } from "@/lib/auth/password-policy";
+
 import { PasswordInput } from "@/components/ui/password-input";
 import { useTranslation } from "react-i18next";
 import { PasswordStrength } from "@/components/auth/password-strength";

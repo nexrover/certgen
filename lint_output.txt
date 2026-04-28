@@ -1,0 +1,28 @@
+
+> cerficate-gen@0.1.0 lint /home/rahat/Nexrover/certgen
+> eslint
+
+
+/home/rahat/Nexrover/certgen/src/app/api/auth/2fa/send/route.ts
+  47:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/rahat/Nexrover/certgen/src/app/api/auth/2fa/verify/route.ts
+   20:23  error    Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+   85:21  warning  'sessionData' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  100:12  warning  'err' is defined but never used                   @typescript-eslint/no-unused-vars
+
+/home/rahat/Nexrover/certgen/src/app/api/auth/delete-account/route.ts
+  5:30  warning  'req' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/rahat/Nexrover/certgen/src/app/dashboard/_components/profile-settings.tsx
+  186:10  warning  'isSaving' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  517:14  warning  'err' is defined but never used                @typescript-eslint/no-unused-vars
+  555:14  warning  'err' is defined but never used                @typescript-eslint/no-unused-vars
+
+/home/rahat/Nexrover/certgen/src/app/verify-2fa/page.tsx
+  4:10  warning  'useRouter' is defined but never used       @typescript-eslint/no-unused-vars
+  5:10  warning  'useTranslation' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 10 problems (2 errors, 8 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

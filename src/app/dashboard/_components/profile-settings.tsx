@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import Image from "next/image";
 import { User, Mail, CreditCard, Bell, Shield, Save, AlertCircle, Phone, Upload, Download, Zap, Camera, X, ZoomIn, ZoomOut, Eye, EyeOff, Lock, Check } from "lucide-react";
@@ -19,12 +19,12 @@ interface CropperModalProps {
 function CropperModal({ image, onCropComplete, onCancel }: CropperModalProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 
   const onCropChange = (crop: { x: number; y: number }) => setCrop(crop);
   const onZoomChange = (zoom: number) => setZoom(zoom);
 
-  const onCropCompleteInternal = (_: any, croppedAreaPixels: any) => {
+  const onCropCompleteInternal = (_: unknown, croppedAreaPixels: { x: number; y: number; width: number; height: number }) => {
     setCroppedAreaPixels(croppedAreaPixels);
   };
 
@@ -167,15 +167,11 @@ function Toast({ message, type, onClose }: { message: string; type: "success" | 
   );
 }
 
-/* ─── helpers ─────────────────────────────────────────── */
-function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-gray-100 ${className}`} />;
-}
+
 
 /* ─── General Tab ────────────────────────────────────── */
-function GeneralTab({ onCancel, onDirtyChange, saveRef }: { 
-  onCancel: () => void, 
-  onDirtyChange: (isDirty: boolean) => void,
+function GeneralTab({ onDirtyChange, saveRef }: { 
+  onDirtyChange: (isDirty: boolean) => void, 
   saveRef?: React.RefObject<(() => Promise<void>) | null>
 }) {
   const { userProfile, updateProfile } = useUserProfileContext();
@@ -187,9 +183,7 @@ function GeneralTab({ onCancel, onDirtyChange, saveRef }: {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill from context
@@ -249,8 +243,8 @@ function GeneralTab({ onCancel, onDirtyChange, saveRef }: {
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const handleSave = async () => {
-    setIsSaving(true); setError(null);
+  const handleSave = useCallback(async () => {
+    setError(null);
     try {
       let finalAvatarUrl = avatarUrl;
 
@@ -285,18 +279,16 @@ function GeneralTab({ onCancel, onDirtyChange, saveRef }: {
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Something went wrong");
       throw e; // Re-throw for parent to catch if needed
-    } finally {
-      setIsSaving(false);
     }
-  };
+  }, [avatarFile, avatarUrl, firstName, lastName, phone, updateProfile]);
 
   // Expose save method to parent
   useEffect(() => {
     if (saveRef) {
-      (saveRef as any).current = handleSave;
+      (saveRef as React.MutableRefObject<(() => Promise<void>) | null>).current = handleSave;
     }
     return () => {
-      if (saveRef) (saveRef as any).current = null;
+      if (saveRef) (saveRef as React.MutableRefObject<(() => Promise<void>) | null>).current = null;
     };
   }, [handleSave, saveRef]);
 
@@ -318,7 +310,7 @@ function GeneralTab({ onCancel, onDirtyChange, saveRef }: {
             <div className="h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow-lg bg-indigo-50 flex items-center justify-center relative">
               {displayAvatar ? (
                 isBlob ? (
-                  <img src={displayAvatar} alt="Profile" className="h-full w-full object-cover" />
+                  <Image src={displayAvatar} alt="Profile" width={128} height={128} className="h-full w-full object-cover" unoptimized />
                 ) : (
                   <Image src={displayAvatar} alt="Profile" fill className="object-cover" unoptimized />
                 )
@@ -519,7 +511,7 @@ function AccountTab({ onDirtyChange }: { onDirtyChange: (isDirty: boolean) => vo
       } else {
         setIsVerified(true);
       }
-    } catch (err) {
+    } catch {
       setVerifyError("Something went wrong");
     } finally {
       setIsVerifying(false);
@@ -557,7 +549,7 @@ function AccountTab({ onDirtyChange }: { onDirtyChange: (isDirty: boolean) => vo
           setConfirmPwd("");
         }, 3000);
       }
-    } catch (err) {
+    } catch {
       setChangeError("Something went wrong");
     } finally {
       setIsChanging(false);
@@ -807,8 +799,8 @@ function AccountTab({ onDirtyChange }: { onDirtyChange: (isDirty: boolean) => vo
                       });
                       if (!res.ok) throw new Error("Failed to send OTP");
                       setTwoFaStep(2);
-                    } catch(e: any) {
-                      setTwoFaError(e.message);
+                    } catch(e: unknown) {
+                      setTwoFaError(e instanceof Error ? e.message : "Failed to send OTP");
                     } finally {
                       setTwoFaLoading(false);
                     }
@@ -861,8 +853,8 @@ function AccountTab({ onDirtyChange }: { onDirtyChange: (isDirty: boolean) => vo
                       setTwoFaCode("");
                       setTwoFaSuccessMsg(`2FA successfully ${is2FAEnabled ? "disabled" : "enabled"}!`);
                       setTimeout(() => setTwoFaSuccessMsg(""), 3000);
-                    } catch(e: any) {
-                      setTwoFaError(e.message);
+                    } catch(e: unknown) {
+                      setTwoFaError(e instanceof Error ? e.message : "Verification failed");
                     } finally {
                       setTwoFaLoading(false);
                     }
@@ -890,8 +882,8 @@ function AccountTab({ onDirtyChange }: { onDirtyChange: (isDirty: boolean) => vo
                         });
                         const data = await res.json();
                         if (!res.ok) throw new Error(data.error || "Failed to resend");
-                      } catch(e: any) {
-                        setTwoFaError(e.message);
+                      } catch(e: unknown) {
+                        setTwoFaError(e instanceof Error ? e.message : "Resend failed");
                       }
                     }}
                     className="font-bold text-indigo-600 hover:text-indigo-800 transition-colors"

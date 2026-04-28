@@ -17,7 +17,13 @@ export async function POST(request: Request) {
     
     let userId: string | undefined;
     let targetContact = body.contact;
-    let tokenPayload: any = null;
+    let tokenPayload: { 
+      user_id: string; 
+      contact: string; 
+      access_token: string; 
+      refresh_token: string; 
+      remember_me: boolean 
+    } | null = null;
 
     if (body.purpose === "login") {
       const cookieStore = await cookies();
@@ -82,7 +88,7 @@ export async function POST(request: Request) {
       const { createRouteHandlerClient } = await import("@/lib/supabase/route-handler");
       const supabaseRouteClient = await createRouteHandlerClient(tokenPayload.remember_me);
       
-      const { data: sessionData, error: sessionError } = await supabaseRouteClient.auth.setSession({
+      const { error: sessionError } = await supabaseRouteClient.auth.setSession({
         access_token: tokenPayload.access_token,
         refresh_token: tokenPayload.refresh_token,
       });
@@ -97,7 +103,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

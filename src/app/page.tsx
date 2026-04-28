@@ -16,8 +16,10 @@ export default function HomePage() {
     
     const searchParams = new URLSearchParams(window.location.search);
     if (searchParams.get('deleted') === 'true') {
-      setToastMessage("Your account has been successfully deleted.");
-      window.history.replaceState({}, document.title, window.location.pathname);
+      setTimeout(() => {
+        setToastMessage("Your account has been successfully deleted.");
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }, 0);
       setTimeout(() => setToastMessage(null), 5000);
     }
 
