@@ -459,12 +459,6 @@ function AccountTab({ onDirtyChange }: { onDirtyChange: (isDirty: boolean) => vo
   const [changeError, setChangeError] = useState("");
   const [changeSuccess, setChangeSuccess] = useState(false);
 
-  // Track dirty state for Account tab
-  useEffect(() => {
-    const isDirty = !!currentPwd || !!newPwd || !!confirmPwd || !!twoFaContact && twoFaContact !== (userProfile?.twoFactorContact || "");
-    onDirtyChange(isDirty);
-  }, [currentPwd, newPwd, confirmPwd, twoFaContact, userProfile, onDirtyChange]);
-
   // 2FA states
   const [twoFaStep, setTwoFaStep] = useState<0 | 1 | 2>(0); // 0: Idle, 1: Enter Contact, 2: Enter OTP
   const [twoFaContact, setTwoFaContact] = useState(userProfile?.twoFactorContact || "");
@@ -473,6 +467,12 @@ function AccountTab({ onDirtyChange }: { onDirtyChange: (isDirty: boolean) => vo
   const [twoFaError, setTwoFaError] = useState("");
   const [twoFaTimeLeft, setTwoFaTimeLeft] = useState(300);
   const [twoFaSuccessMsg, setTwoFaSuccessMsg] = useState("");
+
+  // Track dirty state for Account tab
+  useEffect(() => {
+    const isDirty = !!currentPwd || !!newPwd || !!confirmPwd || !!twoFaContact && twoFaContact !== (userProfile?.twoFactorContact || "");
+    onDirtyChange(isDirty);
+  }, [currentPwd, newPwd, confirmPwd, twoFaContact, userProfile, onDirtyChange]);
   
   const is2FAEnabled = userProfile?.is2FaEnabled || false;
 
