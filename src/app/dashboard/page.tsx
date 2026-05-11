@@ -9,7 +9,6 @@ import { RecipientManagement } from "@/app/dashboard/_components/recipient-manag
 import { ProfileSettings } from "@/app/dashboard/_components/profile-settings";
 import { WelcomeHeader } from "@/app/dashboard/_components/welcome-header";
 import { redirect } from "next/navigation";
-import { FiMail } from "react-icons/fi";
 
 export default async function DashboardPage({
   searchParams,
@@ -38,7 +37,30 @@ export default async function DashboardPage({
   if (view === "emails") {
     return (
       <ComingSoon
-        icon={FiMail}
+        view="emails"
+      />
+    );
+  }
+
+  const comingSoonViews = [
+    { view: "youtube-thumbnail", title: "YouTube Thumbnail" },
+    { view: "ecommerce", title: "E-commerce Marketing" },
+    { view: "real-estate", title: "Real Estate Marketing" },
+    { view: "shipping-label", title: "Shipping Label" },
+    { view: "resume", title: "Resume" },
+    { view: "open-graph", title: "Open Graph" },
+    { view: "christmas-card", title: "Christmas Card" },
+    { view: "social-media", title: "Social Media" },
+    { view: "receipt", title: "Receipt" },
+    { view: "invoice", title: "Invoice" },
+  ];
+
+  const matchedView = comingSoonViews.find(v => v.view === view);
+  if (matchedView) {
+    return (
+      <ComingSoon
+        title={matchedView.title}
+        view={matchedView.view}
       />
     );
   }

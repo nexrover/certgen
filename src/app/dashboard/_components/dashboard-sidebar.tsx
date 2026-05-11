@@ -14,9 +14,15 @@ import {
   FiSearch,
   FiChevronRight,
   FiChevronDown,
-  FiLayout
+  FiLayout,
+  FiShoppingBag,
+  FiHome,
+  FiPackage,
+  FiShare2,
+  FiGift,
+  FiCreditCard
 } from "react-icons/fi";
-import { FaCrown } from "react-icons/fa6";
+import { FaCrown, FaYoutube, FaInstagram } from "react-icons/fa6";
 import { HiOutlineSquares2X2 } from "react-icons/hi2";
 import { useTranslation } from "react-i18next";
 
@@ -42,6 +48,16 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
       children: [
         { label: t("sidebar.certificate"), view: "templates", icon: FiFileText },
         { label: t("sidebar.email"), view: "emails", icon: FiMail },
+        { label: "YouTube Thumbnail", view: "youtube-thumbnail", icon: FaYoutube },
+        { label: "E-commerce Marketing", view: "ecommerce", icon: FiShoppingBag },
+        { label: "Real Estate Marketing", view: "real-estate", icon: FiHome },
+        { label: "Shipping Label", view: "shipping-label", icon: FiPackage },
+        { label: "Resume", view: "resume", icon: FiFileText },
+        { label: "Open Graph", view: "open-graph", icon: FiShare2 },
+        { label: "Christmas Card", view: "christmas-card", icon: FiGift },
+        { label: "Social Media", view: "social-media", icon: FaInstagram },
+        { label: "Receipt", view: "receipt", icon: FiCreditCard },
+        { label: "Invoice", view: "invoice", icon: FiFileText },
       ]
     },
     { label: t("sidebar.recipients"), view: "csvs", icon: FiUsers },
