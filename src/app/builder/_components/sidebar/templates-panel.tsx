@@ -408,7 +408,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
           </div>
         </button>
 
-        <div 
+        <div
           ref={filterScrollRef}
           className="flex items-center gap-1.5 overflow-x-auto no-scrollbar px-3 py-2.5"
           style={{ scrollbarWidth: "none" }}
@@ -460,14 +460,13 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             onClear={() => setSelectedColors([])}
             align="right"
           />
-          
+
           <button
             onClick={() => { setSelectedCategories([]); setSelectedStyles([]); setSelectedColors([]); }}
-            className={`shrink-0 flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-semibold transition-all ${
-              hasFilters 
-                ? "border-red-100 bg-red-50 text-red-600 hover:bg-red-100" 
+            className={`shrink-0 flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-semibold transition-all ${hasFilters
+                ? "border-red-100 bg-red-50 text-red-600 hover:bg-red-100"
                 : "border-gray-100 bg-gray-50 text-gray-400 opacity-60 cursor-default"
-            }`}
+              }`}
           >
             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
               <path d="M18 6 6 18M6 6l12 12" />
@@ -478,7 +477,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
           {/* Extra spacing for the fade mask/button */}
           <div className="shrink-0 w-6" />
         </div>
-        
+
         {/* Right Scroll Button */}
         <button
           onClick={scrollFilterRight}
@@ -683,15 +682,15 @@ function FilterChip<T extends string>({
       </button>
 
       {isOpen && coords && createPortal(
-        <div 
+        <div
           ref={dropdownRef}
           className="fixed z-[9999] w-48 rounded-xl border border-gray-200 bg-white py-1 shadow-2xl ring-1 ring-black/[0.05]"
           style={{
             top: `${coords.top + 6}px`,
-            left: align === "right" 
-              ? `${coords.left + coords.width - 192}px` 
-              : align === "center" 
-                ? `${coords.left + coords.width/2 - 96}px` 
+            left: align === "right"
+              ? `${coords.left + coords.width - 192}px`
+              : align === "center"
+                ? `${coords.left + coords.width / 2 - 96}px`
                 : `${coords.left}px`,
             animation: "dropdown-fade 0.15s ease-out",
           }}
@@ -720,11 +719,11 @@ function FilterChip<T extends string>({
             ))}
           </div>
           <div className="flex items-center justify-end border-t border-gray-100 px-3 py-2 bg-gray-50/50 rounded-b-xl">
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 onClear();
-              }} 
+              }}
               className="text-[10px] font-semibold text-gray-400 hover:text-red-500 transition-colors uppercase tracking-tight"
             >
               Clear Selection

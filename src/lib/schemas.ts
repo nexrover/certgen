@@ -37,6 +37,7 @@ export const SaveBuilderTemplateSchema = z.object({
   paperSize: z.enum(["A4", "A4_LANDSCAPE", "US_LETTER", "US_LETTER_LANDSCAPE"]),
   canvasJson: z.record(z.string(), z.unknown()),
   backgroundUrl: BackgroundUrlSchema.optional().nullable(),
+  category: z.string().min(1).max(50).optional(),
 });
 
 export const BulkGenerateSchema = z.object({

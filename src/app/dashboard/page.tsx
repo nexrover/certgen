@@ -3,12 +3,12 @@ import { StatsCards } from "@/app/dashboard/_components/stats-cards";
 import { CertificateChart } from "@/app/dashboard/_components/certificate-chart";
 import { RecentCertificates } from "@/app/dashboard/_components/recent-certificates";
 import { QuickActions } from "@/app/dashboard/_components/quick-actions";
-import { ComingSoon } from "@/app/dashboard/_components/coming-soon";
 import { TemplateManagement } from "@/app/dashboard/_components/template-management";
 import { RecipientManagement } from "@/app/dashboard/_components/recipient-management";
 import { ProfileSettings } from "@/app/dashboard/_components/profile-settings";
 import { WelcomeHeader } from "@/app/dashboard/_components/welcome-header";
 import { redirect } from "next/navigation";
+import { getCategoryByView, TEMPLATE_VIEW_SLUGS } from "@/lib/template-categories";
 
 export default async function DashboardPage({
   searchParams,
@@ -31,37 +31,6 @@ export default async function DashboardPage({
       <div className="min-h-[calc(100vh-10rem)]">
         <ProfileSettings />
       </div>
-    );
-  }
-
-  if (view === "emails") {
-    return (
-      <ComingSoon
-        view="emails"
-      />
-    );
-  }
-
-  const comingSoonViews = [
-    { view: "youtube-thumbnail", title: "YouTube Thumbnail" },
-    { view: "ecommerce", title: "E-commerce Marketing" },
-    { view: "real-estate", title: "Real Estate Marketing" },
-    { view: "shipping-label", title: "Shipping Label" },
-    { view: "resume", title: "Resume" },
-    { view: "open-graph", title: "Open Graph" },
-    { view: "christmas-card", title: "Christmas Card" },
-    { view: "social-media", title: "Social Media" },
-    { view: "receipt", title: "Receipt" },
-    { view: "invoice", title: "Invoice" },
-  ];
-
-  const matchedView = comingSoonViews.find(v => v.view === view);
-  if (matchedView) {
-    return (
-      <ComingSoon
-        title={matchedView.title}
-        view={matchedView.view}
-      />
     );
   }
 
@@ -91,21 +60,33 @@ export default async function DashboardPage({
     );
   }
 
-  if (view === "templates") {
+  /* ── Template category views ─────────────────────────────────
+   * All sidebar items under "Templates" (certificate, youtube-thumbnail,
+   * email, etc.) share the same TemplateManagement UI, filtered by
+   * the `category` column in certificate_templates.
+   * ─────────────────────────────────────────────────────────── */
+  const viewStr = typeof view === "string" ? view : "";
+  if (TEMPLATE_VIEW_SLUGS.includes(viewStr)) {
+    const categoryConfig = getCategoryByView(viewStr)!;
+
     const { data: templatesData } = await supabase
       .from("certificate_templates")
       .select("*")
       .eq("user_id", userId)
+      .eq("category", categoryConfig.category)
       .order("created_at", { ascending: false });
 
     return (
       <div className="space-y-8">
-        <TemplateManagement templates={templatesData || []} />
+        <TemplateManagement
+          templates={templatesData || []}
+          categoryConfig={categoryConfig}
+        />
       </div>
     );
   }
 
-  // Fetch real data
+  // Fetch real data for the main dashboard view
   const { data: certificates } = await supabase
     .from("certificates")
     .select("*")

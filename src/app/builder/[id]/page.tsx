@@ -19,5 +19,5 @@ export default async function EditBuilderPage({ params }: { params: Promise<{ id
   } catch {
     notFound();
   }
-  return <CertificateBuilder initialTemplate={template} />;
+  return <CertificateBuilder initialTemplate={template} category={template.category ?? "certificate"} />;
 }

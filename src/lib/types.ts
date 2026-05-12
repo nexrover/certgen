@@ -30,6 +30,7 @@ export interface CertificateTemplate {
   fields: TemplateField[];
   canvas_json: Record<string, unknown> | null;
   paper_size: PaperSize;
+  category: string;
   created_at: string;
   updated_at: string;
 }

@@ -42,6 +42,7 @@ export async function saveBuilderTemplate(
     paper_size: input.paperSize,
     canvas_json: input.canvasJson,
     background_url: input.backgroundUrl ?? null,
+    category: input.category ?? "certificate",
     fields: [],
   };
 

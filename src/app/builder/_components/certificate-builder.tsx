@@ -10,6 +10,7 @@ import { PreviewModal } from "./preview-modal";
 import type { CertificateTemplate, PaperSize } from "@/lib/types";
 import { PAPER_DIMENSIONS } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import { getCategoryBySlug } from "@/lib/template-categories";
 import {
   getCustomTemplates,
   saveCustomTemplate,
@@ -20,9 +21,11 @@ import {
 
 interface CertificateBuilderProps {
   initialTemplate?: CertificateTemplate;
+  /** Template category slug (e.g. "youtube", "email"). Defaults to "certificate". */
+  category?: string;
 }
 
-export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps) {
+export function CertificateBuilder({ initialTemplate, category = "certificate" }: CertificateBuilderProps) {
   const router = useRouter();
   const canvasRef = useRef<CanvasEditorHandle>(null);
   const [templateId, setTemplateId] = useState(initialTemplate?.id ?? null);
@@ -164,6 +167,7 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
         paperSize,
         canvasJson,
         backgroundUrl: thumbnailDataUrl,
+        category,
       };
 
       const url = templateId ? `/api/templates/${templateId}` : "/api/templates";
@@ -174,7 +178,10 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
       if (data.success && data.data?.id) {
         setTemplateId(data.data.id);
         setDirty(false);
-        router.push("/dashboard?view=templates");
+        // Navigate back to the correct category view on the dashboard
+        const catConfig = getCategoryBySlug(category);
+        const dashboardView = catConfig?.view ?? "templates";
+        router.push(`/dashboard?view=${dashboardView}`);
       } else {
         alert(data.error || "Failed to save template.");
       }
@@ -184,7 +191,7 @@ export function CertificateBuilder({ initialTemplate }: CertificateBuilderProps)
     } finally {
       setSaving(false);
     }
-  }, [templateName, dims, paperSize, templateId, router]);
+  }, [templateName, dims, paperSize, templateId, router, category]);
 
   const handleExportPdf = useCallback(async () => {
     if (!canvasRef.current || !templateId) {

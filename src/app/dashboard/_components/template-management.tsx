@@ -3,25 +3,18 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { 
-  FiPlus, 
-  FiSearch, 
-  FiFilter, 
-  FiTrash2, 
-  FiCopy, 
-  FiX, 
+import {
+  FiPlus,
+  FiSearch,
+  FiFilter,
+  FiTrash2,
+  FiCopy,
+  FiX,
   FiChevronDown,
-  FiShoppingBag, 
-  FiHome, 
-  FiPackage, 
-  FiShare2, 
-  FiGift, 
-  FiCreditCard,
-  FiFileText
 } from "react-icons/fi";
 import { TemplateCard } from "./template-card";
 import { useTranslation } from "react-i18next";
-import { FaYoutube, FaInstagram } from "react-icons/fa6";
+import type { TemplateCategoryConfig } from "@/lib/template-categories";
 
 /* ─────────────────────────── types ─────────────────────────── */
 
@@ -34,6 +27,8 @@ interface Template {
 
 interface TemplateManagementProps {
   templates: Template[];
+  /** Category configuration — drives labels, empty-state copy, and create-button routing */
+  categoryConfig: TemplateCategoryConfig;
 }
 
 type SortKey = "newest" | "oldest" | "a-z" | "z-a";
@@ -48,8 +43,6 @@ const getSortOptions = (t: any) => [
 
 /* ─────────────────────── sub-components ───────────────────── */
 
-
-
 interface ToolbarProps {
   searchQuery: string;
   onSearchChange: (v: string) => void;
@@ -59,7 +52,10 @@ interface ToolbarProps {
   onBulkDelete: () => void;
   onBulkDuplicate?: () => void;
   onClearSelection: () => void;
-  // no extra props needed — Create button is always shown
+  /** Label shown on the Create CTA */
+  createLabel: string;
+  /** href for the Create CTA */
+  createHref: string;
 }
 
 function Toolbar({
@@ -71,6 +67,8 @@ function Toolbar({
   onBulkDelete,
   onBulkDuplicate,
   onClearSelection,
+  createLabel,
+  createHref,
 }: ToolbarProps) {
   const { t } = useTranslation();
   const hasSelection = selectedCount > 0;
@@ -153,13 +151,13 @@ function Toolbar({
       {/* ── Divider (create) ── */}
       <div className="h-6 w-px bg-gray-200 flex-shrink-0 ml-auto" aria-hidden />
 
-      {/* ── Create Certificate CTA ── */}
+      {/* ── Create CTA ── */}
       <Link
-        href="/builder"
+        href={createHref}
         className="inline-flex flex-shrink-0 items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
       >
         <FiPlus className="h-4 w-4" />
-        {t("sidebar.certificate")}
+        {createLabel}
       </Link>
     </div>
   );
@@ -169,9 +167,12 @@ function Toolbar({
 
 export function TemplateManagement({
   templates: initialTemplates,
+  categoryConfig,
 }: TemplateManagementProps) {
   const { t } = useTranslation();
   const router = useRouter();
+
+  const { label, description, iconColorClass, builderHref } = categoryConfig;
 
   /* ── state ── */
   const [templates, setTemplates] = useState(initialTemplates);
@@ -276,21 +277,21 @@ export function TemplateManagement({
     return (
       <div className="flex h-[calc(100vh-18rem)] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50/50 animate-in fade-in duration-500">
         <div className="flex flex-col items-center text-center max-w-sm">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 shadow-sm">
+          <div className={`mb-4 flex h-16 w-16 items-center justify-center rounded-full shadow-sm ${iconColorClass}`}>
             <FiPlus className="h-8 w-8" />
           </div>
           <h3 className="mb-2 text-xl font-bold text-gray-900">
-            {t("dashboard.recent.no_templates", "No Templates Yet")}
+            No {label}s Yet
           </h3>
           <p className="mb-6 text-sm text-gray-500">
-            {t("dashboard.recent.no_templates_desc", "Start by creating your first professional certificate template.")}
+            {description}
           </p>
           <Link
-            href="/builder"
+            href={builderHref}
             className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-indigo-200 transition-all hover:bg-indigo-700 active:scale-95"
           >
             <FiPlus className="h-5 w-5" />
-            {t("sidebar.certificate")}
+            Create {label}
           </Link>
         </div>
       </div>
@@ -308,6 +309,8 @@ export function TemplateManagement({
         selectedCount={selectedIds.size}
         onBulkDelete={handleBulkDelete}
         onClearSelection={() => setSelectedIds(new Set())}
+        createLabel={label}
+        createHref={builderHref}
       />
 
       {/* ── Template Grid ── */}
@@ -390,46 +393,6 @@ export function TemplateManagement({
           </button>
         </div>
       )}
-
-      {/* ── Explore Categories (Coming Soon) ── */}
-      <div className="pt-10 border-t border-gray-100">
-        <div className="mb-6">
-          <h3 className="text-lg font-bold text-gray-900">Explore Template Categories</h3>
-          <p className="text-sm text-gray-500">New professional templates arriving soon.</p>
-        </div>
-        
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-5">
-          {[
-            { name: "YouTube Thumbnail", icon: FaYoutube, color: "bg-red-50 text-red-600" },
-            { name: "E-commerce Marketing", icon: FiShoppingBag, color: "bg-blue-50 text-blue-600" },
-            { name: "Real Estate Marketing", icon: FiHome, color: "bg-emerald-50 text-emerald-600" },
-            { name: "Shipping Label", icon: FiPackage, color: "bg-orange-50 text-orange-600" },
-            { name: "Resume", icon: FiFileText, color: "bg-indigo-50 text-indigo-600" },
-            { name: "Open Graph", icon: FiShare2, color: "bg-purple-50 text-purple-600" },
-            { name: "Christmas Card", icon: FiGift, color: "bg-rose-50 text-rose-600" },
-            { name: "Social Media", icon: FaInstagram, color: "bg-pink-50 text-pink-600" },
-            { name: "Receipt", icon: FiCreditCard, color: "bg-amber-50 text-amber-600" },
-            { name: "Invoice", icon: FiFileText, color: "bg-slate-50 text-slate-600" },
-          ].map((cat, i) => (
-            <div 
-              key={i}
-              onClick={() => router.push(`/dashboard?view=${cat.name.toLowerCase().replace(/ /g, '-')}`)}
-              className="group relative flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md cursor-pointer"
-            >
-              <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${cat.color} transition-transform group-hover:scale-110`}>
-                <cat.icon className="h-7 w-7" />
-              </div>
-              <span className="text-sm font-semibold text-gray-900 text-center">{cat.name}</span>
-              <div className="mt-2 rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                Coming Soon
-              </div>
-              
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-indigo-600/0 opacity-0 transition-all group-hover:bg-indigo-600/5 group-hover:opacity-100" />
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
