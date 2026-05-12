@@ -300,6 +300,7 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
           onBgSelected={handleBgSelected}
           customTemplates={customTemplates}
           onDeleteCustomTemplate={handleDeleteCustomTemplate}
+          category={category}
         />
 
         {/* Right column: format toolbar + canvas */}

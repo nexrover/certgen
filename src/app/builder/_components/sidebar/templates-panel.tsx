@@ -15,7 +15,17 @@ interface TemplatesPanelProps {
   }) => void;
   customTemplates?: CustomTemplate[];
   onDeleteCustomTemplate?: (id: string) => void;
+  category?: string;
 }
+
+const YOUTUBE_DEMOS = [
+  { id: "yt-gaming", label: "Gaming Thumbnail", src: "https://placehold.co/1280x720/dc2626/ffffff?text=Gaming+Thumbnail" },
+  { id: "yt-tutorial", label: "Tutorial Thumbnail", src: "https://placehold.co/1280x720/2563eb/ffffff?text=Tutorial+Thumbnail" },
+  { id: "yt-vlog", label: "Vlog Thumbnail", src: "https://placehold.co/1280x720/7c3aed/ffffff?text=Vlog+Thumbnail" },
+  { id: "yt-review", label: "Review Thumbnail", src: "https://placehold.co/1280x720/059669/ffffff?text=Product+Review" },
+  { id: "yt-podcast", label: "Podcast Thumbnail", src: "https://placehold.co/1280x720/d97706/ffffff?text=Podcast+Episode" },
+  { id: "yt-music", label: "Music Thumbnail", src: "https://placehold.co/1280x720/db2777/ffffff?text=Music+Video" },
+];
 
 type Orientation = "landscape" | "portrait";
 type Category = "Course" | "Completion" | "Achievement" | "Training" | "Recognition" | "Participation" | "Webinar" | "Appreciation" | "Employee of the Month";
@@ -286,7 +296,9 @@ const TEMPLATES: TemplatePreview[] = [
 
 type FilterType = "category" | "style" | "color";
 
-export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteCustomTemplate }: TemplatesPanelProps) {
+export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteCustomTemplate, category = "certificate" }: TemplatesPanelProps) {
+  const isYoutube = category === "youtube";
+  const isNonCertificate = category !== "certificate";
   const [loading, setLoading] = useState<string | null>(null);
   const [presetThumbnails, setPresetThumbnails] = useState<Record<string, string>>({});
   const customScrollRef = useRef<HTMLDivElement>(null);
@@ -369,6 +381,74 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
     });
   }
 
+  /* ── Non-certificate categories (YouTube, etc.) ─────── */
+  if (isNonCertificate) {
+    return (
+      <div className="-mx-3 -mt-3 flex flex-col">
+        {/* Custom templates (recently used) — shown for all categories */}
+        {customTemplates.length > 0 && (
+          <div className="px-3 py-4 border-b border-gray-100">
+            <span className="text-[11px] font-semibold text-gray-700 mb-2 block">Recently Used</span>
+            <div ref={customScrollRef} className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+              {customTemplates.map((ct) => (
+                <div key={ct.id} className="group relative shrink-0 w-[120px]">
+                  <button
+                    onClick={() => onLoadTemplate({ canvasJson: ct.canvasJson, paperSize: ct.paperSize, width: ct.width, height: ct.height })}
+                    className="block w-full overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md"
+                    style={{ aspectRatio: `${ct.width} / ${ct.height}` }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ct.thumbnail} alt="Custom template" className="h-full w-full object-contain" draggable={false} />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onDeleteCustomTemplate?.(ct.id); }}
+                    className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 group-hover:flex z-10"
+                  >
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="px-3 py-2">
+          <span className="text-[11px] font-semibold text-gray-700">All Results</span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 px-3 pb-3">
+          {/* Blank template */}
+          <button
+            onClick={handleBlank}
+            className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
+            style={{ aspectRatio: "16 / 9" }}
+          >
+            <svg className="h-6 w-6 text-gray-300 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+          </button>
+
+          {/* Demo cards */}
+          {(isYoutube ? YOUTUBE_DEMOS : []).map((demo) => (
+            <button
+              key={demo.id}
+              onClick={handleBlank}
+              className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md"
+              style={{ aspectRatio: "16 / 9" }}
+              title={demo.label}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={demo.src} alt={demo.label} className="h-full w-full object-cover" draggable={false} />
+              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-1.5">
+                <span className="text-[9px] font-semibold text-white drop-shadow-sm">{demo.label}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="-mx-3 -mt-3 flex flex-col">
       {/* Orientation tabs */}
@@ -395,169 +475,55 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
 
       {/* Filter chips */}
       <div className="group relative mb-2 border-b border-gray-100 bg-white">
-        {/* Left Scroll Button */}
         <button
           onClick={scrollFilterLeft}
           className="absolute left-0 top-0 bottom-0 z-20 flex w-8 items-center justify-center bg-gradient-to-r from-white via-white/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
           title="Scroll left"
         >
           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-gray-500 hover:text-blue-600">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
           </div>
         </button>
-
-        <div
-          ref={filterScrollRef}
-          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar px-3 py-2.5"
-          style={{ scrollbarWidth: "none" }}
-        >
-          <FilterChip
-            label="Category"
-            active={selectedCategories.length > 0}
-            isOpen={openFilter === "category"}
-            onToggle={() => setOpenFilter(openFilter === "category" ? null : "category")}
-            onClose={() => setOpenFilter(null)}
-            options={ALL_CATEGORIES}
-            selected={selectedCategories}
-            onSelect={(v) => setSelectedCategories(
-              selectedCategories.includes(v)
-                ? selectedCategories.filter((x) => x !== v)
-                : [...selectedCategories, v]
-            )}
-            onClear={() => setSelectedCategories([])}
-          />
-          <FilterChip
-            label="Style"
-            active={selectedStyles.length > 0}
-            isOpen={openFilter === "style"}
-            onToggle={() => setOpenFilter(openFilter === "style" ? null : "style")}
-            onClose={() => setOpenFilter(null)}
-            options={ALL_STYLES}
-            selected={selectedStyles}
-            onSelect={(v) => setSelectedStyles(
-              selectedStyles.includes(v as Style)
-                ? selectedStyles.filter((x) => x !== v)
-                : [...selectedStyles, v as Style]
-            )}
-            onClear={() => setSelectedStyles([])}
-            align="center"
-          />
-          <FilterChip
-            label="Color"
-            active={selectedColors.length > 0}
-            isOpen={openFilter === "color"}
-            onToggle={() => setOpenFilter(openFilter === "color" ? null : "color")}
-            onClose={() => setOpenFilter(null)}
-            options={ALL_COLORS}
-            selected={selectedColors}
-            onSelect={(v) => setSelectedColors(
-              selectedColors.includes(v as ColorTheme)
-                ? selectedColors.filter((x) => x !== v)
-                : [...selectedColors, v as ColorTheme]
-            )}
-            onClear={() => setSelectedColors([])}
-            align="right"
-          />
-
-          <button
-            onClick={() => { setSelectedCategories([]); setSelectedStyles([]); setSelectedColors([]); }}
-            className={`shrink-0 flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-semibold transition-all ${hasFilters
-                ? "border-red-100 bg-red-50 text-red-600 hover:bg-red-100"
-                : "border-gray-100 bg-gray-50 text-gray-400 opacity-60 cursor-default"
-              }`}
-          >
-            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
+        <div ref={filterScrollRef} className="flex items-center gap-1.5 overflow-x-auto no-scrollbar px-3 py-2.5" style={{ scrollbarWidth: "none" }}>
+          <FilterChip label="Category" active={selectedCategories.length > 0} isOpen={openFilter === "category"} onToggle={() => setOpenFilter(openFilter === "category" ? null : "category")} onClose={() => setOpenFilter(null)} options={ALL_CATEGORIES} selected={selectedCategories} onSelect={(v) => setSelectedCategories(selectedCategories.includes(v) ? selectedCategories.filter((x) => x !== v) : [...selectedCategories, v])} onClear={() => setSelectedCategories([])} />
+          <FilterChip label="Style" active={selectedStyles.length > 0} isOpen={openFilter === "style"} onToggle={() => setOpenFilter(openFilter === "style" ? null : "style")} onClose={() => setOpenFilter(null)} options={ALL_STYLES} selected={selectedStyles} onSelect={(v) => setSelectedStyles(selectedStyles.includes(v as Style) ? selectedStyles.filter((x) => x !== v) : [...selectedStyles, v as Style])} onClear={() => setSelectedStyles([])} align="center" />
+          <FilterChip label="Color" active={selectedColors.length > 0} isOpen={openFilter === "color"} onToggle={() => setOpenFilter(openFilter === "color" ? null : "color")} onClose={() => setOpenFilter(null)} options={ALL_COLORS} selected={selectedColors} onSelect={(v) => setSelectedColors(selectedColors.includes(v as ColorTheme) ? selectedColors.filter((x) => x !== v) : [...selectedColors, v as ColorTheme])} onClear={() => setSelectedColors([])} align="right" />
+          <button onClick={() => { setSelectedCategories([]); setSelectedStyles([]); setSelectedColors([]); }} className={`shrink-0 flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-semibold transition-all ${hasFilters ? "border-red-100 bg-red-50 text-red-600 hover:bg-red-100" : "border-gray-100 bg-gray-50 text-gray-400 opacity-60 cursor-default"}`}>
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M18 6 6 18M6 6l12 12" /></svg>
             Clear All
           </button>
-
-          {/* Extra spacing for the fade mask/button */}
           <div className="shrink-0 w-6" />
         </div>
-
-        {/* Right Scroll Button */}
-        <button
-          onClick={scrollFilterRight}
-          className="absolute right-0 top-0 bottom-0 z-20 flex w-10 items-center justify-center bg-gradient-to-l from-white via-white/90 to-transparent"
-          title="Scroll right"
-        >
+        <button onClick={scrollFilterRight} className="absolute right-0 top-0 bottom-0 z-20 flex w-10 items-center justify-center bg-gradient-to-l from-white via-white/90 to-transparent" title="Scroll right">
           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-gray-500 hover:text-blue-600">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
           </div>
         </button>
       </div>
 
-      {/* ── Custom Templates — horizontal scroll ────────── */}
+      {/* Custom Templates */}
       {customTemplates.length > 0 && (
         <div className="px-3 pb-6">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-[11px] font-semibold text-gray-700">Recently Used</span>
             <div className="flex gap-1">
-              <button
-                onClick={scrollCustomLeft}
-                className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600"
-                title="Scroll left"
-              >
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
+              <button onClick={scrollCustomLeft} className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600" title="Scroll left">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
               </button>
-              <button
-                onClick={scrollCustomRight}
-                className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600"
-                title="Scroll right"
-              >
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
+              <button onClick={scrollCustomRight} className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600" title="Scroll right">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
               </button>
             </div>
           </div>
-          <div
-            ref={customScrollRef}
-            className="flex gap-2 overflow-x-auto pb-2 pt-2"
-            style={{ scrollbarWidth: "none" }}
-          >
+          <div ref={customScrollRef} className="flex gap-2 overflow-x-auto pb-2 pt-2" style={{ scrollbarWidth: "none" }}>
             {customTemplates.map((ct) => (
               <div key={ct.id} className="group relative shrink-0 w-[120px]">
-                <button
-                  onClick={() => {
-                    onLoadTemplate({
-                      canvasJson: ct.canvasJson,
-                      paperSize: ct.paperSize,
-                      width: ct.width,
-                      height: ct.height,
-                    });
-                  }}
-                  className="block w-full overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md"
-                  style={{ aspectRatio: `${ct.width} / ${ct.height}` }}
-                  title="Load custom template"
-                >
+                <button onClick={() => onLoadTemplate({ canvasJson: ct.canvasJson, paperSize: ct.paperSize, width: ct.width, height: ct.height })} className="block w-full overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md" style={{ aspectRatio: `${ct.width} / ${ct.height}` }} title="Load custom template">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={ct.thumbnail}
-                    alt="Custom template"
-                    className="h-full w-full object-contain"
-                    draggable={false}
-                  />
+                  <img src={ct.thumbnail} alt="Custom template" className="h-full w-full object-contain" draggable={false} />
                 </button>
-                {/* Delete button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteCustomTemplate?.(ct.id);
-                  }}
-                  className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md transition-colors hover:bg-red-600 group-hover:flex z-10"
-                  title="Remove"
-                >
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                    <path d="M18 6 6 18M6 6l12 12" />
-                  </svg>
+                <button onClick={(e) => { e.stopPropagation(); onDeleteCustomTemplate?.(ct.id); }} className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 group-hover:flex z-10" title="Remove">
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
                 </button>
               </div>
             ))}
@@ -565,64 +531,32 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
         </div>
       )}
 
-      {/* ── All Results label ──────────────────────────────── */}
+      {/* All Results */}
       <div className="px-3 pb-1.5">
         <span className="text-[11px] font-semibold text-gray-700">All Results</span>
       </div>
-
-      {/* Templates grid */}
       <div className="grid grid-cols-2 gap-2 px-3 pb-3">
-        {/* Blank template */}
         {(() => {
-          const blankDims = orientation === "portrait"
-            ? { width: 595, height: 842 }
-            : { width: 842, height: 595 };
+          const blankDims = orientation === "portrait" ? { width: 595, height: 842 } : { width: 842, height: 595 };
           return (
-            <button
-              onClick={handleBlank}
-              className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
-              style={{ aspectRatio: `${blankDims.width} / ${blankDims.height}` }}
-            >
-              <svg className="h-6 w-6 text-gray-300 transition-colors group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
+            <button onClick={handleBlank} className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50" style={{ aspectRatio: `${blankDims.width} / ${blankDims.height}` }}>
+              <svg className="h-6 w-6 text-gray-300 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
             </button>
           );
         })()}
-
-        {filtered.map((t) => (
-          (() => {
-            const dims = getTemplateDimensions(t.id, t.orientation);
-            return (
-              <button
-                key={t.id}
-                onClick={() => handleLoad(t.id)}
-                disabled={loading === t.id}
-                className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md disabled:opacity-50"
-                style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={presetThumbnails[t.id] ?? t.thumbnailSrc}
-                  alt={`${t.label} preview`}
-                  className="h-full w-full bg-white object-contain"
-                  draggable={false}
-                />
-                {loading === t.id && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white/80">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-                  </div>
-                )}
-              </button>
-            );
-          })()
-        ))}
+        {filtered.map((t) => {
+          const dims = getTemplateDimensions(t.id, t.orientation);
+          return (
+            <button key={t.id} onClick={() => handleLoad(t.id)} disabled={loading === t.id} className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md disabled:opacity-50" style={{ aspectRatio: `${dims.width} / ${dims.height}` }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={presetThumbnails[t.id] ?? t.thumbnailSrc} alt={`${t.label} preview`} className="h-full w-full bg-white object-contain" draggable={false} />
+              {loading === t.id && (<div className="absolute inset-0 flex items-center justify-center bg-white/80"><div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" /></div>)}
+            </button>
+          );
+        })}
       </div>
-
       {filtered.length === 0 && (
-        <div className="px-3 pb-4 text-center text-xs text-gray-400">
-          No templates match your filters.
-        </div>
+        <div className="px-3 pb-4 text-center text-xs text-gray-400">No templates match your filters.</div>
       )}
     </div>
   );

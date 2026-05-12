@@ -71,9 +71,11 @@ interface SidebarProps {
   onBgSelected?: (selected: boolean) => void;
   customTemplates?: CustomTemplate[];
   onDeleteCustomTemplate?: (id: string) => void;
+  /** Template category slug — drives which demo templates appear */
+  category?: string;
 }
 
-export function Sidebar({ canvas, onLoadTemplate, onBgSelected, customTemplates, onDeleteCustomTemplate }: SidebarProps) {
+export function Sidebar({ canvas, onLoadTemplate, onBgSelected, customTemplates, onDeleteCustomTemplate, category = "certificate" }: SidebarProps) {
   const [activeTab, setActiveTab] = useState<TabId>("templates");
 
   return (
@@ -98,7 +100,7 @@ export function Sidebar({ canvas, onLoadTemplate, onBgSelected, customTemplates,
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
-        {activeTab === "templates" && <TemplatesPanel onLoadTemplate={onLoadTemplate} customTemplates={customTemplates} onDeleteCustomTemplate={onDeleteCustomTemplate} />}
+        {activeTab === "templates" && <TemplatesPanel onLoadTemplate={onLoadTemplate} customTemplates={customTemplates} onDeleteCustomTemplate={onDeleteCustomTemplate} category={category} />}
         {activeTab === "uploads" && <UploadsPanel canvas={canvas} />}
         {activeTab === "elements" && <ElementsPanel canvas={canvas} />}
         {activeTab === "text" && <TextPanel canvas={canvas} />}
