@@ -12,14 +12,46 @@ export interface TemplateField {
   height?: number;
 }
 
-export type PaperSize = "A4" | "A4_LANDSCAPE" | "US_LETTER" | "US_LETTER_LANDSCAPE";
+export type PaperSize =
+  | "A4"
+  | "A4_LANDSCAPE"
+  | "US_LETTER"
+  | "US_LETTER_LANDSCAPE"
+  | "YOUTUBE_THUMBNAIL"
+  | "SOCIAL_1080"
+  | "OG_IMAGE"
+  | "CUSTOM_16_9";
 
 export const PAPER_DIMENSIONS: Record<PaperSize, { width: number; height: number }> = {
   A4: { width: 595, height: 842 },
   A4_LANDSCAPE: { width: 842, height: 595 },
   US_LETTER: { width: 612, height: 792 },
   US_LETTER_LANDSCAPE: { width: 792, height: 612 },
+  YOUTUBE_THUMBNAIL: { width: 1280, height: 720 },
+  SOCIAL_1080: { width: 1080, height: 1080 },
+  OG_IMAGE: { width: 1200, height: 630 },
+  CUSTOM_16_9: { width: 1920, height: 1080 },
 };
+
+/**
+ * Maps a template category slug to its default paper size.
+ * Used to auto-select the correct canvas preset when the builder opens.
+ */
+export const CATEGORY_DEFAULT_PAPER_SIZE: Record<string, PaperSize> = {
+  certificate: "A4_LANDSCAPE",
+  youtube: "YOUTUBE_THUMBNAIL",
+  email: "A4",
+  ecommerce: "CUSTOM_16_9",
+  "real-estate": "A4_LANDSCAPE",
+  "shipping-label": "US_LETTER",
+  resume: "A4",
+  "open-graph": "OG_IMAGE",
+  "christmas-card": "A4",
+  "social-media": "SOCIAL_1080",
+  receipt: "US_LETTER",
+  invoice: "A4",
+};
+
 
 export interface CertificateTemplate {
   id: string;

@@ -8,7 +8,7 @@ import { CanvasEditor, type CanvasEditorHandle } from "./canvas-editor";
 import { Sidebar } from "./sidebar/sidebar";
 import { PreviewModal } from "./preview-modal";
 import type { CertificateTemplate, PaperSize } from "@/lib/types";
-import { PAPER_DIMENSIONS } from "@/lib/types";
+import { PAPER_DIMENSIONS, CATEGORY_DEFAULT_PAPER_SIZE } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { getCategoryBySlug } from "@/lib/template-categories";
 import {
@@ -30,7 +30,8 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
   const canvasRef = useRef<CanvasEditorHandle>(null);
   const [templateId, setTemplateId] = useState(initialTemplate?.id ?? null);
   const [templateName, setTemplateName] = useState(initialTemplate?.name ?? "Untitled Template");
-  const [paperSize, setPaperSize] = useState<PaperSize>(initialTemplate?.paper_size ?? "A4_LANDSCAPE");
+  const defaultPaperSize = CATEGORY_DEFAULT_PAPER_SIZE[category] ?? "A4_LANDSCAPE";
+  const [paperSize, setPaperSize] = useState<PaperSize>(initialTemplate?.paper_size ?? defaultPaperSize);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -279,6 +280,7 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
         onDownloadPdf={handleExportPdf}
         saving={saving}
         dirty={dirty}
+        category={category}
       />
 
       {/* Hidden file input for bg image */}

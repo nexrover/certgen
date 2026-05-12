@@ -13,19 +13,40 @@ interface ToolbarProps {
   onDownloadPdf: () => void;
   saving: boolean;
   dirty: boolean;
+  /** Template category slug — drives which format presets appear in the dropdown */
+  category?: string;
 }
 
-const PAPER_OPTIONS: { value: PaperSize; label: string }[] = [
-  { value: "A4", label: "A4 Portrait" },
-  { value: "A4_LANDSCAPE", label: "A4 Landscape" },
-  { value: "US_LETTER", label: "US Letter" },
-  { value: "US_LETTER_LANDSCAPE", label: "US Letter Landscape" },
+/** All available paper/format options with their labels and category affinity. */
+const ALL_PAPER_OPTIONS: { value: PaperSize; label: string; categories: string[] }[] = [
+  // Certificate / print presets
+  { value: "A4", label: "A4 Portrait (595×842)", categories: ["certificate", "email", "resume", "christmas-card", "invoice"] },
+  { value: "A4_LANDSCAPE", label: "A4 Landscape (842×595)", categories: ["certificate", "real-estate"] },
+  { value: "US_LETTER", label: "US Letter (612×792)", categories: ["certificate", "shipping-label", "receipt"] },
+  { value: "US_LETTER_LANDSCAPE", label: "US Letter Landscape (792×612)", categories: ["certificate"] },
+  // Digital presets
+  { value: "YOUTUBE_THUMBNAIL", label: "YouTube 16:9 (1280×720)", categories: ["youtube"] },
+  { value: "SOCIAL_1080", label: "Social Square (1080×1080)", categories: ["social-media"] },
+  { value: "OG_IMAGE", label: "Open Graph (1200×630)", categories: ["open-graph"] },
+  { value: "CUSTOM_16_9", label: "Full HD 16:9 (1920×1080)", categories: ["ecommerce", "youtube"] },
 ];
+
+/**
+ * Returns paper options relevant to the given category.
+ * Always includes at least the full list if category is unknown.
+ */
+function getOptionsForCategory(category: string) {
+  const relevant = ALL_PAPER_OPTIONS.filter((o) => o.categories.includes(category));
+  // If nothing matched (unknown category), show everything
+  return relevant.length > 0 ? relevant : ALL_PAPER_OPTIONS;
+}
 
 export function Toolbar({
   templateName, onNameChange, paperSize, onPaperSizeChange,
-  onPreview, onSave, onDownloadPdf, saving, dirty,
+  onPreview, onSave, onDownloadPdf, saving, dirty, category = "certificate",
 }: ToolbarProps) {
+  const options = getOptionsForCategory(category);
+
   return (
     <div className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4">
       <div className="flex items-center gap-4">
@@ -49,7 +70,7 @@ export function Toolbar({
           onChange={(e) => onPaperSizeChange(e.target.value as PaperSize)}
           className="rounded border border-gray-300 px-2 py-1.5 text-xs text-gray-700"
         >
-          {PAPER_OPTIONS.map((o) => (
+          {options.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>

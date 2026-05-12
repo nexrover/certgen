@@ -80,8 +80,10 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
       if (!containerRef.current) return 1;
       const cw = containerRef.current.clientWidth;
       const ch = containerRef.current.clientHeight;
-      const sx = (cw - 60) / width;
-      const sy = (ch - 60) / height;
+      // Use generous padding so wide canvases (e.g. 1280px YouTube) don't clip
+      const padding = 80;
+      const sx = (cw - padding) / width;
+      const sy = (ch - padding) / height;
       return Math.min(sx, sy, 1);
     }, [width, height]);
 
