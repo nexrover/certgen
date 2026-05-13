@@ -384,30 +384,30 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       objects: [
         // Green background section at bottom
         rect({ left: 0, top: 540, width: YT.w, height: 180, fill: "#22c55e" }),
-        
+
         // Main Human Image from /Images/s3.png
-        img("/Images/s3.png", { 
-          left: -100, 
-          top: 50, 
-          scaleX: 0.4, 
+        img("/Images/s3.png", {
+          left: -100,
+          top: 50,
+          scaleX: 0.4,
           scaleY: 0.4,
           shadow: { color: "#22c55e", blur: 60, offsetX: 0, offsetY: 0 }
         }),
 
         // Stars top right
-        tb("\u2605 \u2605 \u2605 \u2605 \u2605", { 
-          left: 1050, top: 150, width: 200, fontSize: 32, fill: "#22c55e", textAlign: "right" 
+        tb("\u2605 \u2605 \u2605 \u2605 \u2605", {
+          left: 1050, top: 150, width: 200, fontSize: 32, fill: "#22c55e", textAlign: "right"
         }),
 
         // Text Content
-        tb("THE ULTIMATE", { 
-          left: 480, top: 200, width: 800, fontSize: 80, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica" 
+        tb("THE ULTIMATE", {
+          left: 480, top: 200, width: 800, fontSize: 80, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica"
         }),
-        tb("GAMING", { 
-          left: 480, top: 300, width: 800, fontSize: 160, fontWeight: "900", fontStyle: "italic", fill: "#22c55e", textAlign: "left", fontFamily: "Helvetica", charSpacing: -50 
+        tb("GAMING", {
+          left: 480, top: 300, width: 800, fontSize: 160, fontWeight: "900", fontStyle: "italic", fill: "#22c55e", textAlign: "left", fontFamily: "Helvetica", charSpacing: -50
         }),
-        tb("CHALLENGE", { 
-          left: 480, top: 500, width: 800, fontSize: 110, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica" 
+        tb("CHALLENGE", {
+          left: 480, top: 500, width: 800, fontSize: 110, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica"
         }),
       ],
     },
@@ -419,35 +419,68 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
     canvasJson: {
       version: "7.0.0", background: "#0f172a",
       objects: [
-        img("/Images/Temp1/8952a815-9c9c-4d1a-b365-a121f6ede0db.jpeg", { 
-          left: 0, top: -400, scaleX: 0.32, scaleY: 0.32, selectable: true 
+        img("/Images/Temp1/8952a815-9c9c-4d1a-b365-a121f6ede0db.jpeg", {
+          left: 0, top: -400, scaleX: 0.32, scaleY: 0.32, selectable: true
         }),
         rect({ left: 0, top: 0, width: 1280, height: 720, fill: "#000000", opacity: 0.3, selectable: false }),
-        tb("ZERO", { 
-          left: 150, top: 280, width: 200, fontSize: 50, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New" 
+        tb("ZERO", {
+          left: 150, top: 280, width: 200, fontSize: 50, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New"
         }),
-        img("/Images/Temp1/1830aa2d-a9e8-4de9-955d-132e5f935bf9.svg", { 
+        img("/Images/Temp1/1830aa2d-a9e8-4de9-955d-132e5f935bf9.svg", {
           left: 280, top: 180, scaleX: 0.22, scaleY: 0.22, selectable: true
         }),
-        tb("SENIOR\nDEVELOPER", { 
-          left: 450, top: 170, width: 400, fontSize: 60, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New", textAlign: "left", lineHeight: 1.1 
+        tb("SENIOR\nDEVELOPER", {
+          left: 450, top: 170, width: 400, fontSize: 60, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New", textAlign: "left", lineHeight: 1.1
         }),
         rect({ left: 280, top: 380, width: 240, height: 70, fill: "#27486e", rx: 35, ry: 35, angle: -12 }),
-        tb("in only", { 
-          left: 310, top: 385, width: 200, fontSize: 45, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", fontFamily: "Helvetica", angle: -12 
+        tb("in only", {
+          left: 310, top: 385, width: 200, fontSize: 45, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", fontFamily: "Helvetica", angle: -12
         }),
         rect({ left: 220, top: 480, width: 380, height: 90, fill: "#2e295e", rx: 45, ry: 45, angle: -12 }),
-        tb("4 MONTHS", { 
-          left: 250, top: 485, width: 350, fontSize: 65, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", fontFamily: "Helvetica", angle: -12 
+        tb("4 MONTHS", {
+          left: 250, top: 485, width: 350, fontSize: 65, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", fontFamily: "Helvetica", angle: -12
         }),
-        img("/Images/Temp1/a979a5a0-ce84-4e99-9c45-6318f40e9cac.png", { 
+        img("/Images/Temp1/a979a5a0-ce84-4e99-9c45-6318f40e9cac.png", {
           left: 650, top: 150, scaleX: 0.36, scaleY: 0.36, selectable: true
         }),
         rect({ left: 0, top: 620, width: 1280, height: 100, fill: "#27486e" }),
-        tb("EPISODE #2", { 
-          left: 120, top: 645, width: 300, fontSize: 35, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New", charSpacing: 150 
+        tb("EPISODE #2", {
+          left: 120, top: 645, width: 300, fontSize: 35, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New", charSpacing: 150
+        }),
+      ],
+    },
+  },
+
+  "yt-social-media": {
+    name: "Social Media Growth",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE",
+    canvasJson: {
+      version: "7.0.0", background: "#000000",
+      objects: [
+        img("/Images/Temp2/s.png", {
+          left: 0, top: 0, scaleX: 1.6, scaleY: 1.6, selectable: true
+        }),
+        img("/Images/Temp2/s2.png", {
+          left: 530, top: 10, scaleX: 1.4, scaleY: 1.4, selectable: true
+        }),
+        tb("ep #28", {
+          left: -20, top: -50, width: 800, fontSize: 350, fontWeight: "bold", fill: "#1f1f1f", fontFamily: "Helvetica"
+        }),
+        tb("How to grow", {
+          left: 100, top: 250, width: 600, fontSize: 75, fontWeight: "500", fill: "#ffffff", fontFamily: "Helvetica"
+        }),
+        tb("your", {
+          left: 100, top: 340, width: 200, fontSize: 75, fontWeight: "500", fill: "#ffffff", fontFamily: "Helvetica"
+        }),
+        tb("social media.", {
+          left: 270, top: 340, width: 500, fontSize: 75, fontWeight: "bold", fill: "#84cc16", fontFamily: "Helvetica"
+        }),
+        { type: "Circle", left: 100, top: 495, radius: 4, fill: "#84cc16", selectable: true },
+        tb("Olivia Wilson", {
+          left: 125, top: 485, width: 300, fontSize: 24, fill: "#cccccc", fontFamily: "Helvetica", charSpacing: 200
         }),
       ],
     },
   },
 };
+

@@ -19,6 +19,7 @@ interface TemplatesPanelProps {
 }
 
 const YOUTUBE_DEMOS = [
+  { id: "yt-social-media", label: "Social Media Growth", src: "https://placehold.co/1280x720/000000/84cc16?text=Social+Media" },
   { id: "yt-senior-dev", label: "Senior Dev in 4 Months", src: "https://placehold.co/1280x720/0f172a/ffffff?text=Senior+Developer" },
   { id: "yt-gaming-ultimate", label: "Ultimate Gaming", src: "https://placehold.co/1280x720/000000/22c55e?text=Gaming+Ultimate" },
   { id: "yt-gaming", label: "Gaming Thumbnail", src: "https://placehold.co/1280x720/dc2626/ffffff?text=Gaming+Thumbnail" },
@@ -331,8 +332,13 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
     let cancelled = false;
 
     async function hydratePresetThumbnails() {
+      const allTemplatesToRender = [
+        ...TEMPLATES,
+        ...YOUTUBE_DEMOS.map(d => ({ id: d.id, orientation: "landscape" as Orientation }))
+      ];
+
       const results = await Promise.all(
-        TEMPLATES.map(async (template) => {
+        allTemplatesToRender.map(async (template) => {
           const src = await renderPresetThumbnail(template.id, template.orientation);
           return src ? ([template.id, src] as const) : null;
         }),
@@ -494,8 +500,10 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
         {/* Demo cards / Presets */}
         {(isYoutube ? YOUTUBE_DEMOS : filtered).map((demo) => {
           const dims = isYoutube ? { width: 1280, height: 720 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
-          const thumb = isYoutube ? (demo as any).src : (presetThumbnails[demo.id] ?? (demo as any).thumbnailSrc);
-          
+          const thumb = isYoutube
+            ? (presetThumbnails[demo.id] ?? (demo as any).src)
+            : (presetThumbnails[demo.id] ?? (demo as any).thumbnailSrc);
+
           return (
             <button
               key={demo.id}
@@ -506,13 +514,9 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={thumb} alt={demo.label} className="h-full w-full object-cover" draggable={false} />
-              {loading === demo.id ? (
+              {loading === demo.id && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/80">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-                </div>
-              ) : (
-                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-1.5">
-                  <span className="text-[9px] font-semibold text-white drop-shadow-sm">{demo.label}</span>
                 </div>
               )}
             </button>
