@@ -412,4 +412,42 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+
+  "yt-senior-dev": {
+    name: "Senior Developer in 4 Months",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE",
+    canvasJson: {
+      version: "7.0.0", background: "#0f172a",
+      objects: [
+        img("/Images/Temp1/8952a815-9c9c-4d1a-b365-a121f6ede0db.jpeg", { 
+          left: 0, top: -400, scaleX: 0.32, scaleY: 0.32, selectable: true 
+        }),
+        rect({ left: 0, top: 0, width: 1280, height: 720, fill: "#000000", opacity: 0.3, selectable: false }),
+        tb("ZERO", { 
+          left: 150, top: 280, width: 200, fontSize: 50, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New" 
+        }),
+        img("/Images/Temp1/1830aa2d-a9e8-4de9-955d-132e5f935bf9.svg", { 
+          left: 280, top: 180, scaleX: 0.22, scaleY: 0.22, selectable: true
+        }),
+        tb("SENIOR\nDEVELOPER", { 
+          left: 450, top: 170, width: 400, fontSize: 60, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New", textAlign: "left", lineHeight: 1.1 
+        }),
+        rect({ left: 280, top: 380, width: 240, height: 70, fill: "#27486e", rx: 35, ry: 35, angle: -12 }),
+        tb("in only", { 
+          left: 310, top: 385, width: 200, fontSize: 45, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", fontFamily: "Helvetica", angle: -12 
+        }),
+        rect({ left: 220, top: 480, width: 380, height: 90, fill: "#2e295e", rx: 45, ry: 45, angle: -12 }),
+        tb("4 MONTHS", { 
+          left: 250, top: 485, width: 350, fontSize: 65, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", fontFamily: "Helvetica", angle: -12 
+        }),
+        img("/Images/Temp1/a979a5a0-ce84-4e99-9c45-6318f40e9cac.png", { 
+          left: 650, top: 150, scaleX: 0.36, scaleY: 0.36, selectable: true
+        }),
+        rect({ left: 0, top: 620, width: 1280, height: 100, fill: "#27486e" }),
+        tb("EPISODE #2", { 
+          left: 120, top: 645, width: 300, fontSize: 35, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New", charSpacing: 150 
+        }),
+      ],
+    },
+  },
 };

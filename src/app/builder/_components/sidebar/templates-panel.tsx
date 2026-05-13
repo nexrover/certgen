@@ -19,6 +19,7 @@ interface TemplatesPanelProps {
 }
 
 const YOUTUBE_DEMOS = [
+  { id: "yt-senior-dev", label: "Senior Dev in 4 Months", src: "https://placehold.co/1280x720/0f172a/ffffff?text=Senior+Developer" },
   { id: "yt-gaming-ultimate", label: "Ultimate Gaming", src: "https://placehold.co/1280x720/000000/22c55e?text=Gaming+Ultimate" },
   { id: "yt-gaming", label: "Gaming Thumbnail", src: "https://placehold.co/1280x720/dc2626/ffffff?text=Gaming+Thumbnail" },
   { id: "yt-tutorial", label: "Tutorial Thumbnail", src: "https://placehold.co/1280x720/2563eb/ffffff?text=Tutorial+Thumbnail" },
