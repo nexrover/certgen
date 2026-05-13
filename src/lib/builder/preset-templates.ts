@@ -20,6 +20,11 @@ function line(opts: Record<string, unknown>) {
 
 const L = { w: 842, h: 595 };
 const P = { w: 595, h: 842 };
+const YT = { w: 1280, h: 720 };
+
+function img(src: string, opts: Record<string, unknown>) {
+  return { type: "image", src, crossOrigin: "anonymous", selectable: true, ...opts };
+}
 
 function cx(canvasW: number, objW: number) {
   return (canvasW - objW) / 2;
@@ -365,6 +370,45 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         tb("________________________\nProgram Lead", { left: 330, top: 530, width: 200, fontSize: 11, fill: "#374151", textAlign: "center", lineHeight: 1.5 }),
         tb("Issued: {{issued_date}}", { left: cx(P.w, 300), top: 660, width: 300, fontSize: 10, fill: "#d1d5db", textAlign: "center" }),
         tb("{{certificate_id}}", { left: cx(P.w, 300), top: P.h - 50, width: 300, fontSize: 8, fill: "#d1d5db", textAlign: "center" }),
+      ],
+    },
+  },
+
+  // ─── YouTube Thumbnail templates (1280×720) ───
+
+  "yt-gaming-ultimate": {
+    name: "Ultimate Gaming Challenge",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE",
+    canvasJson: {
+      version: "7.0.0", background: "#000000",
+      objects: [
+        // Green background section at bottom
+        rect({ left: 0, top: 540, width: YT.w, height: 180, fill: "#22c55e" }),
+        
+        // Main Human Image from /Images/s3.png
+        img("/Images/s3.png", { 
+          left: -100, 
+          top: 50, 
+          scaleX: 0.4, 
+          scaleY: 0.4,
+          shadow: { color: "#22c55e", blur: 60, offsetX: 0, offsetY: 0 }
+        }),
+
+        // Stars top right
+        tb("\u2605 \u2605 \u2605 \u2605 \u2605", { 
+          left: 1050, top: 150, width: 200, fontSize: 32, fill: "#22c55e", textAlign: "right" 
+        }),
+
+        // Text Content
+        tb("THE ULTIMATE", { 
+          left: 480, top: 200, width: 800, fontSize: 80, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica" 
+        }),
+        tb("GAMING", { 
+          left: 480, top: 300, width: 800, fontSize: 160, fontWeight: "900", fontStyle: "italic", fill: "#22c55e", textAlign: "left", fontFamily: "Helvetica", charSpacing: -50 
+        }),
+        tb("CHALLENGE", { 
+          left: 480, top: 500, width: 800, fontSize: 110, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica" 
+        }),
       ],
     },
   },

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle, useState } from "react";
-import { Canvas, type FabricObject } from "fabric";
+import { Canvas, FabricImage, Textbox, type FabricObject } from "fabric";
 import { FloatingContextMenu } from "./floating-context-menu";
 import { SmartGuideManager } from "./smart-guides";
 
