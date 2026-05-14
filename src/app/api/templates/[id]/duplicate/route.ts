@@ -17,7 +17,10 @@ export async function POST(
     }
 
     const { id } = await params;
-    const template = await duplicateTemplate(id, user.id);
+    const { searchParams } = new URL(_req.url);
+    const category = searchParams.get("category") || undefined;
+
+    const template = await duplicateTemplate(id, user.id, category);
     return NextResponse.json({ success: true, data: template });
   } catch (err) {
     if (err instanceof AppError) {

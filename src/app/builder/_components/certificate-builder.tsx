@@ -199,8 +199,8 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
       if (!templateId) alert("Please save the template first before exporting PDF.");
       return;
     }
-    window.open(`/api/templates/${templateId}/pdf`, "_blank");
-  }, [templateId]);
+    window.open(`/api/templates/${templateId}/pdf?category=${category}`, "_blank");
+  }, [templateId, category]);
 
   const getCanvas = useCallback(() => canvasRef.current?.getCanvas() ?? null, []);
 

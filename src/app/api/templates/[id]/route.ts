@@ -10,7 +10,7 @@ import { AppError } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -23,7 +23,10 @@ export async function GET(
     }
 
     const { id } = await params;
-    const template = await getTemplateById(id, user.id);
+    const { searchParams } = new URL(req.url);
+    const category = searchParams.get("category") || undefined;
+
+    const template = await getTemplateById(id, user.id, category);
     return NextResponse.json({ success: true, data: template });
   } catch (err) {
     if (err instanceof AppError) {
@@ -62,7 +65,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -75,7 +78,10 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await deleteTemplateById(id, user.id);
+    const { searchParams } = new URL(req.url);
+    const category = searchParams.get("category") || undefined;
+
+    await deleteTemplateById(id, user.id, category);
     return NextResponse.json({ success: true });
   } catch (err) {
     if (err instanceof AppError) {
@@ -103,13 +109,13 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const { name } = await req.json();
+    const { name, category } = await req.json();
 
     if (!name || typeof name !== "string") {
       return NextResponse.json({ success: false, error: "Name is required" }, { status: 400 });
     }
 
-    const template = await renameTemplate(id, user.id, name);
+    const template = await renameTemplate(id, user.id, name, category);
     return NextResponse.json({ success: true, data: template });
   } catch (err) {
     if (err instanceof AppError) {

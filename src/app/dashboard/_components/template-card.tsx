@@ -14,6 +14,7 @@ interface TemplateCardProps {
   backgroundUrl: string | null;
   onDeleted?: (id: string) => void;
   onUpdated?: () => void;
+  category: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,6 +34,7 @@ export function TemplateCard({
   backgroundUrl,
   onDeleted,
   onUpdated,
+  category,
 }: TemplateCardProps) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -52,7 +54,7 @@ export function TemplateCard({
 
     setDeleting(true);
     try {
-      const response = await fetch(`/api/templates/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/templates/${id}?category=${category}`, { method: "DELETE" });
       const data = (await response.json()) as { success?: boolean; error?: string };
 
       if (!response.ok || !data.success) {
@@ -75,7 +77,7 @@ export function TemplateCard({
   async function handlePreview() {
     setLoadingPreview(true);
     try {
-      const response = await fetch(`/api/templates/${id}`);
+      const response = await fetch(`/api/templates/${id}?category=${category}`);
       const result = await response.json();
       if (result.success && result.data) {
         setPreviewData({
@@ -104,7 +106,7 @@ export function TemplateCard({
       const response = await fetch(`/api/templates/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName }),
+        body: JSON.stringify({ name: newName, category }),
       });
       const result = await response.json();
       if (result.success) {
@@ -124,7 +126,7 @@ export function TemplateCard({
   async function handleDuplicate() {
     setDuplicating(true);
     try {
-      const response = await fetch(`/api/templates/${id}/duplicate`, {
+      const response = await fetch(`/api/templates/${id}/duplicate?category=${category}`, {
         method: "POST",
       });
       const result = await response.json();
@@ -216,7 +218,7 @@ export function TemplateCard({
         <div className="mt-auto pt-4 flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => router.push(`/builder/${id}`)}
+            onClick={() => router.push(`/builder/${id}?type=${category}`)}
             className="flex-1 min-w-[80px] inline-flex justify-center items-center rounded-md border border-indigo-200 px-2 py-1.5 text-xs font-medium text-indigo-700 transition-colors hover:bg-indigo-50"
           >
             <FiEdit3 className="mr-1.5 h-3.5 w-3.5" />

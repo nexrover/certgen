@@ -8,7 +8,7 @@ import { RecipientManagement } from "@/app/dashboard/_components/recipient-manag
 import { ProfileSettings } from "@/app/dashboard/_components/profile-settings";
 import { WelcomeHeader } from "@/app/dashboard/_components/welcome-header";
 import { redirect } from "next/navigation";
-import { getCategoryByView, TEMPLATE_VIEW_SLUGS } from "@/lib/template-categories";
+import { getCategoryByView, TEMPLATE_VIEW_SLUGS, getTableName } from "@/lib/template-categories";
 
 export default async function DashboardPage({
   searchParams,
@@ -70,7 +70,7 @@ export default async function DashboardPage({
     const categoryConfig = getCategoryByView(viewStr)!;
 
     const { data: templatesData } = await supabase
-      .from("certificate_templates")
+      .from(getTableName(categoryConfig.category))
       .select("*")
       .eq("user_id", userId)
       .eq("category", categoryConfig.category)

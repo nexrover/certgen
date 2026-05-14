@@ -251,7 +251,7 @@ export function TemplateManagement({
     const ids = [...selectedIds];
     const results = await Promise.allSettled(
       ids.map((id) =>
-        fetch(`/api/templates/${id}`, { method: "DELETE" }).then((r) => r.json())
+        fetch(`/api/templates/${id}?category=${categoryConfig.category}`, { method: "DELETE" }).then((r) => r.json())
       )
     );
 
@@ -277,7 +277,7 @@ export function TemplateManagement({
     const ids = [...selectedIds];
     const results = await Promise.allSettled(
       ids.map((id) =>
-        fetch(`/api/templates/${id}/duplicate`, { method: "POST" }).then((r) => r.json())
+        fetch(`/api/templates/${id}/duplicate?category=${categoryConfig.category}`, { method: "POST" }).then((r) => r.json())
       )
     );
 
@@ -394,6 +394,7 @@ export function TemplateManagement({
                   backgroundUrl={template.background_url}
                   onDeleted={handleDeleted}
                   onUpdated={() => router.refresh()}
+                  category={categoryConfig.category}
                 />
               </div>
             </div>

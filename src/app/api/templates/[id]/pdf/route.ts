@@ -18,7 +18,10 @@ export async function GET(
     }
 
     const { id } = await params;
-    const template = await getTemplateById(id, user.id);
+    const { searchParams } = new URL(_req.url);
+    const category = searchParams.get("category") || undefined;
+
+    const template = await getTemplateById(id, user.id, category);
 
     if (!template.canvas_json) {
       return NextResponse.json(

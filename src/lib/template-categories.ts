@@ -132,3 +132,13 @@ export function getCategoryBySlug(slug: string): TemplateCategoryConfig | undefi
 
 /** All valid sidebar view slugs that should render the template management UI. */
 export const TEMPLATE_VIEW_SLUGS = TEMPLATE_CATEGORIES.map((c) => c.view);
+
+/**
+ * Returns the database table name for a given template category.
+ */
+export function getTableName(category?: string): string {
+  if (!category || category === "certificate") return "certificate_templates";
+  // Convert category slug to table name (e.g., "real-estate" -> "real_estate_templates")
+  const sanitized = category.toLowerCase().replace(/-/g, "_");
+  return `${sanitized}_templates`;
+}

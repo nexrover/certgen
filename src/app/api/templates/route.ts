@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const supabase = await createClient();
     const {
@@ -46,7 +46,10 @@ export async function GET() {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const templates = await listTemplates(user.id);
+    const { searchParams } = new URL(req.url);
+    const category = searchParams.get("category") || undefined;
+
+    const templates = await listTemplates(user.id, category);
     return NextResponse.json({ success: true, data: templates });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to list templates";

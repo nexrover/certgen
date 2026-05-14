@@ -3,8 +3,15 @@ import { CertificateBuilder } from "../_components/certificate-builder";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function EditBuilderPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditBuilderPage({ 
+  params,
+  searchParams,
+}: { 
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ type?: string }>;
+}) {
   const { id } = await params;
+  const { type } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -15,7 +22,7 @@ export default async function EditBuilderPage({ params }: { params: Promise<{ id
 
   let template;
   try {
-    template = await getTemplateById(id, user.id);
+    template = await getTemplateById(id, user.id, type);
   } catch {
     notFound();
   }
