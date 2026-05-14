@@ -22,6 +22,7 @@ const YOUTUBE_DEMOS = [
   { id: "yt-social-media", label: "Social Media Growth", src: "https://placehold.co/1280x720/000000/84cc16?text=Social+Media" },
   { id: "yt-senior-dev", label: "Senior Dev in 4 Months", src: "https://placehold.co/1280x720/0f172a/ffffff?text=Senior+Developer" },
   { id: "yt-gaming-ultimate", label: "Ultimate Gaming", src: "https://placehold.co/1280x720/000000/22c55e?text=Gaming+Ultimate" },
+  { id: "yt-fitness-core", label: "Core Fitness Challenge", src: "https://placehold.co/1280x720/c23333/ffffff?text=Fitness+Core" },
   { id: "yt-gaming", label: "Gaming Thumbnail", src: "https://placehold.co/1280x720/dc2626/ffffff?text=Gaming+Thumbnail" },
   { id: "yt-tutorial", label: "Tutorial Thumbnail", src: "https://placehold.co/1280x720/2563eb/ffffff?text=Tutorial+Thumbnail" },
   { id: "yt-vlog", label: "Vlog Thumbnail", src: "https://placehold.co/1280x720/7c3aed/ffffff?text=Vlog+Thumbnail" },

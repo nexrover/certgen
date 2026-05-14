@@ -482,5 +482,48 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+  "yt-fitness-core": {
+    name: "Core Fitness Challenge",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE",
+    canvasJson: {
+      version: "7.0.0", background: "#000000",
+      objects: [
+        // 1. Photo Background
+        img("/Images/Temp3/bg.jpeg", {
+          left: 0, top: 0, scaleX: 0.2, scaleY: 0.2, selectable: true
+        }),
+        // 2. Dark Overlay
+        rect({ left: 0, top: 0, width: 1280, height: 720, fill: "rgba(0,0,0,0.4)", selectable: false }),
+
+        // 3. Bottom-Left Red Shape (L-shape)
+        rect({ left: 80, top: 540, width: 140, height: 45, fill: "#c23333" }),
+        rect({ left: 80, top: 540, width: 45, height: 120, fill: "#c23333" }),
+
+        // 4. Shape-Title-1 (COR background)
+        rect({ left: 240, top: 350, width: 215, height: 110, fill: "#c23333" }),
+        // 5. Title-1 (COR)
+        tb("COR", {
+          left: 255, top: 355, width: 200, fontSize: 95, fontWeight: "900", fill: "#ffffff", fontFamily: "Impact"
+        }),
+
+        // 6. Shape-Title-2 (EXERCISES background)
+        rect({ left: 240, top: 460, width: 500, height: 110, fill: "#c23333" }),
+        // 7. Title-2 (EXERCISES)
+        tb("EXERCISES", {
+          left: 255, top: 465, width: 500, fontSize: 95, fontWeight: "900", fill: "#ffffff", fontFamily: "Impact"
+        }),
+
+        // 8. Subtitle
+        tb("You should do everyday", {
+          left: 250, top: 585, width: 800, fontSize: 45, fill: "#ffffff", fontFamily: "Helvetica"
+        }),
+
+        // 9. Logo (Top Right)
+        img("/Images/Temp3/logo.png", {
+          left: 1100, top: 50, scaleX: 0.2, scaleY: 0.2, selectable: true
+        }),
+      ],
+    },
+  },
 };
 
