@@ -32,6 +32,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Session expired. Please login again." }, { status: 401 });
       }
       tokenPayload = JSON.parse(tempSession);
+      if (!tokenPayload) {
+        return NextResponse.json({ error: "Invalid session data." }, { status: 401 });
+      }
       userId = tokenPayload.user_id;
       targetContact = tokenPayload.contact;
     } else {
@@ -84,6 +87,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
     else if (body.purpose === "login") {
+      if (!tokenPayload) {
+        return NextResponse.json({ error: "Invalid session data." }, { status: 401 });
+      }
       // Upgrade temp session to full session
       const { createRouteHandlerClient } = await import("@/lib/supabase/route-handler");
       const supabaseRouteClient = await createRouteHandlerClient(tokenPayload.remember_me);

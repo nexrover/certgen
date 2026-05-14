@@ -29,6 +29,7 @@ function CropperModal({ image, onCropComplete, onCancel }: CropperModalProps) {
   };
 
   const handleDone = async () => {
+    if (!croppedAreaPixels) return;
     try {
       const croppedBlob = await getCroppedImg(image, croppedAreaPixels);
       onCropComplete(croppedBlob);
@@ -1258,7 +1259,6 @@ export function ProfileSettings() {
         <div className="p-6 sm:p-8 min-h-[500px] animate-in fade-in duration-300">
           {activeTab === "general" && (
             <GeneralTab 
-              onCancel={handleCancel} 
               onDirtyChange={setIsDirty} 
               saveRef={saveRef} 
             />

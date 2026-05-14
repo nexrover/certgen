@@ -272,6 +272,31 @@ export function TemplateManagement({
     }
   }, [selectedIds, router]);
 
+  /* ── bulk duplicate ── */
+  const handleBulkDuplicate = useCallback(async () => {
+    const ids = [...selectedIds];
+    const results = await Promise.allSettled(
+      ids.map((id) =>
+        fetch(`/api/templates/${id}/duplicate`, { method: "POST" }).then((r) => r.json())
+      )
+    );
+
+    const failed: string[] = [];
+    results.forEach((result, i) => {
+      if (result.status === "rejected" || !result.value?.success) {
+        failed.push(ids[i]);
+      }
+    });
+
+    // Refresh everything to show new "Copies"
+    router.refresh();
+    setSelectedIds(new Set());
+
+    if (failed.length > 0) {
+      window.alert(`${failed.length} template(s) could not be duplicated.`);
+    }
+  }, [selectedIds, router]);
+
   /* ── empty state ── */
   if (templates.length === 0 && !searchQuery) {
     return (
@@ -308,6 +333,7 @@ export function TemplateManagement({
         onSortChange={setSortBy}
         selectedCount={selectedIds.size}
         onBulkDelete={handleBulkDelete}
+        onBulkDuplicate={handleBulkDuplicate}
         onClearSelection={() => setSelectedIds(new Set())}
         createLabel={label}
         createHref={builderHref}
@@ -367,6 +393,7 @@ export function TemplateManagement({
                   createdAt={template.created_at}
                   backgroundUrl={template.background_url}
                   onDeleted={handleDeleted}
+                  onUpdated={() => router.refresh()}
                 />
               </div>
             </div>

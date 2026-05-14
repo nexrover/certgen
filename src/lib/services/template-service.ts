@@ -99,3 +99,55 @@ export async function deleteTemplateById(id: string, userId: string): Promise<vo
 
   if (error) throw new Error(`Failed to delete template: ${error.message}`);
 }
+
+export async function renameTemplate(
+  id: string,
+  userId: string,
+  newName: string
+): Promise<CertificateTemplate> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from(TABLE)
+    .update({ name: newName })
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select()
+    .single();
+
+  if (error) throw new Error(`Failed to rename template: ${error.message}`);
+  return data as CertificateTemplate;
+}
+
+export async function duplicateTemplate(
+  id: string,
+  userId: string
+): Promise<CertificateTemplate> {
+  const supabase = await createClient();
+  
+  // 1. Fetch the original
+  const { data: original, error: fetchError } = await supabase
+    .from(TABLE)
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", userId)
+    .single();
+
+  if (fetchError || !original) {
+    throw new Error(`Failed to fetch original template: ${fetchError?.message || "Not found"}`);
+  }
+
+  // 2. Insert as a new row (Supabase will generate a new ID)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id: _, created_at: __, ...rest } = original;
+  const { data, error } = await supabase
+    .from(TABLE)
+    .insert({
+      ...rest,
+      name: `${original.name} (Copy)`,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(`Failed to duplicate template: ${error.message}`);
+  return data as CertificateTemplate;
+}
