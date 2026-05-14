@@ -472,7 +472,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
                   </button>
                 </div>
               </div>
-              <div ref={customScrollRef} className="flex gap-2 overflow-x-auto no-scrollbar pb-1" style={{ scrollbarWidth: "none" }}>
+              <div ref={customScrollRef} className="flex gap-2 overflow-x-auto no-scrollbar pt-2 pb-1 px-1" style={{ scrollbarWidth: "none" }}>
                 {customTemplates.map((ct) => (
                   <div key={ct.id} className="group relative shrink-0 w-[120px]">
                     <button
@@ -485,7 +485,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); onDeleteCustomTemplate?.(ct.id); }}
-                      className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 group-hover:flex z-10"
+                      className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 group-hover:flex z-20"
                     >
                       <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
                     </button>
