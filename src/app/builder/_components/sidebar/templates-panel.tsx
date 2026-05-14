@@ -23,6 +23,7 @@ const YOUTUBE_DEMOS = [
   { id: "yt-senior-dev", label: "Senior Dev in 4 Months", src: "https://placehold.co/1280x720/0f172a/ffffff?text=Senior+Developer" },
   { id: "yt-gaming-ultimate", label: "Ultimate Gaming", src: "https://placehold.co/1280x720/000000/22c55e?text=Gaming+Ultimate" },
   { id: "yt-fitness-core", label: "Core Fitness Challenge", src: "https://placehold.co/1280x720/c23333/ffffff?text=Fitness+Core" },
+  { id: "yt-sunrise-music", label: "Sunrise Music Mix", src: "https://placehold.co/1280x720/1e293b/ffffff?text=Sunrise+Music" },
 ];
 
 type Orientation = "landscape" | "portrait";

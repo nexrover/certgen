@@ -525,5 +525,34 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+  "yt-sunrise-music": {
+    name: "Sunrise Music Mix",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE",
+    canvasJson: {
+      version: "7.0.0", background: "#000000",
+      objects: [
+        // 1. Background
+        img("/Images/Temp4/bg.jpg", {
+          left: 0, top: -66, scaleX: 1.6, scaleY: 1.6, selectable: true
+        }),
+        // 2. Left Spark
+        img("/Images/Temp4/spark.svg", {
+          left: 256, top: 360, scaleX: 0.9, scaleY: 0.9, angle: -40, selectable: true
+        }),
+        // 3. Right Spark
+        img("/Images/Temp4/spark.svg", {
+          left: 1100, top: 300, scaleX: 1.4, scaleY: 1.4, angle: 140, selectable: true
+        }),
+        // 4. Sunrise Text
+        tb("sunrise", {
+          left: 340, top: 180, width: 600, fontSize: 220, fill: "#ffffff", fontFamily: "Georgia", fontStyle: "italic", textAlign: "center", selectable: true
+        }),
+        // 5. Music Mix
+        tb("MUSIC MIX", {
+          left: 440, top: 460, width: 400, fontSize: 36, fill: "#ffffff", fontWeight: "300", fontFamily: "Helvetica", textAlign: "center", charSpacing: 500, selectable: true
+        }),
+      ],
+    },
+  },
 };
 
