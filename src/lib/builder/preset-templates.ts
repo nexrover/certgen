@@ -457,14 +457,14 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
     canvasJson: {
       version: "7.0.0", background: "#000000",
       objects: [
-        img("/Images/Temp2/s.png", {
-          left: 0, top: 0, scaleX: 1.6, scaleY: 1.6, selectable: true
+        tb("ep #28", {
+          left: -20, top: -50, width: 800, fontSize: 350, fontWeight: "bold", fill: "#1f1f1f", fontFamily: "Helvetica"
         }),
         img("/Images/Temp2/s2.png", {
           left: 530, top: 10, scaleX: 1.4, scaleY: 1.4, selectable: true
         }),
-        tb("ep #28", {
-          left: -20, top: -50, width: 800, fontSize: 350, fontWeight: "bold", fill: "#1f1f1f", fontFamily: "Helvetica"
+        img("/Images/Temp2/s.png", {
+          left: 0, top: 0, scaleX: 1.6, scaleY: 1.6, selectable: true
         }),
         tb("How to grow", {
           left: 100, top: 250, width: 600, fontSize: 75, fontWeight: "500", fill: "#ffffff", fontFamily: "Helvetica"
