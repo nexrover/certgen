@@ -19,6 +19,7 @@ export async function createTemplate(
       width: input.width ?? 1920,
       height: input.height ?? 1080,
       background_url: input.backgroundUrl ?? null,
+      category: "certificate", // Default for simple creation
       fields: input.fields,
     })
     .select()
@@ -54,12 +55,44 @@ export async function saveBuilderTemplate(
       .eq("user_id", userId)
       .select()
       .single();
-    if (error) throw new Error(`Failed to update template: ${error.message}`);
+
+    if (error) {
+      // Fallback for missing 'category' column in older schema
+      if (error.message.includes("column \"category\" of relation \"certificate_templates\" does not exist")) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { category, ...rest } = row;
+        const { data: retryData, error: retryError } = await supabase
+          .from(TABLE)
+          .update(rest)
+          .eq("id", existingId)
+          .eq("user_id", userId)
+          .select()
+          .single();
+        if (retryError) throw new Error(`Failed to update template: ${retryError.message}`);
+        return retryData as CertificateTemplate;
+      }
+      throw new Error(`Failed to update template: ${error.message}`);
+    }
     return data as CertificateTemplate;
   }
 
   const { data, error } = await supabase.from(TABLE).insert(row).select().single();
-  if (error) throw new Error(`Failed to create template: ${error.message}`);
+  if (error) {
+    // Fallback for missing 'category' column in older schema
+    if (error.message.includes("column \"category\" of relation \"certificate_templates\" does not exist") || 
+        error.message.includes("Could not find the 'category' column")) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { category, ...rest } = row;
+      const { data: retryData, error: retryError } = await supabase
+        .from(TABLE)
+        .insert(rest)
+        .select()
+        .single();
+      if (retryError) throw new Error(`Failed to create template: ${retryError.message}`);
+      return retryData as CertificateTemplate;
+    }
+    throw new Error(`Failed to create template: ${error.message}`);
+  }
   return data as CertificateTemplate;
 }
 
