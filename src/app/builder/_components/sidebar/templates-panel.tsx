@@ -16,14 +16,15 @@ interface TemplatesPanelProps {
   customTemplates?: CustomTemplate[];
   onDeleteCustomTemplate?: (id: string) => void;
   category?: string;
+  isLoading?: boolean;
 }
 
 const YOUTUBE_DEMOS = [
-  { id: "yt-social-media", label: "Social Media Growth", src: "https://placehold.co/1280x720/000000/84cc16?text=Social+Media" },
-  { id: "yt-senior-dev", label: "Senior Dev in 4 Months", src: "https://placehold.co/1280x720/0f172a/ffffff?text=Senior+Developer" },
-  { id: "yt-gaming-ultimate", label: "Ultimate Gaming", src: "https://placehold.co/1280x720/000000/22c55e?text=Gaming+Ultimate" },
-  { id: "yt-fitness-core", label: "Core Fitness Challenge", src: "https://placehold.co/1280x720/c23333/ffffff?text=Fitness+Core" },
-  { id: "yt-sunrise-music", label: "Sunrise Music Mix", src: "https://placehold.co/1280x720/1e293b/ffffff?text=Sunrise+Music" },
+  { id: "yt-social-media", label: "Social Media Growth" },
+  { id: "yt-senior-dev", label: "Senior Dev in 4 Months" },
+  { id: "yt-gaming-ultimate", label: "Ultimate Gaming" },
+  { id: "yt-fitness-core", label: "Core Fitness Challenge" },
+  { id: "yt-sunrise-music", label: "Sunrise Music Mix" },
 ];
 
 type Orientation = "landscape" | "portrait";
@@ -38,7 +39,6 @@ interface TemplatePreview {
   style: Style;
   colorTheme: ColorTheme;
   orientation: Orientation;
-  thumbnailSrc: string;
 }
 
 const ALL_CATEGORIES: Category[] = ["Course", "Completion", "Achievement", "Training", "Recognition", "Participation", "Webinar", "Appreciation", "Employee of the Month"];
@@ -162,7 +162,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Navy",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Course Completion", style: "Classic", colorTheme: "Navy", orientation: "landscape" }),
   },
   {
     id: "achievement-award",
@@ -171,7 +170,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Dark",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Achievement Award", style: "Bold", colorTheme: "Dark", orientation: "landscape" }),
   },
   {
     id: "professional-cert",
@@ -180,7 +178,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Green",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Professional Certificate", style: "Modern", colorTheme: "Green", orientation: "landscape" }),
   },
   {
     id: "communication-skills",
@@ -189,7 +186,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Red",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Communication Skills", style: "Modern", colorTheme: "Red", orientation: "landscape" }),
   },
   {
     id: "digital-marketing",
@@ -198,7 +194,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Warm",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Digital Marketing", style: "Modern", colorTheme: "Warm", orientation: "landscape" }),
   },
   {
     id: "financial-accounting",
@@ -207,7 +202,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Minimal",
     colorTheme: "Neutral",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Financial Accounting", style: "Minimal", colorTheme: "Neutral", orientation: "landscape" }),
   },
   {
     id: "seo-strategies",
@@ -216,7 +210,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Cool",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "SEO Strategies", style: "Bold", colorTheme: "Cool", orientation: "landscape" }),
   },
   {
     id: "training-course",
@@ -225,7 +218,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Red",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Training Course", style: "Bold", colorTheme: "Red", orientation: "landscape" }),
   },
   {
     id: "webinar-participation",
@@ -234,7 +226,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Cool",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Webinar Participation", style: "Modern", colorTheme: "Cool", orientation: "landscape" }),
   },
   {
     id: "appreciation",
@@ -243,7 +234,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Warm",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Appreciation", style: "Classic", colorTheme: "Warm", orientation: "landscape" }),
   },
   // --- Portrait templates ---
   {
@@ -253,7 +243,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Navy",
     orientation: "portrait",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Course Completion", style: "Classic", colorTheme: "Navy", orientation: "portrait" }),
   },
   {
     id: "creative-writing",
@@ -262,7 +251,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Warm",
     orientation: "portrait",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Creative Writing", style: "Bold", colorTheme: "Warm", orientation: "portrait" }),
   },
   {
     id: "design-academy",
@@ -271,7 +259,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Cool",
     orientation: "portrait",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Design Academy", style: "Modern", colorTheme: "Cool", orientation: "portrait" }),
   },
   {
     id: "employee-month",
@@ -280,7 +267,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Warm",
     orientation: "portrait",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Employee of the Month", style: "Classic", colorTheme: "Warm", orientation: "portrait" }),
   },
   {
     id: "completion-portrait",
@@ -289,16 +275,17 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Minimal",
     colorTheme: "Neutral",
     orientation: "portrait",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Completion Certificate", style: "Minimal", colorTheme: "Neutral", orientation: "portrait" }),
   },
 ];
 
 type FilterType = "category" | "style" | "color";
 
-export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteCustomTemplate, category = "certificate" }: TemplatesPanelProps) {
+export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteCustomTemplate, category = "certificate", isLoading = false }: TemplatesPanelProps) {
   const isYoutube = category === "youtube";
   const isNonCertificate = category !== "certificate";
   const [loading, setLoading] = useState<string | null>(null);
+  const [isHydrating, setIsHydrating] = useState(true);
+  const [hasMounted, setHasMounted] = useState(false);
   const [presetThumbnails, setPresetThumbnails] = useState<Record<string, string>>({});
   const customScrollRef = useRef<HTMLDivElement>(null);
   const filterScrollRef = useRef<HTMLDivElement>(null);
@@ -325,6 +312,8 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
   const [openFilter, setOpenFilter] = useState<FilterType | null>(null);
 
   useEffect(() => {
+    setHasMounted(true);
+    setIsHydrating(true);
     let cancelled = false;
 
     async function hydratePresetThumbnails() {
@@ -341,13 +330,16 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
       );
       if (cancelled) return;
       setPresetThumbnails(Object.fromEntries(results.filter((entry): entry is readonly [string, string] => entry !== null)));
+      setIsHydrating(false);
     }
 
     void hydratePresetThumbnails();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [category, orientation]);
+
+  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]);
 
   const filtered = TEMPLATES.filter((t) => {
     if (t.orientation !== orientation) return false;
@@ -439,88 +431,125 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
         </button>
       </div>
 
-      {/* Recently Used - Integrated into default layout */}
-      {customTemplates.length > 0 && (
-        <div className="px-3 py-4 border-b border-gray-100 bg-white">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-gray-700">Recently Used</span>
-            <div className="flex gap-1">
-              <button onClick={scrollCustomLeft} className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-              </button>
-              <button onClick={scrollCustomRight} className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-              </button>
-            </div>
-          </div>
-          <div ref={customScrollRef} className="flex gap-2 overflow-x-auto no-scrollbar pb-1" style={{ scrollbarWidth: "none" }}>
-            {customTemplates.map((ct) => (
-              <div key={ct.id} className="group relative shrink-0 w-[120px]">
-                <button
-                  onClick={() => onLoadTemplate({ canvasJson: ct.canvasJson, paperSize: ct.paperSize, width: ct.width, height: ct.height })}
-                  className="block w-full overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md"
-                  style={{ aspectRatio: `${ct.width} / ${ct.height}` }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={ct.thumbnail} alt="Custom template" className="h-full w-full object-contain" draggable={false} />
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); onDeleteCustomTemplate?.(ct.id); }}
-                  className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 group-hover:flex z-10"
-                >
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-                </button>
-              </div>
+      {/* Results Section */}
+      {showSkeletons ? (
+        <div className="px-3 py-4">
+          <div className="mb-4 h-3 w-20 skeleton rounded" />
+          <div className="grid grid-cols-2 gap-2">
+            <div
+              className="skeleton rounded-lg border border-dashed border-gray-200"
+              style={{
+                aspectRatio: isYoutube ? "16 / 9" : orientation === "portrait" ? "595 / 842" : "842 / 595",
+              }}
+            />
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div
+                key={`skeleton-${i}`}
+                className="skeleton rounded-lg border border-gray-100"
+                style={{
+                  aspectRatio: isYoutube ? "16 / 9" : orientation === "portrait" ? "595 / 842" : "842 / 595",
+                  animation: "fadeIn 0.8s ease-out forwards",
+                  animationDelay: `${i * 0.05}s`,
+                  opacity: 0,
+                }}
+              />
             ))}
           </div>
         </div>
-      )}
-
-      {/* All Results - Default look */}
-      <div className="px-3 py-2">
-        <span className="text-[11px] font-semibold text-gray-700">All Results</span>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 px-3 pb-6">
-        {/* Blank template */}
-        <button
-          onClick={handleBlank}
-          className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
-          style={{ aspectRatio: isYoutube ? "16 / 9" : orientation === "portrait" ? "595 / 842" : "842 / 595" }}
-        >
-          <svg className="h-6 w-6 text-gray-300 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-        </button>
-
-        {/* Demo cards / Presets */}
-        {(isYoutube ? YOUTUBE_DEMOS : filtered).map((demo) => {
-          const dims = isYoutube ? { width: 1280, height: 720 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
-          const thumb = isYoutube
-            ? (presetThumbnails[demo.id] ?? (demo as any).src)
-            : (presetThumbnails[demo.id] ?? (demo as any).thumbnailSrc);
-
-          return (
-            <button
-              key={demo.id}
-              onClick={() => handleLoad(demo.id)}
-              className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md disabled:opacity-50"
-              style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
-              title={demo.label}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={thumb} alt={demo.label} className="h-full w-full object-cover" draggable={false} />
-              {loading === demo.id && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/80">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+      ) : (
+        <>
+          {/* Recently Used - Integrated into default layout */}
+          {customTemplates.length > 0 && (
+            <div className="px-3 py-4 border-b border-gray-100 bg-white">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-gray-700">Recently Used</span>
+                <div className="flex gap-1">
+                  <button onClick={scrollCustomLeft} className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                  </button>
+                  <button onClick={scrollCustomRight} className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                  </button>
                 </div>
-              )}
+              </div>
+              <div ref={customScrollRef} className="flex gap-2 overflow-x-auto no-scrollbar pb-1" style={{ scrollbarWidth: "none" }}>
+                {customTemplates.map((ct) => (
+                  <div key={ct.id} className="group relative shrink-0 w-[120px]">
+                    <button
+                      onClick={() => onLoadTemplate({ canvasJson: ct.canvasJson, paperSize: ct.paperSize, width: ct.width, height: ct.height })}
+                      className="block w-full overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md"
+                      style={{ aspectRatio: `${ct.width} / ${ct.height}` }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={ct.thumbnail} alt="Custom template" className="h-full w-full object-contain" draggable={false} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDeleteCustomTemplate?.(ct.id); }}
+                      className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 group-hover:flex z-10"
+                    >
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* All Results - Default look */}
+          <div className="px-3 py-2">
+            <span className="text-[11px] font-semibold text-gray-700">All Results</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 px-3 pb-6">
+            {/* Blank template */}
+            <button
+              onClick={handleBlank}
+              className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
+              style={{ aspectRatio: isYoutube ? "16 / 9" : orientation === "portrait" ? "595 / 842" : "842 / 595" }}
+            >
+              <svg className="h-6 w-6 text-gray-300 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
             </button>
-          );
-        })}
-      </div>
-      {filtered.length === 0 && !isYoutube && (
-        <div className="px-3 pb-8 text-center text-xs text-gray-400">No templates match your filters.</div>
+
+            {/* Demo cards / Presets */}
+            {(isYoutube ? YOUTUBE_DEMOS : filtered).map((demo) => {
+              const dims = isYoutube ? { width: 1280, height: 720 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
+              const thumb = presetThumbnails[demo.id];
+
+              if (!thumb) {
+                return (
+                  <div
+                    key={`placeholder-${demo.id}`}
+                    className="skeleton rounded-lg border border-gray-100"
+                    style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
+                  />
+                );
+              }
+
+              return (
+                <button
+                  key={demo.id}
+                  onClick={() => handleLoad(demo.id)}
+                  className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md disabled:opacity-50 animate-in fade-in duration-500"
+                  style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
+                  title={demo.label}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={thumb} alt={demo.label} className="h-full w-full object-cover" draggable={false} />
+                  {loading === demo.id && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {filtered.length === 0 && !isYoutube && (
+            <div className="px-3 pb-8 text-center text-xs text-gray-400">No templates match your filters.</div>
+          )}
+        </>
       )}
     </div>
   );
