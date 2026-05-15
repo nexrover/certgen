@@ -378,7 +378,7 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
 
   "yt-gaming-ultimate": {
     name: "Ultimate Gaming Challenge",
-    width: YT.w, height: YT.h, paperSize: "YOUTUBE",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE_THUMBNAIL",
     canvasJson: {
       version: "7.0.0", background: "#000000",
       objects: [
@@ -415,7 +415,7 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
 
   "yt-senior-dev": {
     name: "Senior Developer in 4 Months",
-    width: YT.w, height: YT.h, paperSize: "YOUTUBE",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE_THUMBNAIL",
     canvasJson: {
       version: "7.0.0", background: "#0f172a",
       objects: [
@@ -453,7 +453,7 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
 
   "yt-social-media": {
     name: "Social Media Growth",
-    width: YT.w, height: YT.h, paperSize: "YOUTUBE",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE_THUMBNAIL",
     canvasJson: {
       version: "7.0.0", background: "#000000",
       objects: [
@@ -484,7 +484,7 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
   },
   "yt-fitness-core": {
     name: "Core Fitness Challenge",
-    width: YT.w, height: YT.h, paperSize: "YOUTUBE",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE_THUMBNAIL",
     canvasJson: {
       version: "7.0.0", background: "#000000",
       objects: [
@@ -527,7 +527,7 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
   },
   "yt-sunrise-music": {
     name: "Sunrise Music Mix",
-    width: YT.w, height: YT.h, paperSize: "YOUTUBE",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE_THUMBNAIL",
     canvasJson: {
       version: "7.0.0", background: "#000000",
       objects: [

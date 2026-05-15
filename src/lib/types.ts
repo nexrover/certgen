@@ -20,6 +20,7 @@ export type PaperSize =
   | "YOUTUBE_THUMBNAIL"
   | "SOCIAL_1080"
   | "SQUARE_500"
+  | "SQUARE_1024"
   | "OG_IMAGE"
   | "CUSTOM_16_9";
 
@@ -31,6 +32,7 @@ export const PAPER_DIMENSIONS: Record<PaperSize, { width: number; height: number
   YOUTUBE_THUMBNAIL: { width: 1280, height: 720 },
   SOCIAL_1080: { width: 1080, height: 1080 },
   SQUARE_500: { width: 500, height: 500 },
+  SQUARE_1024: { width: 1024, height: 1024 },
   OG_IMAGE: { width: 1200, height: 630 },
   CUSTOM_16_9: { width: 1920, height: 1080 },
 };

@@ -27,6 +27,8 @@ const ALL_PAPER_OPTIONS: { value: PaperSize; label: string; categories: string[]
   // Digital presets
   { value: "YOUTUBE_THUMBNAIL", label: "YouTube 16:9 (1280×720)", categories: ["youtube"] },
   { value: "SOCIAL_1080", label: "Social Square (1080×1080)", categories: ["social-media"] },
+  { value: "SQUARE_500", label: "Small Square (500×500)", categories: ["ecommerce"] },
+  { value: "SQUARE_1024", label: "Large Square (1024×1024)", categories: ["ecommerce"] },
   { value: "OG_IMAGE", label: "Open Graph (1200×630)", categories: ["open-graph"] },
   { value: "CUSTOM_16_9", label: "Full HD 16:9 (1920×1080)", categories: ["ecommerce", "youtube"] },
 ];
