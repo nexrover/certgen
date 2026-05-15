@@ -29,6 +29,7 @@ const YOUTUBE_DEMOS = [
 
 const ECOMMERCE_DEMOS = [
   { id: "ecomm-flash-sale", label: "Flash Sale Ecommerce" },
+  { id: "ecomm-flash-sale-2", label: "Flash Sale Ecommerce 2" },
 ];
 
 type Orientation = "landscape" | "portrait" | "square";

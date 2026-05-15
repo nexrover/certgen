@@ -594,5 +594,52 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+
+  "ecomm-flash-sale-2": {
+    name: "Flash Sale Ecommerce 2",
+    width: 500, height: 500, paperSize: "SQUARE_500",
+    canvasJson: {
+      version: "7.0.0", background: "#ff33cc",
+      objects: [
+        // Decorative Shapes
+        { type: "Circle", left: -25, top: -25, radius: 45, fill: "#ffff00", selectable: true },
+        { type: "Circle", left: -30, top: 235, radius: 25, fill: "#0000ff", selectable: true },
+        { type: "Rect", left: 455, top: -15, width: 70, height: 70, fill: "#ff0000", angle: 45, selectable: true },
+
+        // Header Text
+        tb("FLASH SALE", { left: cx(500, 480), top: 45, width: 480, fontSize: 58, fontWeight: "900", fill: "#ffffff", textAlign: "center", fontFamily: "Impact" }),
+        tb("15% OFF ALL BRANDS", { left: cx(500, 400), top: 102, width: 400, fontSize: 16, fontWeight: "bold", fill: "#ffffff", textAlign: "center" }),
+
+        // Center Image (Full width 500px, fit & center)
+        {
+          ...img("/Images/ectemp2/2572972.jpeg", {
+            left: 50,
+            top: 150,
+            width: 1280,
+            height: 853,
+            scaleX: 0.31,
+            scaleY: 0.31,
+            selectable: true,
+          }),
+          clipPath: {
+            type: "Rect",
+            left: 0,
+            top: 0,
+            width: 1280,
+            height: 853,
+            rx: 60,
+            ry: 60,
+            originX: "center",
+            originY: "center"
+          }
+        },
+        { type: "Circle", left: 400, top: 375, radius: 45, fill: "#ffff00", selectable: true },
+
+        // Button
+        rect({ left: cx(500, 200), top: 390, width: 200, height: 50, fill: "#ffffff", rx: 0, ry: 0 }),
+        tb("SHOP NOW", { left: cx(500, 180), top: 402, width: 180, fontSize: 22, fontWeight: "900", fill: "#ff33cc", textAlign: "center" }),
+      ],
+    },
+  },
 };
 
