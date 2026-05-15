@@ -34,7 +34,7 @@ export const SaveBuilderTemplateSchema = z.object({
   name: z.string().min(1).max(100),
   width: z.number().int().positive(),
   height: z.number().int().positive(),
-  paperSize: z.enum(["A4", "A4_LANDSCAPE", "US_LETTER", "US_LETTER_LANDSCAPE", "YOUTUBE_THUMBNAIL", "SOCIAL_1080", "OG_IMAGE", "CUSTOM_16_9"]),
+  paperSize: z.enum(["A4", "A4_LANDSCAPE", "US_LETTER", "US_LETTER_LANDSCAPE", "YOUTUBE_THUMBNAIL", "SOCIAL_1080", "SQUARE_500", "SQUARE_1024", "OG_IMAGE", "CUSTOM_16_9"]),
   canvasJson: z.record(z.string(), z.unknown()),
   backgroundUrl: BackgroundUrlSchema.optional().nullable(),
   category: z.string().min(1).max(50).optional(),
