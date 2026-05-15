@@ -31,6 +31,7 @@ const ECOMMERCE_DEMOS = [
   { id: "ecomm-flash-sale", label: "Flash Sale Ecommerce" },
   { id: "ecomm-flash-sale-2", label: "Flash Sale Ecommerce 2" },
   { id: "ecomm-super-sale", label: "Super Sale Ecommerce" },
+  { id: "ecomm-product-review", label: "Product Review" },
 ];
 
 type Orientation = "landscape" | "portrait" | "square";

@@ -671,5 +671,57 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+
+  "ecomm-product-review": {
+    name: "Product Review",
+    width: 500, height: 500, paperSize: "SQUARE_500",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Split Background
+        rect({ left: 0, top: 0, width: 250, height: 500, fill: "#b9c1c4" }),
+        {
+          ...img("/Images/ectemp4/bg.jpeg", {
+            left: 250, top: 0,
+            width: 640,
+            height: 1280,
+            scaleX: 0.39, scaleY: 0.39, // 1280 * 0.39 = 500
+            selectable: false, evented: false
+          }),
+          clipPath: {
+            type: "Rect", left: 0, top: 0, width: 640, height: 1280, originX: "center", originY: "center"
+          }
+        },
+
+        // Logo Area
+        { type: "Circle", left: 35, top: 70, radius: 20, stroke: "#ffffff", strokeWidth: 1, fill: "transparent" },
+        tb("YOUR LOGO", { left: 82, top: 83, width: 80, fontSize: 14, fill: "#ffffff", fontWeight: "bold" }),
+
+        // Title
+        tb("Product\nReview", { left: 35, top: 120, width: 200, fontSize: 36, fill: "#ffffff", fontWeight: "bold", fontFamily: "Georgia" }),
+
+        // Review Card
+        rect({ left: 30, top: 230, width: 360, height: 210, fill: "#ffffff", rx: 15, ry: 15 }),
+        // Avatar
+        {
+          ...img("/Images/ectemp4/human.jpeg", {
+            left: 55, top: 250,
+            scaleX: 0.06, scaleY: 0.06, // 1280 * 0.06 = 76.8
+            selectable: true
+          }),
+          clipPath: { type: "Circle", radius: 640, left: 0, top: 0, originX: "center", originY: "center" }
+        },
+        // Reviewer Name & Rating
+        tb("Michelly Leary", { left: 145, top: 262, width: 200, fontSize: 18, fill: "#333333", fontWeight: "900" }),
+        img("/Images/ectemp4/star.png", { left: 145, top: 290, scaleX: 0.06, scaleY: 0.06 }),
+
+        // Review Content
+        tb("This facial cleansing is very safe to use and a very satisfying product, i want to try this product for my son since its very mild to use.", {
+          left: 55, top: 345, width: 310, fontSize: 14, fill: "#666666", lineHeight: 1.2
+        }),
+        tb("Reviewed on July 23, 2022", { left: 55, top: 410, width: 310, fontSize: 9, fill: "#999999" }),
+      ],
+    },
+  },
 };
 
