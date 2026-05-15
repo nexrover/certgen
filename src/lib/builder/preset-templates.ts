@@ -641,5 +641,35 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+
+  "ecomm-super-sale": {
+    name: "Super Sale Ecommerce",
+    width: 500, height: 500, paperSize: "SQUARE_500",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Background Pattern
+        img("/Images/ectemp3/bg.png", {
+          left: 0, top: 0, width: 500, height: 500,
+          scaleX: 1, scaleY: 1,
+          selectable: false, evented: false
+        }),
+
+        // Central Black Circle
+        { type: "Circle", left: cx(500, 420), top: 40, radius: 210, fill: "#000000", selectable: true },
+
+        // SUPER SALE Text
+        tb("SUPER", { left: cx(500, 400), top: 125, width: 400, fontSize: 80, fontWeight: "900", fill: "#ffff00", textAlign: "center", fontFamily: "Impact" }),
+        tb("SALE", { left: cx(500, 400), top: 210, width: 400, fontSize: 80, fontWeight: "900", fill: "#ffff00", textAlign: "center", fontFamily: "Impact" }),
+
+        // Promo Subtitle
+        tb("15% off on all items", { left: cx(500, 400), top: 320, width: 400, fontSize: 18, fontWeight: "600", fill: "#ffffff", textAlign: "center" }),
+
+        // Button
+        rect({ left: cx(500, 130), top: 375, width: 130, height: 35, fill: "#ffffff", rx: 17, ry: 17 }),
+        tb("VISIT US", { left: cx(500, 120), top: 382, width: 120, fontSize: 14, fontWeight: "bold", fill: "#000000", textAlign: "center" }),
+      ],
+    },
+  },
 };
 
