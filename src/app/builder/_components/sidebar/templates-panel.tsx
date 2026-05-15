@@ -27,7 +27,11 @@ const YOUTUBE_DEMOS = [
   { id: "yt-sunrise-music", label: "Sunrise Music Mix" },
 ];
 
-type Orientation = "landscape" | "portrait";
+const ECOMMERCE_DEMOS = [
+  { id: "ecomm-flash-sale", label: "Flash Sale Ecommerce" },
+];
+
+type Orientation = "landscape" | "portrait" | "square";
 type Category = "Course" | "Completion" | "Achievement" | "Training" | "Recognition" | "Participation" | "Webinar" | "Appreciation" | "Employee of the Month";
 type Style = "Classic" | "Modern" | "Minimal" | "Bold";
 type ColorTheme = "Navy" | "Dark" | "Green" | "Red" | "Warm" | "Cool" | "Neutral";
@@ -282,6 +286,7 @@ type FilterType = "category" | "style" | "color";
 
 export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteCustomTemplate, category = "certificate", isLoading = false }: TemplatesPanelProps) {
   const isYoutube = category === "youtube";
+  const isEcommerce = category === "ecommerce";
   const isNonCertificate = category !== "certificate";
   const [loading, setLoading] = useState<string | null>(null);
   const [isHydrating, setIsHydrating] = useState(true);
@@ -319,7 +324,8 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
     async function hydratePresetThumbnails() {
       const allTemplatesToRender = [
         ...TEMPLATES,
-        ...YOUTUBE_DEMOS.map(d => ({ id: d.id, orientation: "landscape" as Orientation }))
+        ...YOUTUBE_DEMOS.map(d => ({ id: d.id, orientation: "landscape" as Orientation })),
+        ...ECOMMERCE_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation }))
       ];
 
       const results = await Promise.all(
@@ -339,7 +345,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
     };
   }, [category, orientation]);
 
-  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]);
+  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]);
 
   const filtered = TEMPLATES.filter((t) => {
     if (t.orientation !== orientation) return false;
@@ -505,7 +511,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             <button
               onClick={handleBlank}
               className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
-              style={{ aspectRatio: isYoutube ? "16 / 9" : orientation === "portrait" ? "595 / 842" : "842 / 595" }}
+              style={{ aspectRatio: isYoutube ? "16 / 9" : isEcommerce ? "1 / 1" : orientation === "portrait" ? "595 / 842" : "842 / 595" }}
             >
               <svg className="h-6 w-6 text-gray-300 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -513,8 +519,8 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             </button>
 
             {/* Demo cards / Presets */}
-            {(isYoutube ? YOUTUBE_DEMOS : filtered).map((demo) => {
-              const dims = isYoutube ? { width: 1280, height: 720 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
+            {(isYoutube ? YOUTUBE_DEMOS : isEcommerce ? ECOMMERCE_DEMOS : filtered).map((demo) => {
+              const dims = isYoutube ? { width: 1280, height: 720 } : isEcommerce ? { width: 500, height: 500 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
               const thumb = presetThumbnails[demo.id];
 
               if (!thumb) {

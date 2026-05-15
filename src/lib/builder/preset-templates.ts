@@ -554,5 +554,45 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+
+  "ecomm-flash-sale": {
+    name: "Flash Sale Ecommerce",
+    width: 500, height: 500, paperSize: "SQUARE_500",
+    canvasJson: {
+      version: "7.0.0", background: "#a21caf",
+      objects: [
+        // Background Gradient
+        {
+          type: "Rect", left: 0, top: 0, width: 500, height: 500,
+          fill: {
+            type: 'linear',
+            coords: { x1: 0, y1: 0, x2: 500, y2: 500 },
+            colorStops: [
+              { offset: 0, color: '#a21caf' },
+              { offset: 1, color: '#ec4899' }
+            ]
+          },
+          selectable: false, evented: false
+        },
+        // Logo Icon Background
+        {
+          type: "Circle", left: cx(500, 40), top: 45, radius: 20, fill: "rgba(255,255,255,0.2)"
+        },
+        // Heart Icon
+        tb("\u2764", { left: cx(430, 30), top: 52, width: 50, fontSize: 30, fill: "#ffffff", textAlign: "center" }),
+        // Logo Text
+        tb("YOU BRAND\nNAME HERE", { left: cx(500, 200), top: 85, width: 200, fontSize: 11, fontWeight: "bold", fill: "#ffffff", textAlign: "center", lineHeight: 1.1 }),
+        // Promo Text
+        tb("15% OFF ALL BRANDS", { left: cx(500, 400), top: 155, width: 400, fontSize: 16, fontWeight: "800", fill: "#ffffff", textAlign: "center", charSpacing: 50 }),
+        // FLASH
+        tb("FLASH", { left: cx(500, 500), top: 180, width: 500, fontSize: 115, fontWeight: "900", fill: "#ffffff", textAlign: "center", fontFamily: "Impact" }),
+        // SALE
+        tb("SALE", { left: cx(500, 500), top: 280, width: 500, fontSize: 115, fontWeight: "900", fill: "#ffffff", textAlign: "center", fontFamily: "Impact" }),
+        // Button
+        rect({ left: cx(500, 160), top: 410, width: 160, height: 40, fill: "#ffffff", rx: 2, ry: 2 }),
+        tb("SHOP NOW", { left: cx(500, 150), top: 420, width: 150, fontSize: 18, fontWeight: "900", fill: "#ec4899", textAlign: "center" }),
+      ],
+    },
+  },
 };
 
