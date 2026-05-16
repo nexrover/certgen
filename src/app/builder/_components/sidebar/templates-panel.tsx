@@ -37,6 +37,7 @@ const ECOMMERCE_DEMOS = [
 const REAL_ESTATE_DEMOS = [
   { id: "re-modern-home", label: "Modern Real Estate Home" },
   { id: "re-modern-rent", label: "Modern Rent Real Estate" },
+  { id: "re-luxury-listing", label: "Luxury Property Listing" },
 ];
 
 type Orientation = "landscape" | "portrait" | "square";

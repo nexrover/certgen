@@ -824,5 +824,80 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+  "re-luxury-listing": {
+    name: "Luxury Property Listing",
+    width: 1024, height: 1024, paperSize: "SQUARE_1024",
+    canvasJson: {
+      version: "7.0.0", background: "#1a1a2e",
+      objects: [
+        // 1. Top Header Bar
+        rect({
+          left: 0, top: 0, width: 1024, height: 80,
+          fill: "#1a1a2e", selectable: false
+        }),
+        // 2. Header Text
+        tb("THE PROPERTY.COM  \u2022  +67 998 9027 89", {
+          left: 0, top: 32, width: 1024, fontSize: 16, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica", charSpacing: 150
+        }),
+        // 3. Main Property Image
+        img("/Images/REtemp3/bg.jpeg", {
+          left: 0, top: 80, 
+          scaleX: 0.8, scaleY: 0.8, // 1280 * 0.8 = 1024
+          selectable: true
+        }),
+        // 4. Dark Overlay for bottom text area (Reduced Height)
+        rect({
+          left: 0, top: 680, width: 1024, height: 344,
+          fill: "#1a1a2e", selectable: false
+        }),
+        // 5. Title Layout (Aligned to reference)
+        tb("Modern", {
+          left: 60, top: 720, width: 250, fontSize: 52, fontWeight: "bold",
+          fill: "#c9a84c", textAlign: "left", fontFamily: "Georgia"
+        }),
+        tb("Home", {
+          left: 245, top: 720, width: 200, fontSize: 52, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "left", fontFamily: "Georgia"
+        }),
+        tb("For Sale", {
+          left: 60, top: 775, width: 300, fontSize: 52, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "left", fontFamily: "Georgia"
+        }),
+        // 6. Description
+        tb("Stunning 2 story home in highly desired\nStone Creek neighborhood!", {
+          left: 60, top: 855, width: 450, fontSize: 14,
+          fill: "#bbbbbb", textAlign: "left", fontFamily: "Helvetica", lineHeight: 1.4
+        }),
+        // 7. White Price Box
+        rect({
+          left: 630, top: 540, width: 330, height: 430,
+          fill: "#ffffff", rx: 4, ry: 4,
+          selectable: true,
+          shadow: { color: "rgba(0,0,0,0.3)", blur: 25, offsetX: 0, offsetY: 10 }
+        }),
+        // 8. Box Accent Line (Gold)
+        rect({
+          left: 630, top: 540, width: 330, height: 12,
+          fill: "#c9a84c", rx: 4, ry: 4, selectable: false
+        }),
+        // 9. Price Text
+        tb("$550,000", {
+          left: 630, top: 585, width: 330, fontSize: 44, fontWeight: "900",
+          fill: "#1a1a2e", textAlign: "center", fontFamily: "Helvetica"
+        }),
+        // 10. Features Label
+        tb("Features", {
+          left: 670, top: 655, width: 200, fontSize: 16, fontWeight: "bold",
+          fill: "#c9a84c", textAlign: "left", fontFamily: "Helvetica"
+        }),
+        // 11. Features List
+        tb("\u2022 Single family residence\n\u2022 5 bedrooms\n\u2022 4 bathrooms\n\u2022 Built in 2023\n\u2022 Forced air, natural gas", {
+          left: 670, top: 695, width: 280, fontSize: 14, fontWeight: "600",
+          fill: "#333333", textAlign: "left", fontFamily: "Helvetica", lineHeight: 1.9
+        }),
+      ],
+    },
+  },
 };
 
