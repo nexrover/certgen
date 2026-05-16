@@ -22,6 +22,7 @@ export type PaperSize =
   | "SQUARE_500"
   | "SQUARE_1024"
   | "OG_IMAGE"
+  | "SOCIAL_STORY"
   | "CUSTOM_16_9";
 
 export const PAPER_DIMENSIONS: Record<PaperSize, { width: number; height: number }> = {
@@ -34,6 +35,7 @@ export const PAPER_DIMENSIONS: Record<PaperSize, { width: number; height: number
   SQUARE_500: { width: 500, height: 500 },
   SQUARE_1024: { width: 1024, height: 1024 },
   OG_IMAGE: { width: 1200, height: 630 },
+  SOCIAL_STORY: { width: 1080, height: 1920 },
   CUSTOM_16_9: { width: 1920, height: 1080 },
 };
 

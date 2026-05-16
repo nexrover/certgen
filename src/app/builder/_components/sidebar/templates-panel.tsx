@@ -38,6 +38,7 @@ const REAL_ESTATE_DEMOS = [
   { id: "re-modern-home", label: "Modern Real Estate Home" },
   { id: "re-modern-rent", label: "Modern Rent Real Estate" },
   { id: "re-luxury-listing", label: "Luxury Property Listing" },
+  { id: "re-story-listing", label: "Real Estate Story Listing" },
 ];
 
 type Orientation = "landscape" | "portrait" | "square";
@@ -336,7 +337,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
         ...TEMPLATES,
         ...YOUTUBE_DEMOS.map(d => ({ id: d.id, orientation: "landscape" as Orientation })),
         ...ECOMMERCE_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation })),
-        ...REAL_ESTATE_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation }))
+        ...REAL_ESTATE_DEMOS.map(d => ({ id: d.id, orientation: (d.id === "re-story-listing" ? "portrait" : "square") as Orientation }))
       ];
 
       const results = await Promise.all(

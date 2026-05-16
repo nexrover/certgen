@@ -842,7 +842,7 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         }),
         // 3. Main Property Image
         img("/Images/REtemp3/bg.jpeg", {
-          left: 0, top: 80, 
+          left: 0, top: 80,
           scaleX: 0.8, scaleY: 0.8, // 1280 * 0.8 = 1024
           selectable: true
         }),
@@ -895,6 +895,103 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         tb("\u2022 Single family residence\n\u2022 5 bedrooms\n\u2022 4 bathrooms\n\u2022 Built in 2023\n\u2022 Forced air, natural gas", {
           left: 670, top: 695, width: 280, fontSize: 14, fontWeight: "600",
           fill: "#333333", textAlign: "left", fontFamily: "Helvetica", lineHeight: 1.9
+        }),
+      ],
+    },
+  },
+  "re-story-listing": {
+    name: "Real Estate Story Listing",
+    width: 1080, height: 1920, paperSize: "SOCIAL_STORY",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Top Image (Covering the top half)
+        img("/Images/REtemp4/c1.jpeg", {
+          left: -212, top: 0,
+          scaleX: 0.25, scaleY: 0.25, // Proportional scaling to cover ~1000px height
+          selectable: true
+        }),
+        // 2. Website text (Top overlay)
+        tb("www.housesforyou.com", {
+          left: 0, top: 80, width: 1080, fontSize: 32, fontWeight: "500",
+          fill: "#555555", textAlign: "center", fontFamily: "Helvetica"
+        }),
+        // 3. Main Box (shape-1)
+        rect({
+          left: 190, top: 880, width: 700, height: 280,
+          fill: "#b69d7c", rx: 40, ry: 40,
+          selectable: true,
+          shadow: { color: "rgba(0,0,0,0.15)", blur: 30, offsetX: 0, offsetY: 10 }
+        }),
+        // 4. Box Content
+        tb("THE BEST HOME", {
+          left: 190, top: 930, width: 700, fontSize: 38, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica"
+        }),
+        tb("FOR SALE", {
+          left: 190, top: 990, width: 700, fontSize: 86, fontWeight: "900",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica"
+        }),
+        // 5. Button (button-cta)
+        rect({
+          left: 415, top: 1120, width: 250, height: 80,
+          fill: "#967a5b", rx: 40, ry: 40,
+          selectable: true
+        }),
+        tb("I WANT", {
+          left: 415, top: 1145, width: 250, fontSize: 26, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "center"
+        }),
+        // 6. Three small photos with brown stroke
+        // Photo 1
+        {
+          ...img("/Images/REtemp4/c2.jpeg", {
+            left: -15, top: 1350,
+            scaleX: 300 / 3456, scaleY: 300 / 3456,
+            originX: "left", originY: "top",
+            selectable: true
+          }),
+          clipPath: {
+            type: "Rect", left: 0, top: 0, width: 3456, height: 3456, rx: 345, ry: 345,
+            originX: "center", originY: "center"
+          }
+        },
+        rect({ left: 60, top: 1350, width: 300, height: 300, fill: "transparent", stroke: "#b69d7c", strokeWidth: 10, rx: 30, ry: 30, selectable: true }),
+
+
+        // Photo 2
+        {
+          ...img("/Images/REtemp4/c3.jpeg", {
+            left: 315, top: 1350,
+            scaleX: 300 / 4016, scaleY: 300 / 4016,
+            originX: "left", originY: "top",
+            selectable: true
+          }),
+          clipPath: {
+            type: "Rect", left: 0, top: 0, width: 4016, height: 4016, rx: 401, ry: 401,
+            originX: "center", originY: "center"
+          }
+        },
+        rect({ left: 390, top: 1350, width: 300, height: 300, fill: "transparent", stroke: "#b69d7c", strokeWidth: 10, rx: 30, ry: 30, selectable: false }),
+
+        // Photo 3
+        {
+          ...img("/Images/REtemp4/c4.jpeg", {
+            left: 645, top: 1350,
+            scaleX: 300 / 3072, scaleY: 300 / 3072,
+            originX: "left", originY: "top",
+            selectable: true
+          }),
+          clipPath: {
+            type: "Rect", left: 0, top: 0, width: 3072, height: 3072, rx: 307, ry: 307,
+            originX: "center", originY: "center"
+          }
+        },
+        rect({ left: 720, top: 1350, width: 300, height: 300, fill: "transparent", stroke: "#b69d7c", strokeWidth: 10, rx: 30, ry: 30, selectable: false }),
+        // 7. Bottom Info
+        tb("For more info, contact us", {
+          left: 0, top: 1800, width: 1080, fontSize: 24, fontWeight: "500",
+          fill: "#888888", textAlign: "center", fontFamily: "Helvetica"
         }),
       ],
     },
