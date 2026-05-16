@@ -947,28 +947,27 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         {
           ...img("/Images/REtemp4/c2.jpeg", {
             left: -15, top: 1350,
-            scaleX: 300 / 3456, scaleY: 300 / 3456,
+            scaleX: 0.087, scaleY: 0.087,
             originX: "left", originY: "top",
             selectable: true
           }),
           clipPath: {
-            type: "Rect", left: 0, top: 0, width: 3456, height: 3456, rx: 345, ry: 345,
+            type: "Rect", left: 0, top: 0, width: 300, height: 300, rx: 30, ry: 30,
             originX: "center", originY: "center"
           }
         },
         rect({ left: 60, top: 1350, width: 300, height: 300, fill: "transparent", stroke: "#b69d7c", strokeWidth: 10, rx: 30, ry: 30, selectable: true }),
 
-
         // Photo 2
         {
           ...img("/Images/REtemp4/c3.jpeg", {
             left: 315, top: 1350,
-            scaleX: 300 / 4016, scaleY: 300 / 4016,
+            scaleX: 0.075, scaleY: 0.075,
             originX: "left", originY: "top",
             selectable: true
           }),
           clipPath: {
-            type: "Rect", left: 0, top: 0, width: 4016, height: 4016, rx: 401, ry: 401,
+            type: "Rect", left: 0, top: 0, width: 300, height: 300, rx: 30, ry: 30,
             originX: "center", originY: "center"
           }
         },
@@ -978,12 +977,12 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         {
           ...img("/Images/REtemp4/c4.jpeg", {
             left: 645, top: 1350,
-            scaleX: 300 / 3072, scaleY: 300 / 3072,
+            scaleX: 0.098, scaleY: 0.098,
             originX: "left", originY: "top",
             selectable: true
           }),
           clipPath: {
-            type: "Rect", left: 0, top: 0, width: 3072, height: 3072, rx: 307, ry: 307,
+            type: "Rect", left: 0, top: 0, width: 300, height: 300, rx: 30, ry: 30,
             originX: "center", originY: "center"
           }
         },
