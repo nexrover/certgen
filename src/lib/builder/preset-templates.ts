@@ -766,5 +766,63 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+  "re-modern-rent": {
+    name: "Modern Rent Real Estate",
+    width: 1024, height: 1024, paperSize: "SQUARE_1024",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Background Image
+        img("/Images/REtemp2/bd.png", {
+          left: 0, top: 0, scaleX: 1024 / 1080, scaleY: 1024 / 1080,
+          selectable: true
+        }),
+        // 2. Shape-BG (Left overlay)
+        rect({
+          left: 40, top: 0, width: 370, height: 1024,
+          fill: "rgba(35, 55, 45, 0.7)",
+          selectable: true
+        }),
+        // 3. Title
+        tb("RENT A\nMODERN\nHOUSE", {
+          left: 60, top: 120, width: 300, fontSize: 72, fontWeight: "900",
+          fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica", lineHeight: 1
+        }),
+        // 4. Divider Line (shape-1)
+        rect({
+          left: 60, top: 450, width: 230, height: 15,
+          fill: "#ffffff",
+          selectable: true
+        }),
+        // 5. Bottom White Shape (shape-2)
+        rect({
+          left: 80, top: 940, width: 200, height: 40,
+          fill: "#ffffff",
+          selectable: true
+        }),
+        // 6. Information Title
+        tb("INFORMATION ON", {
+          left: 70, top: 780, width: 300, fontSize: 18, fontWeight: "bold",
+          fill: "#aaaaaa", textAlign: "left", fontFamily: "Helvetica", charSpacing: 100
+        }),
+        // 7. Infos
+        tb("+123-456-7890\nwww.modernhouses.com", {
+          left: 70, top: 820, width: 300, fontSize: 24, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica", lineHeight: 1.4
+        }),
+        // 8. Button (button-cta)
+        rect({
+          left: 680, top: 850, width: 240, height: 75,
+          fill: "#1a2e23", rx: 37, ry: 37,
+          selectable: true
+        }),
+        // 9. Button Text
+        tb("BOOK NOW", {
+          left: 680, top: 872, width: 240, fontSize: 24, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica"
+        }),
+      ],
+    },
+  },
 };
 
