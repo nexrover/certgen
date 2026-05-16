@@ -46,7 +46,7 @@ export const CATEGORY_DEFAULT_PAPER_SIZE: Record<string, PaperSize> = {
   youtube: "YOUTUBE_THUMBNAIL",
   email: "A4",
   ecommerce: "SQUARE_500",
-  "real-estate": "A4_LANDSCAPE",
+  "real-estate": "SQUARE_1024",
   "shipping-label": "US_LETTER",
   resume: "A4",
   "open-graph": "OG_IMAGE",

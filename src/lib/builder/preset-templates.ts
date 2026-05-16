@@ -723,5 +723,48 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+  "re-modern-home": {
+    name: "Modern Real Estate Home",
+    width: 1024, height: 1024, paperSize: "SQUARE_1024",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Background Image
+        img("/Images/REtemp1/bg.jpeg", {
+          left: -255, top: 0,
+          scaleX: 0.291, scaleY: 0.291, // Proportional scaling to fit height (1024/3517)
+          selectable: true
+        }),
+        // 2. Shape-Title (Red banner)
+        rect({
+          left: 0, top: 220, width: 1024, height: 280,
+          fill: "rgba(205, 92, 92, 0.8)",
+          selectable: true
+        }),
+        // 3. Title
+        tb("YOUR NEXT HOME", {
+          left: 0, top: 270, width: 1024, fontSize: 90, fontWeight: "900",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica"
+        }),
+        // 4. Subtitle
+        tb("STARTS RIGHT HERE", {
+          left: 0, top: 380, width: 1024, fontSize: 38, fontWeight: "800",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica", charSpacing: 100
+        }),
+        // 5. Button (Red rounded rect)
+        rect({
+          left: cx(1024, 340), top: 800, width: 340, height: 85,
+          fill: "#cd5c5c", rx: 42, ry: 42,
+          selectable: true,
+          stroke: "#ffffff", strokeWidth: 3
+        }),
+        // 6. Button Text
+        tb("book a visit", {
+          left: cx(1024, 300), top: 822, width: 300, fontSize: 32, fontWeight: "600",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica"
+        }),
+      ],
+    },
+  },
 };
 
