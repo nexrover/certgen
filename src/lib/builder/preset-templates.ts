@@ -1423,6 +1423,68 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         tb("10 June 2024", { left: 700, top: 945, width: 245, fontSize: 14, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" })
       ]
     }
+  },
+
+  "inv-minimal": {
+    name: "Minimalist Invoice",
+    width: 1020, height: 1320, paperSize: "INVOICE",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Bottom-left charcoal overlay shape
+        circle({ left: -250, top: 920, radius: 350, fill: "#1a1a1a", selectable: false }),
+
+        // Top-left grey logo badge
+        circle({ left: 75, top: 80, radius: 45, fill: "#e2e8f0", selectable: false }),
+        tb("LOGO", { left: 75, top: 112, width: 90, fontSize: 18, fontWeight: "900", fontStyle: "italic", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "center" }),
+
+        // Top-right INVOICE heading
+        tb("INVOICE", { left: 600, top: 100, width: 325, fontSize: 32, fontFamily: "Georgia", fill: "#1a1a1a", textAlign: "right", charSpacing: 100 }),
+
+        // Billing detail headings & content
+        tb("Invoice to:", { left: 75, top: 210, width: 300, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a" }),
+        tb("Josh Boyd\nCreative Lab Company\n123 Anywhere St., Any City\n+123 456 7890", { left: 75, top: 245, width: 400, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.5 }),
+
+        // Invoice number & date metadata (right side)
+        tb("Invoice No. 12345\n10 June 2024", { left: 600, top: 245, width: 325, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right", lineHeight: 1.5 }),
+
+        // Table Header Solid Background block
+        rect({ left: 75, top: 385, width: 870, height: 45, fill: "#e2e8f0", selectable: true }),
+        tb("Item", { left: 95, top: 398, width: 300, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a" }),
+        tb("Qty", { left: 550, top: 398, width: 120, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "center" }),
+        tb("Price", { left: 690, top: 398, width: 100, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "center" }),
+        tb("Total", { left: 810, top: 398, width: 130, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+
+        // Row 1
+        tb("Item 1", { left: 95, top: 455, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 455, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 455, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 455, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 2
+        tb("Item 2", { left: 95, top: 510, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 510, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 510, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 510, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 3
+        tb("Item 3", { left: 95, top: 565, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 565, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 565, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 565, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+        
+        // Horizontal Total Divider Line
+        rect({ left: 75, top: 615, width: 870, height: 2, fill: "#1a1a1a", selectable: false }),
+
+        // Total
+        tb("TOTAL", { left: 550, top: 635, width: 200, fontSize: 20, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+        tb("$300", { left: 780, top: 635, width: 145, fontSize: 20, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+
+        // Signature Line & Label (bottom right of details, left of bottom oval)
+        rect({ left: 550, top: 950, width: 250, height: 2, fill: "#94a3b8", selectable: false }),
+        tb("Signature", { left: 550, top: 960, width: 250, fontSize: 14, fontFamily: "Helvetica", fill: "#94a3b8", textAlign: "center" })
+      ]
+    }
   }
 };
 
