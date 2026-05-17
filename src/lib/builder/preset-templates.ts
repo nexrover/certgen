@@ -1511,15 +1511,70 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         tb("ITEMS PURCHASED", { left: 110, top: 620, width: 600, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" }),
 
         // Monospaced Items List (centered container block)
-        tb("1x Ibuprofen 200mg (50 tabs)            $6.49\n1x Vitamin C 1000mg (60 caps)            $9.99\n1x Hand Sanitizer (250ml)               $3.79\n1x Toothpaste Whitening (6oz)            $2.89\n1x Cotton Swabs (200 ct)                 $1.99\n1x Cough Syrup (4 fl oz)                 $5.49", { left: 110, top: 700, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8 }),
+        tb("1x Ibuprofen 200mg (50 tabs)\n1x Vitamin C 1000mg (60 caps)\n1x Hand Sanitizer (250ml)\n1x Toothpaste Whitening (6oz)\n1x Cotton Swabs (200 ct)\n1x Cough Syrup (4 fl oz)", { left: 110, top: 700, width: 450, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8 }),
+        tb("$6.49\n$9.99\n$3.79\n$2.89\n$1.99\n$5.49", { left: 560, top: 700, width: 150, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
 
         // Dashed lines and subtotal block (centered container)
         tb("--------------------------------------------------", { left: 110, top: 1020, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" }),
-        tb("Subtotal                                 $8.17\nTax                                      $0.53\nTotal                                    $8.70", { left: 110, top: 1060, width: 600, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8 }),
+        tb("Subtotal\nTax\nTotal", { left: 360, top: 1060, width: 200, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+        tb("$8.17\n$0.53\n$8.70", { left: 560, top: 1060, width: 150, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
         tb("--------------------------------------------------", { left: 110, top: 1200, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" }),
 
         // Bottom tagline (centered)
         tb("STAY HEALTHY AND VISIT US AGAIN!", { left: 110, top: 1250, width: 600, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" })
+      ]
+    }
+  },
+
+  "rec-happyshop": {
+    name: "Happy Shop Receipt",
+    width: 820, height: 1360, paperSize: "RECEIPT",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Shopping bag body
+        rect({ left: 360, top: 120, width: 70, height: 75, fill: "transparent", stroke: "#1a1a1a", strokeWidth: 5, rx: 6, ry: 6, selectable: false }),
+        
+        // Shopping bag handle (semi-circle arch)
+        circle({ left: 375, top: 85, radius: 20, fill: "transparent", stroke: "#1a1a1a", strokeWidth: 5, selectable: false }),
+        // Covering rect to hide bottom half of handle circle
+        rect({ left: 360, top: 110, width: 70, height: 12, fill: "#ffffff", selectable: false }),
+
+        // Cute smiling face eyes & smile
+        circle({ left: 382, top: 145, radius: 4, fill: "#1a1a1a", selectable: false }),
+        circle({ left: 404, top: 145, radius: 4, fill: "#1a1a1a", selectable: false }),
+        circle({ left: 390, top: 148, radius: 5, fill: "transparent", stroke: "#1a1a1a", strokeWidth: 3, selectable: false }),
+        // Cover rect to make the smile look like an arc
+        rect({ left: 388, top: 145, width: 14, height: 7, fill: "#ffffff", selectable: false }),
+
+        // Brand logo text next to bag
+        tb("Happy\nShop", { left: 445, top: 120, width: 150, fontSize: 24, fontWeight: "900", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.0 }),
+
+        // Store Name (left aligned)
+        tb("HAPPY SHOP", { left: 110, top: 250, width: 600, fontSize: 32, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a" }),
+
+        // Store Address (left aligned)
+        tb("2457 Maplewood Lane", { left: 110, top: 300, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a" }),
+
+        // Sub-header details line (left aligned city/state/date/time)
+        tb("Brooksville        OH 43101    12/07/2025 08:26 PM", { left: 110, top: 340, width: 600, fontSize: 18, fontFamily: "Courier New", fill: "#1a1a1a" }),
+
+        // Horizontal separator line
+        rect({ left: 110, top: 380, width: 600, height: 3, fill: "#1a1a1a", selectable: false }),
+
+        // Monospaced Items List
+        tb("1x Organic Bananas (1.2 lb)\n1x Whole Wheat Bread\n1x Almond Milk (1L)\n1x Free-Range Eggs (12ct)\n1x Pasta Fusilli (500g)\n1x Tomato Sauce (24 oz)", { left: 110, top: 430, width: 450, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8 }),
+        tb("$1.44\n$2.99\n$3.49\n$4.29\n$1.79\n$2.59", { left: 560, top: 430, width: 150, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+
+        // Subtotal, tax and total block
+        tb("Subtotal\nTax\nTotal", { left: 360, top: 760, width: 200, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+        tb("$8.17\n$0.53\n$8.70", { left: 560, top: 760, width: 150, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+
+        // Bottom horizontal line
+        rect({ left: 110, top: 1120, width: 600, height: 2, fill: "#1a1a1a", selectable: false }),
+
+        // Bottom tagline (centered)
+        tb("Come back soon!", { left: 110, top: 1160, width: 600, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" })
       ]
     }
   }
