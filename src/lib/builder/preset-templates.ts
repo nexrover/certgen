@@ -1134,5 +1134,69 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+
+  "sl-modern": {
+    name: "Modern Shipping Label",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Main Border
+        rect({ left: 150, top: 80, width: 900, height: 1040, fill: "transparent", stroke: "#111111", strokeWidth: 4, rx: 15, ry: 15 }),
+
+        // Horizontal Lines
+        line({ x1: 0, y1: 0, x2: 900, y2: 0, left: 150, top: 520, stroke: "#111111", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 900, y2: 0, left: 150, top: 740, stroke: "#111111", strokeWidth: 4 }),
+
+        // Vertical divider separating SHIP TO/FROM and Left/Right details
+        line({ x1: 0, y1: 0, x2: 0, y2: 660, left: 600, top: 80, stroke: "#111111", strokeWidth: 4 }),
+
+        // Section 1: SHIP TO (Top Left)
+        tb("SHIP TO", { left: 180, top: 120, width: 390, fontSize: 32, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 100 }),
+        tb("Ethan Stuart", { left: 180, top: 180, width: 390, fontSize: 24, fontWeight: "bold", fill: "#111111", fontFamily: "Helvetica" }),
+        tb("123 Principal Street Apt 45A,\nNew York, 999, USA", { left: 180, top: 225, width: 390, fontSize: 20, fill: "#333333", fontFamily: "Helvetica", lineHeight: 1.3 }),
+
+        // Section 2: FROM (Top Right)
+        tb("FROM", { left: 630, top: 120, width: 390, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 100 }),
+        tb("ABCD Enterprise", { left: 630, top: 180, width: 390, fontSize: 24, fontWeight: "bold", fill: "#111111", fontFamily: "Helvetica" }),
+        tb("987 Av. Main One, Los Angeles,\n66, USA", { left: 630, top: 225, width: 390, fontSize: 20, fill: "#333333", fontFamily: "Helvetica", lineHeight: 1.3 }),
+
+        // Section 3: DETAILS (Middle)
+        // Column 1, Row 1: ORDER ID
+        tb("ORDER ID", { left: 180, top: 550, width: 190, fontSize: 18, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("#1020304050", { left: 180, top: 580, width: 190, fontSize: 18, fill: "#333333", fontFamily: "Helvetica" }),
+        
+        // Column 2, Row 1: DIMENSION
+        tb("DIMENSION", { left: 390, top: 550, width: 190, fontSize: 18, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("10cmx10cmx10cm", { left: 390, top: 580, width: 190, fontSize: 18, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Column 1, Row 2: WEIGHT
+        tb("WEIGHT", { left: 180, top: 640, width: 190, fontSize: 18, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("4.5 KG", { left: 180, top: 670, width: 190, fontSize: 18, fill: "#333333", fontFamily: "Helvetica" }),
+        
+        // Column 2, Row 2: SHIPPING DATE
+        tb("SHIPPING", { left: 390, top: 640, width: 190, fontSize: 18, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("2025-01-20", { left: 390, top: 670, width: 190, fontSize: 18, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Column 3: REMARKS (Middle Right)
+        tb("REMARKS", { left: 630, top: 550, width: 390, fontSize: 18, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("No remark", { left: 630, top: 580, width: 390, fontSize: 18, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Section 4: BARCODE
+        // Dynamic vector barcode
+        ...[6,3,5,9,3,7,2,3,5,11,3,7,5,3,9,3,7,4,5,7,3,9,3,3,5,7,3,11,3,6,4,8,3].map((w, i, arr) => 
+          rect({
+            left: 298 + arr.slice(0, i).reduce((a, b) => a + (b * 1.6) + 10, 0),
+            top: 840,
+            width: w * 1.6,
+            height: 160,
+            fill: "#111111"
+          })
+        ),
+        // Tracking number underneath
+        tb("112233445566778899", { left: 150, top: 1025, width: 900, fontSize: 22, fontWeight: "bold", fill: "#111111", textAlign: "center", fontFamily: "Helvetica", charSpacing: 200 }),
+      ],
+    },
+  },
 };
 
