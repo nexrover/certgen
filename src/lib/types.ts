@@ -21,6 +21,7 @@ export type PaperSize =
   | "SOCIAL_1080"
   | "SQUARE_500"
   | "SQUARE_1024"
+  | "SQUARE_1200"
   | "OG_IMAGE"
   | "SOCIAL_STORY"
   | "CUSTOM_16_9";
@@ -34,6 +35,7 @@ export const PAPER_DIMENSIONS: Record<PaperSize, { width: number; height: number
   SOCIAL_1080: { width: 1080, height: 1080 },
   SQUARE_500: { width: 500, height: 500 },
   SQUARE_1024: { width: 1024, height: 1024 },
+  SQUARE_1200: { width: 1200, height: 1200 },
   OG_IMAGE: { width: 1200, height: 630 },
   SOCIAL_STORY: { width: 1080, height: 1920 },
   CUSTOM_16_9: { width: 1920, height: 1080 },
@@ -49,7 +51,7 @@ export const CATEGORY_DEFAULT_PAPER_SIZE: Record<string, PaperSize> = {
   email: "A4",
   ecommerce: "SQUARE_500",
   "real-estate": "SQUARE_1024",
-  "shipping-label": "US_LETTER",
+  "shipping-label": "SQUARE_1200",
   resume: "A4",
   "open-graph": "OG_IMAGE",
   "christmas-card": "A4",

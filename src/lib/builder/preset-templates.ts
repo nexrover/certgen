@@ -995,5 +995,73 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+
+  "sl-standard": {
+    name: "Standard Shipping Label",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Main Border
+        rect({ left: 40, top: 40, width: 1120, height: 1120, fill: "transparent", stroke: "#222222", strokeWidth: 4, rx: 15, ry: 15 }),
+
+        // Horizontal Lines
+        line({ x1: 0, y1: 0, x2: 1120, y2: 0, left: 40, top: 300, stroke: "#222222", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 1120, y2: 0, left: 40, top: 520, stroke: "#222222", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 1120, y2: 0, left: 40, top: 850, stroke: "#222222", strokeWidth: 4 }),
+
+        // Vertical Lines
+        line({ x1: 0, y1: 0, x2: 0, y2: 260, left: 300, top: 40, stroke: "#222222", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 0, y2: 330, left: 580, top: 520, stroke: "#222222", strokeWidth: 4 }),
+
+        // Logo Box
+        tb("LO\nGO", { left: 40, top: 90, width: 260, fontSize: 80, fontWeight: "900", fontStyle: "italic", textAlign: "center", fill: "#111111", lineHeight: 1.1 }),
+
+        // Ship To Box
+        tb("SHIP TO:", { left: 330, top: 80, width: 150, fontSize: 24, fontWeight: "900", fill: "#111111" }),
+        tb("Company Name\n987 Av. Main One, Los Angeles,\n001002 - USA", { left: 480, top: 80, width: 600, fontSize: 24, fill: "#222222", lineHeight: 1.4 }),
+
+        // From Box
+        tb("FROM:", { left: 80, top: 350, width: 120, fontSize: 22, fontWeight: "900", fill: "#111111" }),
+        tb("Ethan Stuart\n123 Principal Street, Apt 45A,\nNew York, 999, USA", { left: 200, top: 350, width: 800, fontSize: 22, fill: "#222222", lineHeight: 1.4 }),
+
+        // Barcode Box (Bottom Left)
+        ...[6,3,5,9,3,7,2,3,5,11,3,7,5,3,9,3,7,4,5,7,3,9,3,3,5,7,3,11,3,6,4,8,3].map((w, i, arr) => 
+          rect({ left: 100 + arr.slice(0, i).reduce((a, b) => a + b + 6, 0), top: 570, width: w, height: 180, fill: "#111111" })
+        ),
+        tb("TRACK CODE 123456789", { left: 100, top: 780, width: 440, fontSize: 18, fontWeight: "bold", fill: "#111111", textAlign: "center", charSpacing: 250 }),
+
+        // Order Details (Bottom Right)
+        tb("ORDER ID:", { left: 620, top: 560, width: 160, fontSize: 20, fontWeight: "900", fill: "#111111" }),
+        tb("#1020304050", { left: 780, top: 560, width: 300, fontSize: 22, fill: "#222222" }),
+
+        tb("WEIGHT:", { left: 620, top: 620, width: 160, fontSize: 20, fontWeight: "900", fill: "#111111" }),
+        tb("4.5 KG", { left: 780, top: 620, width: 300, fontSize: 22, fill: "#222222" }),
+
+        tb("DIMENSIONS:", { left: 620, top: 680, width: 160, fontSize: 20, fontWeight: "900", fill: "#111111" }),
+        tb("10cmx10cmx10cm", { left: 780, top: 680, width: 300, fontSize: 22, fill: "#222222" }),
+
+        tb("SHIPPING\nDATE:", { left: 620, top: 740, width: 160, fontSize: 20, fontWeight: "900", fill: "#111111", lineHeight: 1.2 }),
+        tb("2025-01-20", { left: 780, top: 750, width: 300, fontSize: 22, fill: "#222222" }),
+
+        // Icons Area (Very Bottom)
+        // Box 1
+        rect({ left: 120, top: 910, width: 160, height: 160, fill: "transparent", stroke: "#333333", strokeWidth: 10, rx: 20, ry: 20 }),
+        tb("🍷", { left: 120, top: 940, width: 160, fontSize: 80, textAlign: "center" }),
+
+        // Box 2
+        rect({ left: 370, top: 910, width: 160, height: 160, fill: "transparent", stroke: "#333333", strokeWidth: 10, rx: 20, ry: 20 }),
+        tb("📦", { left: 370, top: 940, width: 160, fontSize: 80, textAlign: "center" }),
+
+        // Box 3
+        rect({ left: 620, top: 910, width: 160, height: 160, fill: "transparent", stroke: "#333333", strokeWidth: 10, rx: 20, ry: 20 }),
+        tb("↑↑", { left: 620, top: 940, width: 160, fontSize: 80, fontWeight: "bold", fill: "#333333", textAlign: "center" }),
+
+        // Box 4
+        rect({ left: 870, top: 910, width: 160, height: 160, fill: "transparent", stroke: "#333333", strokeWidth: 10, rx: 20, ry: 20 }),
+        tb("☂", { left: 870, top: 935, width: 160, fontSize: 90, fill: "#333333", textAlign: "center" }),
+      ],
+    },
+  },
 };
 
