@@ -53,6 +53,7 @@ const RESUME_DEMOS = [
 
 const INVOICE_DEMOS = [
   { id: "inv-classic", label: "Classic Invoice" },
+  { id: "inv-modern", label: "Modern Invoice" },
 ];
 
 type Orientation = "landscape" | "portrait" | "square";
@@ -381,7 +382,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
     };
   }, [category, orientation]);
 
-  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]) || (isRealEstate && !presetThumbnails["re-modern-home"]) || (isShippingLabel && !presetThumbnails["sl-standard"]) || (isResume && !presetThumbnails["resume-martha-williams"]) || (isInvoice && !presetThumbnails["inv-classic"]);
+  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]) || (isRealEstate && !presetThumbnails["re-modern-home"]) || (isShippingLabel && !presetThumbnails["sl-standard"]) || (isResume && !presetThumbnails["resume-martha-williams"]) || (isInvoice && (!presetThumbnails["inv-classic"] || !presetThumbnails["inv-modern"]));
 
   const filtered = TEMPLATES.filter((t) => {
     if (t.orientation !== orientation) return false;

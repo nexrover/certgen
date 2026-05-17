@@ -18,6 +18,10 @@ function line(opts: Record<string, unknown>) {
   return { type: "Line", selectable: true, ...opts };
 }
 
+function circle(opts: Record<string, unknown>) {
+  return { type: "Circle", selectable: true, ...opts };
+}
+
 const L = { w: 842, h: 595 };
 const P = { w: 595, h: 842 };
 const YT = { w: 1280, h: 720 };
@@ -1357,6 +1361,66 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         // Bottom Right Metadata Box
         rect({ left: 580, top: 885, width: 360, height: 110, fill: "#4676a4", rx: 4, ry: 4, selectable: true }),
         tb("Invoice No. 12345\n10 June 2024", { left: 610, top: 915, width: 300, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#ffffff", lineHeight: 1.4 })
+      ]
+    }
+  },
+
+  "inv-modern": {
+    name: "Modern Invoice",
+    width: 1020, height: 1320, paperSize: "INVOICE",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Top-right background overlapping curves
+        circle({ left: 280, top: -450, radius: 550, fill: "#f1eee0", selectable: false }),
+        circle({ left: 450, top: -350, radius: 500, fill: "#e7e2c9", selectable: false }),
+
+        // Top-left Logo
+        tb("YOUR LOGO\nCreative Lab Company", { left: 75, top: 110, width: 400, fontSize: 28, fontWeight: "900", fontStyle: "italic", fontFamily: "Helvetica", fill: "#1a1a1a", lineHeight: 1.2 }),
+
+        // Top-right INVOICE heading with overlaps
+        tb("INVOIC\nE", { left: 700, top: 120, width: 220, fontSize: 44, fontWeight: "900", fontFamily: "Helvetica", fill: "#c8bc82", lineHeight: 1.1, charSpacing: 100 }),
+        tb("No. 12345", { left: 780, top: 160, width: 140, fontSize: 14, fontWeight: "bold", fontFamily: "Helvetica", fill: "#c8bc82", textAlign: "right" }),
+
+        // Client Details
+        tb("Peter Fields\n123 Anywhere St., Any City\n+123 456 7890", { left: 75, top: 240, width: 400, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.5 }),
+
+        // Table Header Solid Background block
+        rect({ left: 75, top: 380, width: 870, height: 48, fill: "#d8d2ab", rx: 8, ry: 8, selectable: true }),
+        
+        // Table Header Labels
+        tb("Item", { left: 95, top: 394, width: 300, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#4a4e3b" }),
+        tb("Qnt.", { left: 550, top: 394, width: 120, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#4a4e3b", textAlign: "center" }),
+        tb("Price", { left: 690, top: 394, width: 100, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#4a4e3b", textAlign: "center" }),
+        tb("Total", { left: 810, top: 394, width: 130, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#4a4e3b", textAlign: "right" }),
+
+        // Row 1
+        tb("Item 1", { left: 95, top: 455, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 455, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 455, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 455, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 2
+        tb("Item 2", { left: 95, top: 515, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 515, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 515, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 515, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 3
+        tb("Item 3", { left: 95, top: 575, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 575, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 575, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 575, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Total
+        tb("Total: $400", { left: 700, top: 630, width: 245, fontSize: 16, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+
+        // Signature Line & Label
+        rect({ left: 90, top: 950, width: 200, height: 2, fill: "#1a1a1a", selectable: false }),
+        tb("Signature", { left: 90, top: 960, width: 200, fontSize: 14, fontFamily: "Helvetica", fill: "#cbd5e1", textAlign: "center" }),
+
+        // Bottom Right Date
+        tb("10 June 2024", { left: 700, top: 945, width: 245, fontSize: 14, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" })
       ]
     }
   }
