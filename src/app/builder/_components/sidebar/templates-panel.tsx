@@ -47,6 +47,10 @@ const SHIPPING_LABEL_DEMOS = [
   { id: "sl-modern", label: "Modern Shipping Label" },
 ];
 
+const RESUME_DEMOS = [
+  { id: "resume-martha-williams", label: "Martha Williams Resume" },
+];
+
 type Orientation = "landscape" | "portrait" | "square";
 type Category = "Course" | "Completion" | "Achievement" | "Training" | "Recognition" | "Participation" | "Webinar" | "Appreciation" | "Employee of the Month";
 type Style = "Classic" | "Modern" | "Minimal" | "Bold";
@@ -306,6 +310,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
   const isEcommerce = category === "ecommerce";
   const isRealEstate = category === "real-estate";
   const isShippingLabel = category === "shipping-label";
+  const isResume = category === "resume";
   const isNonCertificate = category !== "certificate";
   const [loading, setLoading] = useState<string | null>(null);
   const [isHydrating, setIsHydrating] = useState(true);
@@ -346,7 +351,8 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
         ...YOUTUBE_DEMOS.map(d => ({ id: d.id, orientation: "landscape" as Orientation })),
         ...ECOMMERCE_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation })),
         ...REAL_ESTATE_DEMOS.map(d => ({ id: d.id, orientation: (d.id === "re-story-listing" ? "portrait" : "square") as Orientation })),
-        ...SHIPPING_LABEL_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation }))
+        ...SHIPPING_LABEL_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation })),
+        ...RESUME_DEMOS.map(d => ({ id: d.id, orientation: "portrait" as Orientation }))
       ];
 
       const results = await Promise.all(
@@ -369,7 +375,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
     };
   }, [category, orientation]);
 
-  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]) || (isRealEstate && !presetThumbnails["re-modern-home"]) || (isShippingLabel && !presetThumbnails["sl-standard"]);
+  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]) || (isRealEstate && !presetThumbnails["re-modern-home"]) || (isShippingLabel && !presetThumbnails["sl-standard"]) || (isResume && !presetThumbnails["resume-martha-williams"]);
 
   const filtered = TEMPLATES.filter((t) => {
     if (t.orientation !== orientation) return false;
@@ -535,7 +541,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             <button
               onClick={handleBlank}
               className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
-              style={{ aspectRatio: isYoutube ? "16 / 9" : (isEcommerce || isRealEstate || isShippingLabel) ? "1 / 1" : orientation === "portrait" ? "595 / 842" : "842 / 595" }}
+              style={{ aspectRatio: isYoutube ? "16 / 9" : isResume ? "1020 / 1320" : (isEcommerce || isRealEstate || isShippingLabel) ? "1 / 1" : orientation === "portrait" ? "595 / 842" : "842 / 595" }}
             >
               <svg className="h-6 w-6 text-gray-300 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -543,8 +549,8 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             </button>
 
             {/* Demo cards / Presets */}
-            {(isYoutube ? YOUTUBE_DEMOS : isEcommerce ? ECOMMERCE_DEMOS : isRealEstate ? REAL_ESTATE_DEMOS : isShippingLabel ? SHIPPING_LABEL_DEMOS : filtered).map((demo) => {
-              const dims = isYoutube ? { width: 1280, height: 720 } : (isEcommerce || isRealEstate || isShippingLabel) ? { width: 500, height: 500 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
+            {(isYoutube ? YOUTUBE_DEMOS : isEcommerce ? ECOMMERCE_DEMOS : isRealEstate ? REAL_ESTATE_DEMOS : isShippingLabel ? SHIPPING_LABEL_DEMOS : isResume ? RESUME_DEMOS : filtered).map((demo) => {
+              const dims = isYoutube ? { width: 1280, height: 720 } : (isEcommerce || isRealEstate || isShippingLabel) ? { width: 500, height: 500 } : isResume ? { width: 1020, height: 1320 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
               const thumb = presetThumbnails[demo.id];
 
               if (!thumb) {

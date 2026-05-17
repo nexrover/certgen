@@ -1198,5 +1198,101 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+
+  "resume-martha-williams": {
+    name: "Martha Williams Resume",
+    width: 1020, height: 1320, paperSize: "RESUME",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Name and Subtitle
+        tb("MARTHA\nWILLIAMS", {
+          left: 80, top: 90, width: 450, fontSize: 50, fontWeight: "900", fontFamily: "Helvetica", fill: "#1a1a1a", lineHeight: 1.0, charSpacing: -20
+        }),
+        tb("Product Manager", {
+          left: 80, top: 200, width: 450, fontSize: 20, fontWeight: "500", fontFamily: "Helvetica", fill: "#718096"
+        }),
+        // Contact details
+        tb("+123 456 7890\nmartha-will@email.com\n@williamsmartha", {
+          left: 590, top: 100, width: 350, fontSize: 16, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right", lineHeight: 1.5
+        }),
+
+        // --- WORK EXPERIENCE ---
+        tb("WORK EXPERIENCE", {
+          left: 80, top: 290, width: 860, fontSize: 16, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", charSpacing: 100
+        }),
+        rect({
+          left: 80, top: 315, width: 860, height: 2, fill: "#1a1a1a"
+        }),
+
+        // Work Exp 1
+        tb("Company Name\n2022 - Present", {
+          left: 80, top: 345, width: 200, fontSize: 13, fontFamily: "Helvetica", fill: "#a0aec0", lineHeight: 1.4
+        }),
+        tb("Group Product Manager", {
+          left: 280, top: 345, width: 660, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a"
+        }),
+        tb("Lorem ipsum dolor sit amet. Sed nisi tempore est perspiciatis galisum ut eligendi vel odit atque. Non laboriosam distinctio et nisi molestiae qui mollitia consequuntur. Id voluptatibus culpa qui architecto provident quo minima illo et sunt saepe qui aliquid cupiditate.", {
+          left: 280, top: 370, width: 660, fontSize: 13, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.4
+        }),
+
+        // Work Exp 2
+        tb("Company Name\n2019 - 2022", {
+          left: 80, top: 510, width: 200, fontSize: 13, fontFamily: "Helvetica", fill: "#a0aec0", lineHeight: 1.4
+        }),
+        tb("Senior Product Manager", {
+          left: 280, top: 510, width: 660, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a"
+        }),
+        tb("Lorem ipsum dolor sit amet. Sed nisi tempore est perspiciatis galisum ut eligendi vel odit atque. Non laboriosam distinctio et nisi molestiae qui mollitia consequuntur. Id voluptatibus culpa qui architecto provident quo minima illo et sunt saepe qui aliquid cupiditate.", {
+          left: 280, top: 535, width: 660, fontSize: 13, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.4
+        }),
+
+        // Work Exp 3
+        tb("Company Name\n2017 - 2018", {
+          left: 80, top: 675, width: 200, fontSize: 13, fontFamily: "Helvetica", fill: "#a0aec0", lineHeight: 1.4
+        }),
+        tb("Product Manager", {
+          left: 280, top: 675, width: 660, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a"
+        }),
+        tb("Lorem ipsum dolor sit amet. Sed nisi tempore est perspiciatis galisum ut eligendi vel odit atque. Non laboriosam distinctio et nisi molestiae qui mollitia consequuntur. Id voluptatibus culpa qui architecto provident quo minima illo et sunt saepe qui aliquid cupiditate.", {
+          left: 280, top: 700, width: 660, fontSize: 13, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.4
+        }),
+
+        // --- EDUCATION & SKILLS ---
+        // Education (Left)
+        tb("EDUCATION", {
+          left: 80, top: 865, width: 390, fontSize: 16, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", charSpacing: 100
+        }),
+        rect({
+          left: 80, top: 890, width: 390, height: 2, fill: "#1a1a1a"
+        }),
+
+        tb("Bachelor in Managment      2012 -\n2016", {
+          left: 80, top: 915, width: 390, fontSize: 13, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", lineHeight: 1.3
+        }),
+        tb("Lorem ipsum dolor sit amet. Sed nisi tempore est perspiciatis galisum ut eligendi vel odit atque.", {
+          left: 80, top: 960, width: 390, fontSize: 13, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.4
+        }),
+
+        tb("Product Managment Course      2018 -\n2019", {
+          left: 80, top: 1040, width: 390, fontSize: 13, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", lineHeight: 1.3
+        }),
+        tb("Lorem ipsum dolor sit amet. Sed nisi tempore est perspiciatis galisum ut eligendi vel odit atque.", {
+          left: 80, top: 1085, width: 390, fontSize: 13, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.4
+        }),
+
+        // Skills (Right)
+        tb("SKILLS", {
+          left: 550, top: 865, width: 390, fontSize: 16, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", charSpacing: 100
+        }),
+        rect({
+          left: 550, top: 890, width: 390, height: 2, fill: "#1a1a1a"
+        }),
+        tb("• Lorem ipsum\n• Lorem ipsum\n• Lorem ipsum\n• Lorem ipsum\n• Lorem ipsum\n• Lorem ipsum", {
+          left: 550, top: 915, width: 390, fontSize: 14, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.8
+        })
+      ]
+    }
+  }
 };
 
