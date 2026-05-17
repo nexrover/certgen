@@ -1063,5 +1063,76 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+
+  "sl-classic": {
+    name: "Classic Shipping Label",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Main Border
+        rect({ left: 150, top: 80, width: 900, height: 1040, fill: "transparent", stroke: "#111111", strokeWidth: 4, rx: 15, ry: 15 }),
+
+        // Horizontal Lines
+        line({ x1: 0, y1: 0, x2: 900, y2: 0, left: 150, top: 340, stroke: "#111111", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 900, y2: 0, left: 150, top: 600, stroke: "#111111", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 900, y2: 0, left: 150, top: 860, stroke: "#111111", strokeWidth: 4 }),
+
+        // Section 1: SHIP TO
+        // Black Pill Box
+        rect({ left: 180, top: 125, width: 160, height: 50, fill: "#111111", rx: 10, ry: 10 }),
+        tb("SHIP TO", { left: 180, top: 137, width: 160, fontSize: 22, fontWeight: "900", fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica", charSpacing: 100 }),
+        
+        // Recipient Name
+        tb("Ethan Stuart", { left: 390, top: 120, width: 600, fontSize: 26, fontWeight: "bold", fill: "#111111", fontFamily: "Helvetica" }),
+        
+        // Recipient Address
+        tb("23 Principal Street, Apt 45A, New York, 999, USA", { left: 390, top: 160, width: 600, fontSize: 22, fill: "#333333", fontFamily: "Helvetica", lineHeight: 1.3 }),
+
+        // Section 2: FROM
+        // Bold label FROM
+        tb("FROM", { left: 180, top: 385, width: 160, fontSize: 24, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 100 }),
+        
+        // Sender Name
+        tb("ABCD Enterprise", { left: 390, top: 385, width: 600, fontSize: 24, fontWeight: "bold", fill: "#111111", fontFamily: "Helvetica" }),
+        
+        // Sender Address
+        tb("987 Av. Main One, Los Angeles, 66, USA", { left: 390, top: 425, width: 600, fontSize: 22, fill: "#333333", fontFamily: "Helvetica", lineHeight: 1.3 }),
+
+        // Section 3: DETAILS
+        // Row 1
+        tb("ORDER ID", { left: 190, top: 640, width: 180, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("#1020304050", { left: 380, top: 640, width: 200, fontSize: 20, fill: "#333333", fontFamily: "Helvetica" }),
+        
+        tb("DIMENSION\nS", { left: 610, top: 640, width: 180, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50, lineHeight: 1.1 }),
+        tb("10cmx10cmx10cm", { left: 800, top: 640, width: 210, fontSize: 20, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Row 2
+        tb("WEIGHT", { left: 190, top: 710, width: 180, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("4.5 KG", { left: 380, top: 710, width: 200, fontSize: 20, fill: "#333333", fontFamily: "Helvetica" }),
+        
+        tb("SHIPPING\nDATE", { left: 610, top: 710, width: 180, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50, lineHeight: 1.1 }),
+        tb("2025-01-20", { left: 800, top: 710, width: 210, fontSize: 20, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Row 3
+        tb("REMARKS", { left: 190, top: 780, width: 180, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("No remark", { left: 380, top: 780, width: 200, fontSize: 20, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Section 4: BARCODE
+        // Dynamic vector barcode
+        ...[6,3,5,9,3,7,2,3,5,11,3,7,5,3,9,3,7,4,5,7,3,9,3,3,5,7,3,11,3,6,4,8,3].map((w, i, arr) => 
+          rect({
+            left: 298 + arr.slice(0, i).reduce((a, b) => a + (b * 1.6) + 10, 0),
+            top: 895,
+            width: w * 1.6,
+            height: 140,
+            fill: "#111111"
+          })
+        ),
+        // Tracking number underneath
+        tb("112233445566778899", { left: 150, top: 1055, width: 900, fontSize: 22, fontWeight: "bold", fill: "#111111", textAlign: "center", fontFamily: "Helvetica", charSpacing: 200 }),
+      ],
+    },
+  },
 };
 

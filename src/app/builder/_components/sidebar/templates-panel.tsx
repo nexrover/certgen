@@ -43,6 +43,7 @@ const REAL_ESTATE_DEMOS = [
 
 const SHIPPING_LABEL_DEMOS = [
   { id: "sl-standard", label: "Standard Shipping Label" },
+  { id: "sl-classic", label: "Classic Shipping Label" },
 ];
 
 type Orientation = "landscape" | "portrait" | "square";
