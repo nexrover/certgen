@@ -1485,6 +1485,43 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         tb("Signature", { left: 550, top: 960, width: 250, fontSize: 14, fontFamily: "Helvetica", fill: "#94a3b8", textAlign: "center" })
       ]
     }
+  },
+
+  "rec-drugstore": {
+    name: "DrugStore Receipt",
+    width: 820, height: 1360, paperSize: "RECEIPT",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Top medical badge logo (centered at X=410)
+        circle({ left: 360, top: 100, radius: 50, fill: "#1a1a1a", selectable: false }),
+        rect({ left: 404, top: 118, width: 12, height: 64, fill: "#ffffff", selectable: false }),
+        rect({ left: 378, top: 144, width: 64, height: 12, fill: "#ffffff", selectable: false }),
+
+        // Brand logo text next to badge (centered under emblem)
+        tb("DrugStore\ntagline here", { left: 110, top: 220, width: 600, fontSize: 44, fontWeight: "900", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center", lineHeight: 1.0 }),
+
+        // Store Address & Details (centered)
+        tb("DRUG STORE\n730 Oakridge Avenue\nMeadowville TX 75422", { left: 110, top: 380, width: 600, fontSize: 24, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center", lineHeight: 1.4 }),
+
+        // Date & Time (centered)
+        tb("12/07/2025   08:26 PM", { left: 110, top: 520, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" }),
+
+        // Items Purchased Heading (centered)
+        tb("ITEMS PURCHASED", { left: 110, top: 620, width: 600, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" }),
+
+        // Monospaced Items List (centered container block)
+        tb("1x Ibuprofen 200mg (50 tabs)            $6.49\n1x Vitamin C 1000mg (60 caps)            $9.99\n1x Hand Sanitizer (250ml)               $3.79\n1x Toothpaste Whitening (6oz)            $2.89\n1x Cotton Swabs (200 ct)                 $1.99\n1x Cough Syrup (4 fl oz)                 $5.49", { left: 110, top: 700, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8 }),
+
+        // Dashed lines and subtotal block (centered container)
+        tb("--------------------------------------------------", { left: 110, top: 1020, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" }),
+        tb("Subtotal                                 $8.17\nTax                                      $0.53\nTotal                                    $8.70", { left: 110, top: 1060, width: 600, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8 }),
+        tb("--------------------------------------------------", { left: 110, top: 1200, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" }),
+
+        // Bottom tagline (centered)
+        tb("STAY HEALTHY AND VISIT US AGAIN!", { left: 110, top: 1250, width: 600, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" })
+      ]
+    }
   }
 };
 

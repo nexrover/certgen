@@ -26,7 +26,8 @@ export type PaperSize =
   | "SOCIAL_STORY"
   | "CUSTOM_16_9"
   | "RESUME"
-  | "INVOICE";
+  | "INVOICE"
+  | "RECEIPT";
 
 export const PAPER_DIMENSIONS: Record<PaperSize, { width: number; height: number }> = {
   A4: { width: 595, height: 842 },
@@ -43,6 +44,7 @@ export const PAPER_DIMENSIONS: Record<PaperSize, { width: number; height: number
   CUSTOM_16_9: { width: 1920, height: 1080 },
   RESUME: { width: 1020, height: 1320 },
   INVOICE: { width: 1020, height: 1320 },
+  RECEIPT: { width: 820, height: 1360 },
 };
 
 /**
@@ -60,7 +62,7 @@ export const CATEGORY_DEFAULT_PAPER_SIZE: Record<string, PaperSize> = {
   "open-graph": "OG_IMAGE",
   "christmas-card": "A4",
   "social-media": "SOCIAL_1080",
-  receipt: "US_LETTER",
+  receipt: "RECEIPT",
   invoice: "INVOICE",
 };
 

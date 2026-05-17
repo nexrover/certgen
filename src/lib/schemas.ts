@@ -48,7 +48,8 @@ export const SaveBuilderTemplateSchema = z.object({
     "SOCIAL_STORY",
     "CUSTOM_16_9",
     "RESUME",
-    "INVOICE"
+    "INVOICE",
+    "RECEIPT"
   ]),
   canvasJson: z.record(z.string(), z.unknown()),
   backgroundUrl: BackgroundUrlSchema.optional().nullable(),

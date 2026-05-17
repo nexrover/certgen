@@ -57,6 +57,10 @@ const INVOICE_DEMOS = [
   { id: "inv-minimal", label: "Minimalist Invoice" },
 ];
 
+const RECEIPT_DEMOS = [
+  { id: "rec-drugstore", label: "DrugStore Receipt" },
+];
+
 type Orientation = "landscape" | "portrait" | "square";
 type Category = "Course" | "Completion" | "Achievement" | "Training" | "Recognition" | "Participation" | "Webinar" | "Appreciation" | "Employee of the Month";
 type Style = "Classic" | "Modern" | "Minimal" | "Bold";
@@ -318,6 +322,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
   const isShippingLabel = category === "shipping-label";
   const isResume = category === "resume";
   const isInvoice = category === "invoice";
+  const isReceipt = category === "receipt";
   const isNonCertificate = category !== "certificate";
   const [loading, setLoading] = useState<string | null>(null);
   const [isHydrating, setIsHydrating] = useState(true);
@@ -360,7 +365,8 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
         ...REAL_ESTATE_DEMOS.map(d => ({ id: d.id, orientation: (d.id === "re-story-listing" ? "portrait" : "square") as Orientation })),
         ...SHIPPING_LABEL_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation })),
         ...RESUME_DEMOS.map(d => ({ id: d.id, orientation: "portrait" as Orientation })),
-        ...INVOICE_DEMOS.map(d => ({ id: d.id, orientation: "portrait" as Orientation }))
+        ...INVOICE_DEMOS.map(d => ({ id: d.id, orientation: "portrait" as Orientation })),
+        ...RECEIPT_DEMOS.map(d => ({ id: d.id, orientation: "portrait" as Orientation }))
       ];
 
       const results = await Promise.all(
@@ -383,7 +389,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
     };
   }, [category, orientation]);
 
-  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]) || (isRealEstate && !presetThumbnails["re-modern-home"]) || (isShippingLabel && !presetThumbnails["sl-standard"]) || (isResume && !presetThumbnails["resume-martha-williams"]) || (isInvoice && (!presetThumbnails["inv-classic"] || !presetThumbnails["inv-modern"] || !presetThumbnails["inv-minimal"]));
+  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]) || (isRealEstate && !presetThumbnails["re-modern-home"]) || (isShippingLabel && !presetThumbnails["sl-standard"]) || (isResume && !presetThumbnails["resume-martha-williams"]) || (isInvoice && (!presetThumbnails["inv-classic"] || !presetThumbnails["inv-modern"] || !presetThumbnails["inv-minimal"])) || (isReceipt && !presetThumbnails["rec-drugstore"]);
 
   const filtered = TEMPLATES.filter((t) => {
     if (t.orientation !== orientation) return false;
@@ -549,7 +555,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             <button
               onClick={handleBlank}
               className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
-              style={{ aspectRatio: isYoutube ? "16 / 9" : (isResume || isInvoice) ? "1020 / 1320" : (isEcommerce || isRealEstate || isShippingLabel) ? "1 / 1" : orientation === "portrait" ? "595 / 842" : "842 / 595" }}
+              style={{ aspectRatio: isYoutube ? "16 / 9" : (isResume || isInvoice) ? "1020 / 1320" : isReceipt ? "820 / 1360" : (isEcommerce || isRealEstate || isShippingLabel) ? "1 / 1" : orientation === "portrait" ? "595 / 842" : "842 / 595" }}
             >
               <svg className="h-6 w-6 text-gray-300 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -557,8 +563,8 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             </button>
 
             {/* Demo cards / Presets */}
-            {(isYoutube ? YOUTUBE_DEMOS : isEcommerce ? ECOMMERCE_DEMOS : isRealEstate ? REAL_ESTATE_DEMOS : isShippingLabel ? SHIPPING_LABEL_DEMOS : isResume ? RESUME_DEMOS : isInvoice ? INVOICE_DEMOS : filtered).map((demo) => {
-              const dims = isYoutube ? { width: 1280, height: 720 } : (isEcommerce || isRealEstate || isShippingLabel) ? { width: 500, height: 500 } : (isResume || isInvoice) ? { width: 1020, height: 1320 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
+            {(isYoutube ? YOUTUBE_DEMOS : isEcommerce ? ECOMMERCE_DEMOS : isRealEstate ? REAL_ESTATE_DEMOS : isShippingLabel ? SHIPPING_LABEL_DEMOS : isResume ? RESUME_DEMOS : isInvoice ? INVOICE_DEMOS : isReceipt ? RECEIPT_DEMOS : filtered).map((demo) => {
+              const dims = isYoutube ? { width: 1280, height: 720 } : (isEcommerce || isRealEstate || isShippingLabel) ? { width: 500, height: 500 } : (isResume || isInvoice) ? { width: 1020, height: 1320 } : isReceipt ? { width: 820, height: 1360 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
               const thumb = presetThumbnails[demo.id];
 
               if (!thumb) {
