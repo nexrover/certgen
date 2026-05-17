@@ -1293,6 +1293,72 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         })
       ]
     }
+  },
+
+  "inv-classic": {
+    name: "Classic Invoice",
+    width: 1020, height: 1320, paperSize: "INVOICE",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Top-left vertical blue bar
+        rect({ left: 0, top: 0, width: 35, height: 160, fill: "#4676a4", selectable: false }),
+
+        // Top-left INVOICE heading
+        tb("INVOICE", { left: 75, top: 80, width: 400, fontSize: 44, fontWeight: "900", fontFamily: "Helvetica", fill: "#4676a4" }),
+
+        // Top-right Logo
+        tb("YOUR\nLOGO", { left: 800, top: 80, width: 140, fontSize: 20, fontWeight: "900", fontStyle: "italic", fontFamily: "Helvetica", fill: "#4676a4", textAlign: "right", lineHeight: 1.1 }),
+
+        // Client Details
+        tb("Peter Fields\nCreative Lab Company\n123 Anywhere St., Any City\n+123 456 7890", { left: 75, top: 200, width: 400, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.5 }),
+
+        // Table Header & Line 1
+        rect({ left: 75, top: 340, width: 865, height: 2, fill: "#cbd5e1", selectable: false }),
+        tb("Item", { left: 75, top: 355, width: 300, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a" }),
+        tb("Quantity", { left: 550, top: 355, width: 120, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "center" }),
+        tb("Price", { left: 690, top: 355, width: 100, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "center" }),
+        tb("Total", { left: 810, top: 355, width: 130, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+        rect({ left: 75, top: 385, width: 865, height: 1, fill: "#cbd5e1", selectable: false }),
+
+        // Row 1
+        tb("Item 1", { left: 75, top: 415, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 415, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 415, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 415, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 2
+        tb("Item 2", { left: 75, top: 485, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 485, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 485, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 485, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 3
+        tb("Item 3", { left: 75, top: 555, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 555, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 555, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 555, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 4
+        tb("Item 4", { left: 75, top: 625, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 625, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 625, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 625, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+        rect({ left: 75, top: 675, width: 865, height: 1, fill: "#cbd5e1", selectable: false }),
+
+        // Total
+        tb("TOTA\nL", { left: 75, top: 705, width: 150, fontSize: 24, fontWeight: "900", fontFamily: "Helvetica", fill: "#1a1a1a", lineHeight: 1.1 }),
+        tb("$400", { left: 700, top: 705, width: 240, fontSize: 24, fontWeight: "900", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+
+        // Bottom Left Signature
+        rect({ left: 75, top: 935, width: 250, height: 2, fill: "#1a1a1a", selectable: false }),
+        tb("Signature", { left: 75, top: 945, width: 250, fontSize: 14, fontFamily: "Helvetica", fill: "#cbd5e1", textAlign: "center" }),
+
+        // Bottom Right Metadata Box
+        rect({ left: 580, top: 885, width: 360, height: 110, fill: "#4676a4", rx: 4, ry: 4, selectable: true }),
+        tb("Invoice No. 12345\n10 June 2024", { left: 610, top: 915, width: 300, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#ffffff", lineHeight: 1.4 })
+      ]
+    }
   }
 };
 
