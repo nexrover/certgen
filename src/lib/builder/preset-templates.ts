@@ -1853,6 +1853,137 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         })
       ]
     }
+  },
+
+  "cc-christmas-card-1": {
+    name: "Ornaments Christmas Card",
+    width: 1050, height: 600, paperSize: "CHRISTMAS_CARD",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Background image (non-selectable, at the bottom)
+        {
+          ...img("/Images/CCtemp1/bg.png", {
+            left: 0, top: 0, width: 1050, height: 600,
+            scaleX: 1, scaleY: 1,
+            selectable: false, evented: false,
+            __isBackground: true
+          })
+        },
+
+        // 2. Hanging ornaments (illustration)
+        {
+          ...img("/Images/CCtemp1/style.svg", {
+            name: "illustration",
+            left: 550, top: 0, width: 440, height: 512,
+            scaleX: 1.15, scaleY: 1.15,
+            selectable: true
+          })
+        },
+
+        // 3. Subtitle "& H A P P Y   N E W   Y E A R"
+        tb("& H A P P Y   N E W   Y E A R", {
+          name: "subtitle",
+          left: 120, top: 290,
+          width: 450,
+          fontSize: 15,
+          fill: "#ffffff",
+          fontFamily: "Cinzel",
+          charSpacing: 300,
+          selectable: true
+        }),
+
+        // 4. Cursive Script "Christmas"
+        tb("Christmas", {
+          name: "title-christmas",
+          left: 90, top: 170,
+          width: 500,
+          fontSize: 110,
+          fill: "#ffffff",
+          fontFamily: "Great Vibes",
+          selectable: true
+        }),
+
+        // 5. Serif Header "M E R R Y"
+        tb("M E R R Y", {
+          name: "title-merry",
+          left: 120, top: 150,
+          width: 300,
+          fontSize: 18,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Cinzel",
+          charSpacing: 350,
+          selectable: true
+        }),
+
+        // 6. Label To:
+        tb("To:", {
+          name: "label-to",
+          left: 120, top: 410,
+          width: 50,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 7. Label From:
+        tb("From:", {
+          name: "label-from",
+          left: 120, top: 470,
+          width: 70,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 8. Line below To field
+        rect({
+          name: "to-line",
+          left: 120, top: 435,
+          width: 250, height: 1,
+          fill: "#ffffff",
+          opacity: 0.5,
+          selectable: true
+        }),
+
+        // 9. Line below From field
+        rect({
+          name: "from-line",
+          left: 120, top: 495,
+          width: 250, height: 1,
+          fill: "#ffffff",
+          opacity: 0.5,
+          selectable: true
+        }),
+
+        // 10. To (Editable field)
+        tb("Dear Smith Family", {
+          name: "to",
+          left: 155, top: 410,
+          width: 250,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 11. From (Editable field)
+        tb("The Johnson Family", {
+          name: "from",
+          left: 175, top: 470,
+          width: 250,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        })
+      ]
+    }
   }
 };
 

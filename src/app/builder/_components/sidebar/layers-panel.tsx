@@ -271,6 +271,9 @@ export function LayersPanel({ canvas, onBgSelected }: LayersPanelProps) {
 /* ── Helpers ───────────────────────────────────────────── */
 
 function getObjectName(obj: FabricObject, index: number): string {
+  if ((obj as any).name) {
+    return (obj as any).name;
+  }
   if ("text" in obj && typeof obj.text === "string") {
     const t = obj.text.trim();
     return t.length > 0 ? t.substring(0, 40) : `Text ${index + 1}`;

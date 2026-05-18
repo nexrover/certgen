@@ -36,6 +36,7 @@ const ALL_PAPER_OPTIONS: { value: PaperSize; label: string; categories: string[]
   { value: "RESUME", label: "Resume Page (1020×1320)", categories: ["resume"] },
   { value: "INVOICE", label: "Invoice Page (1020×1320)", categories: ["invoice"] },
   { value: "RECEIPT", label: "Receipt Tape (820×1360)", categories: ["receipt"] },
+  { value: "CHRISTMAS_CARD", label: "Christmas Card (1050×600)", categories: ["christmas-card"] },
 ];
 
 /**
