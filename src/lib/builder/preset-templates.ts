@@ -1984,6 +1984,113 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         })
       ]
     }
+  },
+
+  "cc-christmas-card-2": {
+    name: "Snowflake Christmas Card",
+    width: 1050, height: 600, paperSize: "CHRISTMAS_CARD",
+    canvasJson: {
+      version: "7.0.0", background: "#21365C",
+      objects: [
+        // 1. bg-snow (Snowflake style image covering the entire canvas)
+        {
+          ...img("/Images/CCtemp2/style.png", {
+            name: "bg-snow",
+            left: 0, top: 0, width: 1050, height: 600,
+            scaleX: 1, scaleY: 1,
+            selectable: true
+          })
+        },
+
+        // 2. Label From:
+        tb("From:", {
+          name: "label-from",
+          left: 80, top: 510,
+          width: 70,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 3. Line below From field
+        rect({
+          name: "line-from",
+          left: 80, top: 535,
+          width: 250, height: 1,
+          fill: "#ffffff",
+          opacity: 0.5,
+          selectable: true
+        }),
+
+        // 4. Label To:
+        tb("To:", {
+          name: "label-to",
+          left: 80, top: 450,
+          width: 50,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 5. Line below To field
+        rect({
+          name: "line-to",
+          left: 80, top: 475,
+          width: 250, height: 1,
+          fill: "#ffffff",
+          opacity: 0.5,
+          selectable: true
+        }),
+
+        // 6. Title text: "Merry Christmas!"
+        tb("Merry Christmas!", {
+          name: "title",
+          left: 80, top: 150,
+          width: 600,
+          fontSize: 85,
+          fill: "#ffffff",
+          fontFamily: "Great Vibes",
+          selectable: true
+        }),
+
+        // 7. Subtitle text: "and Happy New Year"
+        tb("and Happy New Year", {
+          name: "subtitle",
+          left: 170, top: 250,
+          width: 400,
+          fontSize: 26,
+          fill: "#ffffff",
+          fontFamily: "Great Vibes",
+          selectable: true
+        }),
+
+        // 8. To field: "Dear Smith Family"
+        tb("Dear Smith Family", {
+          name: "to",
+          left: 115, top: 450,
+          width: 250,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 9. From field: "The Johnson Family"
+        tb("The Johnson Family", {
+          name: "from",
+          left: 135, top: 510,
+          width: 250,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        })
+      ]
+    }
   }
 };
 
