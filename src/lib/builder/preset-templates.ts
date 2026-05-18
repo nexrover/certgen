@@ -1996,8 +1996,8 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         {
           ...img("/Images/CCtemp2/style.png", {
             name: "bg-snow",
-            left: 0, top: 0, width: 1050, height: 600,
-            scaleX: 1, scaleY: 1,
+            left: 0, top: 0, width: 1254, height: 1200,
+            scaleX: 1050 / 1254, scaleY: 600 / 1200,
             selectable: true
           })
         },
@@ -2084,6 +2084,93 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
           name: "from",
           left: 135, top: 510,
           width: 250,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        })
+      ]
+    }
+  },
+
+  "cc-christmas-card-3": {
+    name: "Red Landscape Christmas Card",
+    width: 1050, height: 600, paperSize: "CHRISTMAS_CARD",
+    canvasJson: {
+      version: "7.0.0", background: "#9D1A1A",
+      objects: [
+        // 1. bg-snow (Winter landscape overlay style image)
+        {
+          ...img("/Images/CCtmep3/style.png", {
+            name: "bg-snow",
+            left: 0, top: 0, width: 2100, height: 1200,
+            scaleX: 0.5, scaleY: 0.5,
+            selectable: true
+          })
+        },
+
+        // 2. Title text: "Merry Christmas"
+        tb("Merry Christmas", {
+          name: "title",
+          left: 110, top: 200,
+          width: 600,
+          fontSize: 70,
+          fill: "#ffffff",
+          fontFamily: "Georgia",
+          selectable: true
+        }),
+
+        // 3. Subtitle text: "May peace, love, and prosperity be with you always."
+        tb("May peace, love, and prosperity be with you always.", {
+          name: "subtitle",
+          left: 110, top: 285,
+          width: 800,
+          fontSize: 18,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 4. Label To:
+        tb("To:", {
+          name: "label-to",
+          left: 110, top: 350,
+          width: 50,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 5. Label From:
+        tb("From:", {
+          name: "label-from",
+          left: 110, top: 400,
+          width: 70,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 6. To field: "Dear Smith Family"
+        tb("Dear Smith Family", {
+          name: "to",
+          left: 145, top: 350,
+          width: 300,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 7. From field: "The Johnson Family"
+        tb("The Johnson Family", {
+          name: "from",
+          left: 165, top: 400,
+          width: 300,
           fontSize: 16,
           fill: "#ffffff",
           fontFamily: "Helvetica",

@@ -72,6 +72,7 @@ const SOCIAL_MEDIA_DEMOS = [
 const CHRISTMAS_CARD_DEMOS = [
   { id: "cc-christmas-card-1", label: "Ornaments Christmas Card" },
   { id: "cc-christmas-card-2", label: "Snowflake Christmas Card" },
+  { id: "cc-christmas-card-3", label: "Red Landscape Christmas Card" },
 ];
 
 type Orientation = "landscape" | "portrait" | "square";
