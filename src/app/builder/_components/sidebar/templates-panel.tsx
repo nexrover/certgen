@@ -60,6 +60,7 @@ const INVOICE_DEMOS = [
 const RECEIPT_DEMOS = [
   { id: "rec-drugstore", label: "DrugStore Receipt" },
   { id: "rec-happyshop", label: "Happy Shop Receipt" },
+  { id: "rec-aromacafe", label: "Aroma Cafe Receipt" },
 ];
 
 type Orientation = "landscape" | "portrait" | "square";
@@ -390,7 +391,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
     };
   }, [category, orientation]);
 
-  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]) || (isRealEstate && !presetThumbnails["re-modern-home"]) || (isShippingLabel && !presetThumbnails["sl-standard"]) || (isResume && !presetThumbnails["resume-martha-williams"]) || (isInvoice && (!presetThumbnails["inv-classic"] || !presetThumbnails["inv-modern"] || !presetThumbnails["inv-minimal"])) || (isReceipt && (!presetThumbnails["rec-drugstore"] || !presetThumbnails["rec-happyshop"]));
+  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]) || (isRealEstate && !presetThumbnails["re-modern-home"]) || (isShippingLabel && !presetThumbnails["sl-standard"]) || (isResume && !presetThumbnails["resume-martha-williams"]) || (isInvoice && (!presetThumbnails["inv-classic"] || !presetThumbnails["inv-modern"] || !presetThumbnails["inv-minimal"])) || (isReceipt && (!presetThumbnails["rec-drugstore"] || !presetThumbnails["rec-happyshop"] || !presetThumbnails["rec-aromacafe"]));
 
   const filtered = TEMPLATES.filter((t) => {
     if (t.orientation !== orientation) return false;

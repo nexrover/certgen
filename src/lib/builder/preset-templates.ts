@@ -1577,6 +1577,46 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         tb("Come back soon!", { left: 110, top: 1160, width: 600, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" })
       ]
     }
+  },
+
+  "rec-aromacafe": {
+    name: "Aroma Cafe Receipt",
+    width: 820, height: 1360, paperSize: "RECEIPT",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Coffee Bean Logo Emblem (centered at X=410)
+        circle({ left: 360, top: 100, radius: 50, fill: "transparent", stroke: "#4a3728", strokeWidth: 5, selectable: false }),
+        // Coffee bean brown oval body
+        circle({ left: 375, top: 115, radius: 35, fill: "#4a3728", selectable: false }),
+        // Coffee bean crease (white wavy line)
+        circle({ left: 395, top: 115, radius: 25, fill: "transparent", stroke: "#ffffff", strokeWidth: 5, startAngle: 30, endAngle: 150, selectable: false }),
+
+        // Brand Name (centered)
+        tb("AROMA CAFE", { left: 110, top: 220, width: 600, fontSize: 36, fontWeight: "bold", fontFamily: "Courier New", fill: "#4a3728", textAlign: "center" }),
+
+        // Brand Address & Details (centered)
+        tb("1211 Green Street\nNew York NY 10005", { left: 110, top: 280, width: 600, fontSize: 24, fontFamily: "Courier New", fill: "#4a3728", textAlign: "center", lineHeight: 1.3 }),
+
+        // Date & Time (centered)
+        tb("12/07/2025 08:26 PM", { left: 110, top: 370, width: 600, fontSize: 18, fontFamily: "Courier New", fill: "#4a3728", textAlign: "center" }),
+
+        // Header Row above items
+        tb("QTY | DESC | AMT", { left: 110, top: 430, width: 600, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#4a3728" }),
+        rect({ left: 110, top: 460, width: 600, height: 3, fill: "#4a3728", selectable: false }),
+
+        // Monospaced Items List (left and right columns perfectly aligned)
+        tb("1 Americano\n1 Almond Scone\n1 Bottel Water", { left: 110, top: 490, width: 450, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8 }),
+        tb("$8.17\n$2.17\n$2.99", { left: 560, top: 490, width: 150, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+
+        // Subtotal, tax and total block
+        tb("Subtotal\nTax\nTotal", { left: 360, top: 650, width: 200, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+        tb("$8.17\n$0.53\n$8.70", { left: 560, top: 650, width: 150, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+
+        // Bottom tagline (centered)
+        tb("Thank you for your visit! Come back soon for more cozy\nmoments and great coffee.", { left: 110, top: 1100, width: 600, fontSize: 18, fontFamily: "Courier New", fill: "#4a3728", textAlign: "center", lineHeight: 1.4 })
+      ]
+    }
   }
 };
 
