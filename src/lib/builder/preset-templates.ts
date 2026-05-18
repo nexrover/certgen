@@ -1785,6 +1785,74 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         })
       ]
     }
+  },
+
+  "sm-template-3": {
+    name: "Cartoon Speech Social Post",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#fcd116",
+      objects: [
+        // 1. shape-2: Cartoon Speech Bubble Image (1280x1120, scaled by 0.586)
+        img("/Images/SMtemp3/bubble.png", {
+          left: 225, top: 150,
+          scaleX: 0.586, scaleY: 0.586,
+          selectable: true
+        }),
+
+        // 2. text-1: Quote Text inside Speech Bubble
+        tb("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla blandit, mauris commodo cursus pharetra.", {
+          left: 285, top: 220,
+          width: 580,
+          fontSize: 34,
+          fontWeight: "bold",
+          fill: "#000000",
+          fontFamily: "Helvetica",
+          textAlign: "center",
+          lineHeight: 1.4,
+          selectable: true
+        }),
+
+        // 3. photo: Circular avatar image frame (1280x1280, scaled to 160x160px)
+        {
+          ...img("/Images/SMtemp3/avatar.png", {
+            left: 520, top: 800,
+            scaleX: 0.125, scaleY: 0.125,
+            selectable: true
+          }),
+          clipPath: {
+            type: "Circle",
+            radius: 640,
+            left: 0, top: 0,
+            originX: "center",
+            originY: "center"
+          }
+        },
+
+        // 4. name: Name heading
+        tb("Namey Namerson", {
+          left: 300, top: 985,
+          width: 600,
+          fontSize: 34,
+          fontWeight: "bold",
+          fill: "#000000",
+          fontFamily: "Helvetica",
+          textAlign: "center",
+          selectable: true
+        }),
+
+        // 5. handle: Handle text
+        tb("@somehandle", {
+          left: 300, top: 1035,
+          width: 600,
+          fontSize: 22,
+          fill: "#555555",
+          fontFamily: "Helvetica",
+          textAlign: "center",
+          selectable: true
+        })
+      ]
+    }
   }
 };
 
