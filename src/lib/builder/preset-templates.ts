@@ -2178,6 +2178,49 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         })
       ]
     }
+  },
+
+  "email-newsletter-1": {
+    name: "Corporate Newsletter",
+    width: P.w, height: P.h, paperSize: "A4",
+    canvasJson: {
+      version: "7.0.0", background: "#f4f4f5",
+      objects: [
+        // Email Body Container
+        rect({ left: cx(P.w, 500), top: 40, width: 500, height: 760, fill: "#ffffff", rx: 8, ry: 8, selectable: false }),
+        
+        // Header Logo
+        tb("YOUR LOGO", { left: cx(P.w, 300), top: 75, width: 300, fontSize: 24, fontWeight: "900", fontFamily: "Helvetica", fill: "#1e3a8a", textAlign: "center", charSpacing: 100 }),
+        
+        // Hero Section Background
+        rect({ left: cx(P.w, 500), top: 130, width: 500, height: 200, fill: "#2563eb", selectable: true }),
+        
+        // Hero Text
+        tb("MONTHLY\nUPDATE", { left: cx(P.w, 400), top: 170, width: 400, fontSize: 36, fontWeight: "900", fontFamily: "Helvetica", fill: "#ffffff", textAlign: "center", lineHeight: 1.1, charSpacing: 50 }),
+        tb("Discover our latest news and insights.", { left: cx(P.w, 300), top: 260, width: 300, fontSize: 14, fontFamily: "Helvetica", fill: "#bfdbfe", textAlign: "center" }),
+        
+        // Main Headline
+        tb("A Month of Innovation", { left: cx(P.w, 400), top: 370, width: 400, fontSize: 22, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1f2937", textAlign: "center" }),
+        
+        // Body Paragraph
+        tb("We are thrilled to share the milestones achieved this month. Our team has been working tirelessly to bring you the best features and improvements. Read on to explore what's new and how it can empower your daily workflow and business growth.", { left: cx(P.w, 420), top: 415, width: 420, fontSize: 14, fontFamily: "Helvetica", fill: "#4b5563", textAlign: "center", lineHeight: 1.6 }),
+        
+        // Divider
+        rect({ left: cx(P.w, 420), top: 515, width: 420, height: 1, fill: "#e5e7eb", selectable: true }),
+        
+        // Secondary Section
+        tb("New Dashboard 2.0", { left: cx(P.w, 400), top: 545, width: 400, fontSize: 18, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1f2937", textAlign: "center" }),
+        tb("Experience a faster, cleaner, and more intuitive interface designed specifically for your advanced data needs.", { left: cx(P.w, 400), top: 580, width: 400, fontSize: 13, fontFamily: "Helvetica", fill: "#6b7280", textAlign: "center", lineHeight: 1.5 }),
+        
+        // CTA Button
+        rect({ left: cx(P.w, 200), top: 645, width: 200, height: 45, fill: "#2563eb", rx: 4, ry: 4 }),
+        tb("READ FULL UPDATE", { left: cx(P.w, 180), top: 658, width: 180, fontSize: 14, fontWeight: "bold", fontFamily: "Helvetica", fill: "#ffffff", textAlign: "center", charSpacing: 100 }),
+        
+        // Footer
+        tb("© 2026 Your Company Inc. All rights reserved.", { left: cx(P.w, 400), top: 740, width: 400, fontSize: 10, fontFamily: "Helvetica", fill: "#9ca3af", textAlign: "center" }),
+        tb("Unsubscribe | Manage Preferences", { left: cx(P.w, 200), top: 760, width: 200, fontSize: 10, fontFamily: "Helvetica", fill: "#9ca3af", textAlign: "center", underline: true })
+      ]
+    }
   }
 };
 

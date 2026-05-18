@@ -19,6 +19,10 @@ interface TemplatesPanelProps {
   isLoading?: boolean;
 }
 
+const EMAIL_DEMOS = [
+  { id: "email-newsletter-1", label: "Corporate Newsletter" },
+];
+
 const YOUTUBE_DEMOS = [
   { id: "yt-social-media", label: "Social Media Growth" },
   { id: "yt-senior-dev", label: "Senior Dev in 4 Months" },
@@ -331,6 +335,7 @@ type FilterType = "category" | "style" | "color";
 
 export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteCustomTemplate, category = "certificate", isLoading = false }: TemplatesPanelProps) {
   const isYoutube = category === "youtube";
+  const isEmail = category === "email";
   const isEcommerce = category === "ecommerce";
   const isRealEstate = category === "real-estate";
   const isShippingLabel = category === "shipping-label";
@@ -377,6 +382,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
       const allTemplatesToRender = [
         ...TEMPLATES,
         ...YOUTUBE_DEMOS.map(d => ({ id: d.id, orientation: "landscape" as Orientation })),
+        ...EMAIL_DEMOS.map(d => ({ id: d.id, orientation: "portrait" as Orientation })),
         ...ECOMMERCE_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation })),
         ...REAL_ESTATE_DEMOS.map(d => ({ id: d.id, orientation: (d.id === "re-story-listing" ? "portrait" : "square") as Orientation })),
         ...SHIPPING_LABEL_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation })),
@@ -407,7 +413,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
     };
   }, [category, orientation]);
 
-  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]) || (isRealEstate && !presetThumbnails["re-modern-home"]) || (isShippingLabel && !presetThumbnails["sl-standard"]) || (isResume && !presetThumbnails["resume-martha-williams"]) || (isInvoice && (!presetThumbnails["inv-classic"] || !presetThumbnails["inv-modern"] || !presetThumbnails["inv-minimal"])) || (isReceipt && (!presetThumbnails["rec-drugstore"] || !presetThumbnails["rec-happyshop"] || !presetThumbnails["rec-aromacafe"])) || (isSocialMedia && (!presetThumbnails["sm-template-1"] || !presetThumbnails["sm-template-2"] || !presetThumbnails["sm-template-3"])) || (isChristmasCard && !presetThumbnails["cc-christmas-card-1"]);
+  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEmail && !presetThumbnails["email-newsletter-1"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]) || (isRealEstate && !presetThumbnails["re-modern-home"]) || (isShippingLabel && !presetThumbnails["sl-standard"]) || (isResume && !presetThumbnails["resume-martha-williams"]) || (isInvoice && (!presetThumbnails["inv-classic"] || !presetThumbnails["inv-modern"] || !presetThumbnails["inv-minimal"])) || (isReceipt && (!presetThumbnails["rec-drugstore"] || !presetThumbnails["rec-happyshop"] || !presetThumbnails["rec-aromacafe"])) || (isSocialMedia && (!presetThumbnails["sm-template-1"] || !presetThumbnails["sm-template-2"] || !presetThumbnails["sm-template-3"])) || (isChristmasCard && !presetThumbnails["cc-christmas-card-1"]);
 
   const filtered = TEMPLATES.filter((t) => {
     if (t.orientation !== orientation) return false;
@@ -448,7 +454,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
   return (
     <div className="-mx-3 -mt-3 flex flex-col">
       {/* Orientation tabs - Restore default look */}
-      {!isYoutube && !isChristmasCard && (
+      {!isYoutube && !isEmail && !isChristmasCard && (
         <div className="flex border-b border-gray-200">
           <button
             onClick={() => setOrientation("landscape")}
@@ -507,7 +513,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             <div
               className="skeleton rounded-lg border border-dashed border-gray-200"
               style={{
-                aspectRatio: isYoutube ? "16 / 9" : orientation === "portrait" ? "595 / 842" : "842 / 595",
+                aspectRatio: isYoutube ? "16 / 9" : isEmail ? "595 / 842" : orientation === "portrait" ? "595 / 842" : "842 / 595",
               }}
             />
             {Array.from({ length: 7 }).map((_, i) => (
@@ -515,7 +521,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
                 key={`skeleton-${i}`}
                 className="skeleton rounded-lg border border-gray-100"
                 style={{
-                  aspectRatio: isYoutube ? "16 / 9" : orientation === "portrait" ? "595 / 842" : "842 / 595",
+                  aspectRatio: isYoutube ? "16 / 9" : isEmail ? "595 / 842" : orientation === "portrait" ? "595 / 842" : "842 / 595",
                   animation: "fadeIn 0.8s ease-out forwards",
                   animationDelay: `${i * 0.05}s`,
                   opacity: 0,
@@ -573,7 +579,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             <button
               onClick={handleBlank}
               className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
-              style={{ aspectRatio: isYoutube ? "16 / 9" : (isResume || isInvoice) ? "1020 / 1320" : isReceipt ? "820 / 1360" : (isEcommerce || isRealEstate || isShippingLabel || isSocialMedia) ? "1 / 1" : isChristmasCard ? "1050 / 600" : orientation === "portrait" ? "595 / 842" : "842 / 595" }}
+              style={{ aspectRatio: isYoutube ? "16 / 9" : isEmail ? "595 / 842" : (isResume || isInvoice) ? "1020 / 1320" : isReceipt ? "820 / 1360" : (isEcommerce || isRealEstate || isShippingLabel || isSocialMedia) ? "1 / 1" : isChristmasCard ? "1050 / 600" : orientation === "portrait" ? "595 / 842" : "842 / 595" }}
             >
               <svg className="h-6 w-6 text-gray-300 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -581,8 +587,8 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
             </button>
 
             {/* Demo cards / Presets */}
-            {(isYoutube ? YOUTUBE_DEMOS : isEcommerce ? ECOMMERCE_DEMOS : isRealEstate ? REAL_ESTATE_DEMOS : isShippingLabel ? SHIPPING_LABEL_DEMOS : isResume ? RESUME_DEMOS : isInvoice ? INVOICE_DEMOS : isReceipt ? RECEIPT_DEMOS : isSocialMedia ? SOCIAL_MEDIA_DEMOS : isChristmasCard ? CHRISTMAS_CARD_DEMOS : filtered).map((demo) => {
-              const dims = isYoutube ? { width: 1280, height: 720 } : (isEcommerce || isRealEstate || isShippingLabel) ? { width: 500, height: 500 } : isSocialMedia ? { width: 1200, height: 1200 } : isChristmasCard ? { width: 1050, height: 600 } : (isResume || isInvoice) ? { width: 1020, height: 1320 } : isReceipt ? { width: 820, height: 1360 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
+            {(isYoutube ? YOUTUBE_DEMOS : isEmail ? EMAIL_DEMOS : isEcommerce ? ECOMMERCE_DEMOS : isRealEstate ? REAL_ESTATE_DEMOS : isShippingLabel ? SHIPPING_LABEL_DEMOS : isResume ? RESUME_DEMOS : isInvoice ? INVOICE_DEMOS : isReceipt ? RECEIPT_DEMOS : isSocialMedia ? SOCIAL_MEDIA_DEMOS : isChristmasCard ? CHRISTMAS_CARD_DEMOS : filtered).map((demo) => {
+              const dims = isYoutube ? { width: 1280, height: 720 } : isEmail ? { width: 595, height: 842 } : (isEcommerce || isRealEstate || isShippingLabel) ? { width: 500, height: 500 } : isSocialMedia ? { width: 1200, height: 1200 } : isChristmasCard ? { width: 1050, height: 600 } : (isResume || isInvoice) ? { width: 1020, height: 1320 } : isReceipt ? { width: 820, height: 1360 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
               const thumb = presetThumbnails[demo.id];
 
               if (!thumb) {
@@ -614,7 +620,7 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
               );
             })}
           </div>
-          {filtered.length === 0 && !isYoutube && (
+          {filtered.length === 0 && !isYoutube && !isEmail && (
             <div className="px-3 pb-8 text-center text-xs text-gray-400">No templates match your filters.</div>
           )}
         </>
