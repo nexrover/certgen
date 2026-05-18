@@ -8,7 +8,7 @@ import { RecipientManagement } from "@/app/dashboard/_components/recipient-manag
 import { ProfileSettings } from "@/app/dashboard/_components/profile-settings";
 import { WelcomeHeader } from "@/app/dashboard/_components/welcome-header";
 import { redirect } from "next/navigation";
-import { getCategoryByView, TEMPLATE_VIEW_SLUGS, getTableName } from "@/lib/template-categories";
+import { getCategoryByView, TEMPLATE_VIEW_SLUGS, getTableName, TEMPLATE_CATEGORIES } from "@/lib/template-categories";
 
 export default async function DashboardPage({
   searchParams,
@@ -94,10 +94,18 @@ export default async function DashboardPage({
     .order("created_at", { ascending: false })
     .limit(10);
 
-  const { count: templateCount } = await supabase
-    .from("certificate_templates")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", userId);
+  // Calculate total template count across all categories
+  const templateCountPromises = TEMPLATE_CATEGORIES.map(async (category) => {
+    const tableName = getTableName(category.category);
+    const { count } = await supabase
+      .from(tableName)
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+    return count || 0;
+  });
+
+  const templateCounts = await Promise.all(templateCountPromises);
+  const totalTemplateCount = templateCounts.reduce((acc, count) => acc + count, 0);
 
   const { count: certificateCount } = await supabase
     .from("certificates")
@@ -111,7 +119,7 @@ export default async function DashboardPage({
 
       {/* Stats Section */}
       <StatsCards
-        templateCount={templateCount || 0}
+        templateCount={totalTemplateCount}
         certificateCount={certificateCount || 0}
       />
 
