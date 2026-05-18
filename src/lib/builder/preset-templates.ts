@@ -1700,6 +1700,91 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         })
       ]
     }
+  },
+
+  "sm-template-2": {
+    name: "Sand Dunes Quote Social Post",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Background image (1280x857, scaled by 1.4 to cover 1200x1200px canvas)
+        img("/Images/SMtemp2/bg.jpeg", {
+          left: -296, top: 0,
+          scaleX: 1.4, scaleY: 1.4,
+          selectable: true
+        }),
+
+        // 2. shape-1: Rounded White Card
+        rect({
+          left: 260, top: 230,
+          width: 680, height: 740,
+          fill: "#ffffff",
+          rx: 35, ry: 35,
+          selectable: true
+        }),
+
+        // 3. photo: Circular avatar image frame (1280x1280, scaled to 110x110px)
+        {
+          ...img("/Images/SMtemp2/avatar.png", {
+            left: 320, top: 290,
+            scaleX: 0.086, scaleY: 0.086,
+            selectable: true
+          }),
+          clipPath: {
+            type: "Circle",
+            radius: 640,
+            left: 0, top: 0,
+            originX: "center",
+            originY: "center"
+          }
+        },
+
+        // 4. name: Name heading
+        tb("Name", {
+          left: 460, top: 310,
+          width: 400,
+          fontSize: 32,
+          fontWeight: "bold",
+          fill: "#1a1a1a",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 5. handle: Handle text
+        tb("@username", {
+          left: 460, top: 355,
+          width: 400,
+          fontSize: 20,
+          fill: "#777777",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 6. text: Main quote text
+        tb("Lorem ipsum dolor sit amet, consectetur adipiscing elit.", {
+          left: 320,
+          top: 450,
+          width: 560,
+          fontSize: 38,
+          lineHeight: 1.4,
+          fill: "#1a1a1a",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 7. text: Footer line info
+        tb("Line for a date or other info.", {
+          left: 320,
+          top: 870,
+          width: 560,
+          fontSize: 18,
+          fill: "#a0a0a0",
+          fontFamily: "Helvetica",
+          selectable: true
+        })
+      ]
+    }
   }
 };
 
