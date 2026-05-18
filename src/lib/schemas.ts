@@ -44,7 +44,6 @@ export const SaveBuilderTemplateSchema = z.object({
     "SQUARE_500",
     "SQUARE_1024",
     "SQUARE_1200",
-    "OG_IMAGE",
     "SOCIAL_STORY",
     "CUSTOM_16_9",
     "RESUME",

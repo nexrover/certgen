@@ -79,14 +79,6 @@ export const TEMPLATE_CATEGORIES: TemplateCategoryConfig[] = [
     builderHref: "/builder?type=resume",
   },
   {
-    view: "open-graph",
-    category: "open-graph",
-    label: "Open Graph",
-    description: "Create OG images that make your links stand out on social media.",
-    iconColorClass: "bg-purple-100 text-purple-600",
-    builderHref: "/builder?type=open-graph",
-  },
-  {
     view: "christmas-card",
     category: "christmas-card",
     label: "Christmas Card",

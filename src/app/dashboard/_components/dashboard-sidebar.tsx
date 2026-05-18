@@ -53,7 +53,6 @@ export function DashboardSidebar({}: DashboardSidebarProps) {
         { label: "Real Estate Marketing", view: "real-estate", icon: FiHome },
         { label: "Shipping Label", view: "shipping-label", icon: FiPackage },
         { label: "Resume", view: "resume", icon: FiFileText },
-        { label: "Open Graph", view: "open-graph", icon: FiShare2 },
         { label: "Christmas Card", view: "christmas-card", icon: FiGift },
         { label: "Social Media", view: "social-media", icon: FaInstagram },
         { label: "Receipt", view: "receipt", icon: FiCreditCard },

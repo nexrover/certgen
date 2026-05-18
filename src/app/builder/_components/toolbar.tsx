@@ -31,7 +31,6 @@ const ALL_PAPER_OPTIONS: { value: PaperSize; label: string; categories: string[]
   { value: "SQUARE_1024", label: "Large Square (1024×1024)", categories: ["ecommerce", "real-estate"] },
   { value: "SQUARE_1200", label: "Square Large (1200×1200)", categories: ["shipping-label", "social-media"] },
   { value: "SOCIAL_STORY", label: "Social Story (1080×1920)", categories: ["real-estate", "social-media"] },
-  { value: "OG_IMAGE", label: "Open Graph (1200×630)", categories: ["open-graph"] },
   { value: "CUSTOM_16_9", label: "Full HD 16:9 (1920×1080)", categories: ["ecommerce", "youtube"] },
   { value: "RESUME", label: "Resume Page (1020×1320)", categories: ["resume"] },
   { value: "INVOICE", label: "Invoice Page (1020×1320)", categories: ["invoice"] },

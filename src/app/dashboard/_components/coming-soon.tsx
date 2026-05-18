@@ -28,7 +28,6 @@ export function ComingSoon({
       case "real-estate": displayIcon = <FiHome className="h-12 w-12" />; break;
       case "shipping-label": displayIcon = <FiPackage className="h-12 w-12" />; break;
       case "resume": displayIcon = <FiFileText className="h-12 w-12" />; break;
-      case "open-graph": displayIcon = <FiShare2 className="h-12 w-12" />; break;
       case "christmas-card": displayIcon = <FiGift className="h-12 w-12" />; break;
       case "social-media": displayIcon = <FaInstagram className="h-12 w-12" />; break;
       case "receipt": displayIcon = <FiCreditCard className="h-12 w-12" />; break;
