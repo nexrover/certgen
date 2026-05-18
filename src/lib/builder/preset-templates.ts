@@ -1617,6 +1617,89 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
         tb("Thank you for your visit! Come back soon for more cozy\nmoments and great coffee.", { left: 110, top: 1100, width: 600, fontSize: 18, fontFamily: "Courier New", fill: "#4a3728", textAlign: "center", lineHeight: 1.4 })
       ]
     }
+  },
+
+  "sm-template-1": {
+    name: "Forest Quote Social Post",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Background image (1280x720, scaled to cover 1200x1200px)
+        img("/Images/SMtemp1/bg.jpeg", {
+          left: -466.67, top: 0,
+          scaleX: 1.6667, scaleY: 1.6667,
+          selectable: true
+        }),
+
+        // 2. shape-2: Offset Black shadow rectangle behind green card (Centered)
+        rect({
+          left: 195, top: 160,
+          width: 850, height: 920,
+          fill: "#000000",
+          selectable: true
+        }),
+
+        // 3. shape-1: Muted forest green card with black border (Centered)
+        rect({
+          left: 175, top: 140,
+          width: 850, height: 920,
+          fill: "#3f4e35",
+          stroke: "#000000",
+          strokeWidth: 10,
+          selectable: true
+        }),
+
+        // 4. photo: Circular avatar image frame (Centered)
+        {
+          ...img("/Images/SMtemp1/avatar.png", {
+            left: 265, top: 230,
+            scaleX: 0.125, scaleY: 0.125,
+            selectable: true
+          }),
+          clipPath: {
+            type: "Circle",
+            radius: 640,
+            left: 0, top: 0,
+            originX: "center",
+            originY: "center"
+          }
+        },
+
+        // 5. name: User Name heading (Centered)
+        tb("User Name", {
+          left: 460, top: 260,
+          width: 500,
+          fontSize: 44,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 6. handle: Handle detail text (Centered)
+        tb("@handle", {
+          left: 460, top: 320,
+          width: 400,
+          fontSize: 26,
+          fill: "#b3c4b0",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 7. text: Main quote text (Centered)
+        tb("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget ligula eu lectus lobortis condimentum. Aliquam nonummy auctor massa.", {
+          left: 265,
+          top: 460,
+          width: 670,
+          fontSize: 48,
+          lineHeight: 1.5,
+          fill: "#ffffff",
+          fontFamily: "Georgia",
+          selectable: true
+        })
+      ]
+    }
   }
 };
 

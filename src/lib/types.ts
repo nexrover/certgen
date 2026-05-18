@@ -61,7 +61,7 @@ export const CATEGORY_DEFAULT_PAPER_SIZE: Record<string, PaperSize> = {
   resume: "RESUME",
   "open-graph": "OG_IMAGE",
   "christmas-card": "A4",
-  "social-media": "SOCIAL_1080",
+  "social-media": "SQUARE_1200",
   receipt: "RECEIPT",
   invoice: "INVOICE",
 };
