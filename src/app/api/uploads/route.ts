@@ -89,3 +89,36 @@ export async function GET() {
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const name = searchParams.get("name");
+
+    if (!name) {
+      return NextResponse.json({ success: false, error: "File name is required" }, { status: 400 });
+    }
+
+    const path = `uploads/${user.id}/${name}`;
+
+    const { error } = await supabase.storage.from("certificates").remove([path]);
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to delete upload";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}
