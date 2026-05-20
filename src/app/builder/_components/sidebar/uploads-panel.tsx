@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { addImageFromUrl } from "@/lib/builder/fabric-utils";
 import type { Canvas } from "fabric";
+import { Loader2 } from "lucide-react";
 
 interface UploadsPanelProps {
   canvas: Canvas | null;
@@ -11,6 +12,24 @@ interface UploadsPanelProps {
 export function UploadsPanel({ canvas }: UploadsPanelProps) {
   const [images, setImages] = useState<{ url: string; name: string }[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const res = await fetch("/api/uploads");
+        const data = await res.json();
+        if (data.success) {
+          setImages(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to load images", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchImages();
+  }, []);
 
   const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -41,7 +60,11 @@ export function UploadsPanel({ canvas }: UploadsPanelProps) {
         <input type="file" accept="image/png,image/jpeg,image/svg+xml" className="hidden" onChange={handleUpload} />
       </label>
 
-      {images.length > 0 && (
+      {loading ? (
+        <div className="mt-8 flex justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        </div>
+      ) : images.length > 0 && (
         <div className="mt-3 grid grid-cols-2 gap-2">
           {images.map((img, i) => (
             <button

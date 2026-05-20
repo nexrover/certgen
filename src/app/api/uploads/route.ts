@@ -48,3 +48,44 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
+
+export async function GET() {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data, error } = await supabase.storage
+      .from("certificates")
+      .list(`uploads/${user.id}`, {
+        limit: 100,
+        offset: 0,
+        sortBy: { column: "created_at", order: "desc" },
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    const images = data
+      .filter((file) => file.name !== ".emptyFolderPlaceholder" && file.id) // ignore placeholders
+      .map((file) => {
+        const path = `uploads/${user.id}/${file.name}`;
+        const { data: { publicUrl } } = supabase.storage.from("certificates").getPublicUrl(path);
+        return {
+          url: publicUrl,
+          name: file.name,
+        };
+      });
+
+    return NextResponse.json({ success: true, data: images });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to list uploads";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}
