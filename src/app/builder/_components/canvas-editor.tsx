@@ -606,15 +606,16 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
     /* ── Render ────────────────────────────────────────── */
 
     return (
-      <div ref={containerRef} className="relative flex flex-1 items-center justify-center overflow-y-scroll overflow-x-auto bg-gray-100">
-        <div
-          style={{
-            width: width * scale,
-            height: height * scale,
-            flexShrink: 0,
-            position: "relative",
-          }}
-        >
+      <div className="relative flex flex-1 overflow-hidden bg-gray-100">
+        <div ref={containerRef} className="flex flex-1 overflow-auto">
+          <div className="m-auto p-8 md:p-12 flex-shrink-0">
+          <div
+            style={{
+              width: width * scale,
+              height: height * scale,
+              position: "relative",
+            }}
+          >
           <div
             ref={canvasWrapperRef}
             style={{
@@ -659,6 +660,8 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
               onLock={handleLock}
             />
           )}
+          </div>
+        </div>
         </div>
 
         {/* Zoom indicator */}
