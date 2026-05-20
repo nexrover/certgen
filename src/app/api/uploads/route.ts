@@ -80,6 +80,9 @@ export async function GET() {
         return {
           url: publicUrl,
           name: file.name,
+          created_at: file.created_at,
+          updated_at: file.updated_at,
+          metadata: file.metadata,
         };
       });
 
