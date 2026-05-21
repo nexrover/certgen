@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { addImageFromUrl } from "@/lib/builder/fabric-utils";
 import type { Canvas } from "fabric";
-import { Loader2, MoreHorizontal, Trash2, Download, Info, Pencil } from "lucide-react";
+import { Loader2, MoreHorizontal, Trash2, Download, Info, Pencil, ChevronLeft } from "lucide-react";
 
 interface UploadedImage {
   url: string;
@@ -38,6 +38,7 @@ export function UploadsPanel({ canvas }: UploadsPanelProps) {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeMenuIndex, setActiveMenuIndex] = useState<number | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   const handleDownload = async (url: string, name: string) => {
     try {
@@ -110,7 +111,10 @@ export function UploadsPanel({ canvas }: UploadsPanelProps) {
       {activeMenuIndex !== null && (
         <div 
           className="fixed inset-0 z-40" 
-          onClick={() => setActiveMenuIndex(null)}
+          onClick={() => {
+            setActiveMenuIndex(null);
+            setShowDetails(false);
+          }}
         />
       )}
 
@@ -137,6 +141,9 @@ export function UploadsPanel({ canvas }: UploadsPanelProps) {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    if (activeMenuIndex !== i) {
+                      setShowDetails(false);
+                    }
                     setActiveMenuIndex(activeMenuIndex === i ? null : i);
                   }}
                   className="rounded-md bg-[#6F42C1] p-1 text-white hover:bg-[#5a3e85] shadow-sm"
@@ -150,54 +157,95 @@ export function UploadsPanel({ canvas }: UploadsPanelProps) {
                   className={`absolute ${i % 2 === 0 ? 'left-0' : 'right-0'} top-9 z-[9999] w-64 rounded-xl bg-white shadow-[0_4px_20px_rgb(0,0,0,0.15)] overflow-hidden text-left`}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="px-4 py-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-semibold text-gray-900 truncate pr-2">
-                          {img.name}
-                        </h4>
-                        <Pencil className="h-3.5 w-3.5 text-gray-500 flex-shrink-0 cursor-pointer" />
+                  {!showDetails ? (
+                    <>
+                      <div className="px-4 py-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-semibold text-gray-900 truncate pr-2">
+                            {img.name}
+                          </h4>
+                          <Pencil className="h-3.5 w-3.5 text-gray-500 flex-shrink-0 cursor-pointer" />
+                        </div>
+                        <p className="mt-0.5 text-xs text-gray-500">
+                          Uploaded by you on {formatDate(img.updated_at || img.created_at)}
+                        </p>
                       </div>
-                      <p className="mt-0.5 text-xs text-gray-500">
-                        Uploaded by you on {formatDate(img.updated_at || img.created_at)}
-                      </p>
-                    </div>
-                    
-                    <div className="border-t border-gray-100 py-1">
-                      <button className="flex w-full items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
-                        <Info className="mr-3 h-4 w-4" />
-                        Details
-                      </button>
-                      <button 
-                        onClick={() => {
-                          handleDownload(img.url, img.name);
-                          setActiveMenuIndex(null);
-                        }}
-                        className="flex w-full items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <Download className="mr-3 h-4 w-4" />
-                        Download
-                      </button>
-                      <button 
-                        onClick={async () => {
-                          try {
-                            const res = await fetch(`/api/uploads?name=${encodeURIComponent(img.name)}`, { method: "DELETE" });
-                            const data = await res.json();
-                            if (data.success) {
-                              setImages((prev) => prev.filter((_, idx) => idx !== i));
-                              setActiveMenuIndex(null);
+                      
+                      <div className="border-t border-gray-100 py-1">
+                        <button 
+                          onClick={() => setShowDetails(true)}
+                          className="flex w-full items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <Info className="mr-3 h-4 w-4" />
+                          Details
+                        </button>
+                        <button 
+                          onClick={() => {
+                            handleDownload(img.url, img.name);
+                            setActiveMenuIndex(null);
+                            setShowDetails(false);
+                          }}
+                          className="flex w-full items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <Download className="mr-3 h-4 w-4" />
+                          Download
+                        </button>
+                        <button 
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(`/api/uploads?name=${encodeURIComponent(img.name)}`, { method: "DELETE" });
+                              const data = await res.json();
+                              if (data.success) {
+                                setImages((prev) => prev.filter((_, idx) => idx !== i));
+                                setActiveMenuIndex(null);
+                                setShowDetails(false);
+                              }
+                            } catch (err) {
+                              console.error("Failed to delete image", err);
                             }
-                          } catch (err) {
-                            console.error("Failed to delete image", err);
-                          }
-                        }}
-                        className="flex w-full items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 className="mr-3 h-4 w-4" />
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                )}
+                          }}
+                          className="flex w-full items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="mr-3 h-4 w-4" />
+                          Remove
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="px-4 py-3 border-b border-gray-100 flex items-center bg-gray-50/50">
+                        <button 
+                          onClick={() => setShowDetails(false)}
+                          className="mr-2 text-gray-500 hover:text-gray-900 transition-colors"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </button>
+                        <h4 className="text-sm font-semibold text-gray-900">Image Details</h4>
+                      </div>
+                      <div className="px-4 py-4 space-y-4 text-sm text-gray-700">
+                        <div>
+                          <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Name</span>
+                          <span className="font-medium text-gray-900 break-all">{img.name}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Size</span>
+                            <span className="font-medium text-gray-900">{formatBytes(img.metadata?.size)}</span>
+                          </div>
+                          <div>
+                            <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Format</span>
+                            <span className="font-medium text-gray-900">{img.metadata?.mimetype?.split('/')[1]?.toUpperCase() || img.name.split(".").pop()?.toUpperCase() || "Unknown"}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Uploaded</span>
+                          <span className="font-medium text-gray-900">{formatDate(img.updated_at || img.created_at)}</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
