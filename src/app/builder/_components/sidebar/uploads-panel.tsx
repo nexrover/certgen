@@ -121,7 +121,7 @@ export function UploadsPanel({ canvas }: UploadsPanelProps) {
       ) : images.length > 0 && (
         <div className="mt-3 grid grid-cols-2 gap-2">
           {images.map((img, i) => (
-            <div key={i} className="group relative">
+            <div key={i} className={`group relative ${activeMenuIndex === i ? 'z-50' : 'z-10'}`}>
               <button
                 onClick={() => canvas && addImageFromUrl(canvas, img.url)}
                 className="block h-full w-full overflow-hidden rounded border border-gray-200 hover:border-indigo-400"
@@ -143,13 +143,14 @@ export function UploadsPanel({ canvas }: UploadsPanelProps) {
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </button>
-                
-                {activeMenuIndex === i && (
-                  <div 
-                    className="absolute right-0 top-9 z-[9999] w-64 rounded-xl bg-white shadow-[0_4px_20px_rgb(0,0,0,0.15)] overflow-hidden text-left"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="px-4 py-3">
+              </div>
+
+              {activeMenuIndex === i && (
+                <div 
+                  className={`absolute ${i % 2 === 0 ? 'left-0' : 'right-0'} top-9 z-[9999] w-64 rounded-xl bg-white shadow-[0_4px_20px_rgb(0,0,0,0.15)] overflow-hidden text-left`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="px-4 py-3">
                       <div className="flex items-center justify-between">
                         <h4 className="text-sm font-semibold text-gray-900 truncate pr-2">
                           {img.name}
@@ -197,7 +198,6 @@ export function UploadsPanel({ canvas }: UploadsPanelProps) {
                     </div>
                   </div>
                 )}
-              </div>
             </div>
           ))}
         </div>
