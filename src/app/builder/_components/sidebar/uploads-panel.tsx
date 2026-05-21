@@ -13,6 +13,29 @@ interface UploadedImage {
   metadata?: any;
 }
 
+const DEFAULT_IMAGES = [
+  { name: "Abstract Stripes", url: "/Images/ImageCards/abstract-stripes-qhd.jpg" },
+  { name: "Alien Planet", url: "/Images/ImageCards/aien-planet-4k-gj-1366x768.jpg" },
+  { name: "Backtrack Linux", url: "/Images/ImageCards/backtrack-linux-h8.jpg" },
+  { name: "Balance", url: "/Images/ImageCards/balance-110850.jpg" },
+  { name: "Blue Wave", url: "/Images/ImageCards/blue-abstract-wave-flow-minimalist-1k-1366x768.jpg" },
+  { name: "Boat at Dawn", url: "/Images/ImageCards/boat-and-duck-in-the-calm-of-dawn-us-1366x768.jpg" },
+  { name: "Buttermere Lake", url: "/Images/ImageCards/buttermere-7051403_1920.jpg" },
+  { name: "Couple in Love", url: "/Images/ImageCards/couple-in-love-lu_copy.jpg" },
+  { name: "Couple Silhouette", url: "/Images/ImageCards/couple-silhouette-art-5k-8a.jpg" },
+  { name: "Eid Celebration", url: "/Images/ImageCards/eid-8683303_1280.png" },
+  { name: "Emerald Lake", url: "/Images/ImageCards/emerald-lake-landscape-mountains-5k-la-1366x768.jpg" },
+  { name: "Fisherman Mist", url: "/Images/ImageCards/fisherman-on-the-misty-lake-qhd-1366x768.jpg" },
+  { name: "Fog Lake Duck", url: "/Images/ImageCards/fog-lake-duck-evening-4k-pl-1366x768.jpg" },
+  { name: "Geometry Print", url: "/Images/ImageCards/geometry-print-4k-gj-1366x768.jpg" },
+  { name: "Iceland Rocks", url: "/Images/ImageCards/iceland-rocks-dawn-black-sand-zb-1366x768.jpg" },
+  { name: "Island Moon", url: "/Images/ImageCards/island-sky-moon-tree-5q-1366x768.jpg" },
+  { name: "Jupiter Dark", url: "/Images/ImageCards/jupiter-dark-5k-sx-1366x768.jpg" },
+  { name: "Lake Louise", url: "/Images/ImageCards/lake-louise-hamlet-in-canada-7g-1366x768.jpg" },
+  { name: "Leather Texture", url: "/Images/ImageCards/leather-texture-blue-4k-si-1366x768.jpg" },
+  { name: "Parrot Security", url: "/Images/ImageCards/parrot-security-linux-debian-img-1920x1080.jpg" },
+];
+
 function formatBytes(bytes?: number) {
   if (!bytes) return "Unknown";
   const k = 1024;
@@ -250,6 +273,25 @@ export function UploadsPanel({ canvas }: UploadsPanelProps) {
           ))}
         </div>
       )}
+
+      {/* Default Images Section */}
+      <h3 className="mb-3 mt-6 text-xs font-semibold uppercase tracking-wider text-gray-500">Default Images</h3>
+      <div className="grid grid-cols-2 gap-2">
+        {DEFAULT_IMAGES.map((img, i) => (
+          <button
+            key={i}
+            onClick={() => canvas && addImageFromUrl(canvas, img.url)}
+            className="group relative block overflow-hidden rounded border border-gray-200 hover:border-indigo-400 transition-colors"
+            title={img.name}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={img.url} alt={img.name} className="h-16 w-full object-cover" />
+            <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-1.5 py-1 text-[10px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 truncate">
+              {img.name}
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
