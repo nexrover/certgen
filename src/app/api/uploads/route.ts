@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/svg+xml"];
@@ -113,7 +114,8 @@ export async function DELETE(req: Request) {
 
     const path = `uploads/${user.id}/${name}`;
 
-    const { error } = await supabase.storage.from("certificates").remove([path]);
+    const adminSupabase = createAdminClient();
+    const { data, error } = await adminSupabase.storage.from("certificates").remove([path]);
 
     if (error) {
       throw error;
