@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { Canvas } from "fabric";
 import { LuMinus, LuPlus, LuBold, LuItalic, LuUnderline, LuAlignLeft, LuAlignCenter, LuAlignRight, LuUndo2, LuRedo2, LuTrash2, LuImage } from "react-icons/lu";
 import { MdOutlineColorLens } from "react-icons/md";
+import { ImageEditToolbar } from "./image-edit-toolbar";
 
 /* ── Font catalogue (Google + system-safe) ────────────── */
 
@@ -77,6 +78,7 @@ export function FormatToolbar({
   const [textAlign, setTextAlign] = useState("center");
   const [isText, setIsText] = useState(false);
   const [isLine, setIsLine] = useState(false);
+  const [isImage, setIsImage] = useState(false);
   const [strokeWidth, setStrokeWidth] = useState(2);
 
   /* ── Sync state from the currently-selected Fabric object ── */
@@ -84,12 +86,19 @@ export function FormatToolbar({
   const syncFromSelection = useCallback(() => {
     if (!canvas) return;
     const obj = canvas.getActiveObject();
-    if (!obj) return;
+    if (!obj) {
+      setIsText(false);
+      setIsLine(false);
+      setIsImage(false);
+      return;
+    }
 
     const textLike = "fontSize" in obj;
     const lineLike = obj.type === "line";
+    const imageLike = obj.type === "image";
     setIsText(textLike);
     setIsLine(lineLike);
+    setIsImage(imageLike);
 
     if (textLike) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -123,10 +132,12 @@ export function FormatToolbar({
     const handler = () => syncFromSelection();
     canvas.on("selection:created", handler);
     canvas.on("selection:updated", handler);
+    canvas.on("selection:cleared", handler);
     canvas.on("object:modified", handler);
     return () => {
       canvas.off("selection:created", handler);
       canvas.off("selection:updated", handler);
+      canvas.off("selection:cleared", handler);
       canvas.off("object:modified", handler);
     };
   }, [canvas, syncFromSelection]);
@@ -215,6 +226,11 @@ export function FormatToolbar({
   const isBoldActive = fontWeight === "bold" || Number(fontWeight) >= 700;
 
   /* ── Render ──────────────────────────────────────────── */
+
+  /* ── If an image is selected, show the dedicated image toolbar ── */
+  if (isImage && !bgSelected) {
+    return <ImageEditToolbar canvas={canvas} onUndo={onUndo} onRedo={onRedo} />;
+  }
 
   return (
     <div
