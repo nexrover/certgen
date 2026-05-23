@@ -295,24 +295,24 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
     const newPreset = preset || borderRadiusPreset;
     setBorderRadius(newVal);
     setBorderRadiusPreset(newPreset);
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const obj = canvas?.getActiveObject() as any;
     if (!obj) return;
-    
+
     if (newVal === 0) {
       apply({ clipPath: undefined, rx: 0, ry: 0, brPreset: newPreset });
     } else {
       const w = obj.width || 100;
       const h = obj.height || 100;
       const r = Math.min(newVal, Math.min(w, h) / 2);
-      
+
       const pathStr = getRoundedRectPath(w, h, r, newPreset);
       const clipPath = new Path(pathStr, {
         originX: "center",
         originY: "center",
       });
-      
+
       apply({ clipPath, rx: r, ry: r, brPreset: newPreset });
     }
   };
@@ -353,7 +353,7 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
     if (!canvas) return;
     const obj = canvas.getActiveObject();
     if (!obj || obj.type !== "image") return;
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const img = obj as any;
     const w = img.width || 100;
@@ -407,10 +407,10 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const img = obj as any;
-    
+
     // Clear existing filters
     img.filters = [];
-    
+
     if (preset !== "none") {
       switch (preset) {
         case "grayscale": img.filters.push(new filters.Grayscale()); break;
@@ -424,7 +424,7 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
         case "invert": img.filters.push(new filters.Invert()); break;
       }
     }
-    
+
     img.applyFilters();
     img.set({ filterPreset: preset });
     canvas.requestRenderAll();
@@ -448,7 +448,7 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
     const obj = canvas.getActiveObject();
     if (!obj) return;
     if (s.preset === "none") {
-      obj.set({ 
+      obj.set({
         shadow: undefined,
         shPreset: undefined,
         shColor: undefined,
@@ -602,25 +602,18 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
     active?: boolean;
     onClick: () => void;
   }) => (
-    <div className="relative group">
-      <button
-        ref={(el) => { btnRefs.current[id] = el; }}
-        id={`img-${id}`}
-        onClick={onClick}
-        className={`flex h-8 w-8 items-center justify-center rounded-md transition-all duration-150 ${
-          active
-            ? "bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200"
-            : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+    <button
+      ref={(el) => { btnRefs.current[id] = el; }}
+      id={`img-${id}`}
+      onClick={onClick}
+      title={label}
+      className={`flex h-8 w-8 items-center justify-center rounded-md transition-all duration-50 ${active
+        ? "bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200"
+        : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
         }`}
-      >
-        {icon}
-      </button>
-      {/* Tooltip */}
-      <div className="absolute left-1/2 -translate-x-1/2 -top-9 px-2 py-1 rounded-md bg-gray-800 text-white text-[10px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
-        {label}
-        <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[4px] border-r-[4px] border-t-[4px] border-l-transparent border-r-transparent border-t-gray-800" />
-      </div>
-    </div>
+    >
+      {icon}
+    </button>
   );
 
   /* ── Render ──────────────────────────────────────────── */
@@ -771,20 +764,19 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
                   <button
                     key={p.value}
                     onClick={() => handleFilterChange(p.value)}
-                    className={`flex flex-col items-center gap-1.5 overflow-hidden rounded-md transition-all ${
-                      activeFilter === p.value
-                        ? "ring-2 ring-indigo-600 bg-indigo-50"
-                        : "ring-1 ring-gray-200 bg-white hover:ring-gray-400"
-                    }`}
+                    className={`flex flex-col items-center gap-1.5 overflow-hidden rounded-md transition-all ${activeFilter === p.value
+                      ? "ring-2 ring-indigo-600 bg-indigo-50"
+                      : "ring-1 ring-gray-200 bg-white hover:ring-gray-400"
+                      }`}
                     title={p.label}
                   >
                     <div className="h-10 w-full overflow-hidden bg-gray-100 flex items-center justify-center">
                       {selectedImageSrc ? (
-                        <img 
-                          src={selectedImageSrc} 
-                          alt={p.label} 
-                          className="h-full w-full object-cover" 
-                          style={{ filter: getFilterCSS(p.value) }} 
+                        <img
+                          src={selectedImageSrc}
+                          alt={p.label}
+                          className="h-full w-full object-cover"
+                          style={{ filter: getFilterCSS(p.value) }}
                         />
                       ) : (
                         <div className="h-full w-full bg-gray-200" style={{ filter: getFilterCSS(p.value) }} />
@@ -801,7 +793,7 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
           {activePanel === "radius" && (
             <div className="space-y-4" style={{ minWidth: 260 }}>
               <div className="text-xs font-semibold text-gray-700">Border Radius</div>
-              
+
               <div className="grid grid-cols-5 gap-2">
                 {BORDER_RADIUS_PRESETS.map((p) => {
                   const r = "10px";
@@ -823,11 +815,10 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
                       key={p.value}
                       onClick={() => handleBorderRadiusChange(borderRadius, p.value)}
                       style={brStyle}
-                      className={`h-9 w-9 border-[2.5px] transition-all ${
-                        borderRadiusPreset === p.value
-                          ? "border-indigo-600 bg-indigo-50"
-                          : "border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50"
-                      }`}
+                      className={`h-9 w-9 border-[2.5px] transition-all ${borderRadiusPreset === p.value
+                        ? "border-indigo-600 bg-indigo-50"
+                        : "border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50"
+                        }`}
                       title={p.label}
                     />
                   );
@@ -942,11 +933,10 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
                     <div key={p} className="flex flex-col items-center gap-1.5">
                       <button
                         onClick={() => handleShadowPresetChange(p)}
-                        className={`flex h-9 w-9 items-center justify-center rounded-md transition-all ${
-                          shadow.preset === p
-                            ? "bg-indigo-50 ring-2 ring-indigo-600"
-                            : "bg-gray-50 ring-1 ring-gray-200 hover:ring-gray-400"
-                        }`}
+                        className={`flex h-9 w-9 items-center justify-center rounded-md transition-all ${shadow.preset === p
+                          ? "bg-indigo-50 ring-2 ring-indigo-600"
+                          : "bg-gray-50 ring-1 ring-gray-200 hover:ring-gray-400"
+                          }`}
                         title={p}
                       >
                         {p === "none" ? (
