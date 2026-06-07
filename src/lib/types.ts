@@ -27,7 +27,19 @@ export type PaperSize =
   | "RESUME"
   | "INVOICE"
   | "RECEIPT"
-  | "CHRISTMAS_CARD";
+  | "CHRISTMAS_CARD"
+  | "INSTAGRAM_STORY"
+  | "LANDSCAPE_POST"
+  | "TWITTER_POST"
+  | "TWITTER_BANNER"
+  | "FACEBOOK_POST"
+  | "APP_STORE_SCREENSHOT"
+  | "OPEN_GRAPH"
+  | "TIKTOK_VIDEO"
+  | "LINKEDIN_POST"
+  | "BILLBOARD"
+  | "US_LEGAL"
+  | "CUSTOM";
 
 export const PAPER_DIMENSIONS: Record<PaperSize, { width: number; height: number }> = {
   A4: { width: 595, height: 842 },
@@ -45,6 +57,18 @@ export const PAPER_DIMENSIONS: Record<PaperSize, { width: number; height: number
   INVOICE: { width: 1020, height: 1320 },
   RECEIPT: { width: 820, height: 1360 },
   CHRISTMAS_CARD: { width: 1050, height: 600 },
+  INSTAGRAM_STORY: { width: 1080, height: 1920 },
+  LANDSCAPE_POST: { width: 1080, height: 608 },
+  TWITTER_POST: { width: 1600, height: 900 },
+  TWITTER_BANNER: { width: 1500, height: 500 },
+  FACEBOOK_POST: { width: 1200, height: 630 },
+  APP_STORE_SCREENSHOT: { width: 1290, height: 2796 },
+  OPEN_GRAPH: { width: 1200, height: 630 },
+  TIKTOK_VIDEO: { width: 1080, height: 1920 },
+  LINKEDIN_POST: { width: 1200, height: 627 },
+  BILLBOARD: { width: 970, height: 250 },
+  US_LEGAL: { width: 612, height: 1008 },
+  CUSTOM: { width: 1080, height: 1080 },
 };
 
 /**

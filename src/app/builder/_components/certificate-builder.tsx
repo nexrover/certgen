@@ -40,6 +40,8 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
   const [bgSelected, setBgSelected] = useState(false);
   const [bgColor, setBgColor] = useState("#ffffff");
   const bgFileRef = useRef<HTMLInputElement>(null);
+  const [customWidth, setCustomWidth] = useState(1080);
+  const [customHeight, setCustomHeight] = useState(1080);
 
   /* ── Custom Templates (auto-save) ──────────────────── */
   const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
@@ -51,7 +53,7 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
     setCustomTemplates(getCustomTemplates());
   }, []);
 
-  const dims = PAPER_DIMENSIONS[paperSize];
+  const dims = paperSize === "CUSTOM" ? { width: customWidth, height: customHeight } : PAPER_DIMENSIONS[paperSize];
 
   const handlePaperSizeChange = useCallback((size: PaperSize) => {
     setPaperSize(size);
@@ -275,6 +277,13 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
         onNameChange={(n) => { setTemplateName(n); setDirty(true); }}
         paperSize={paperSize}
         onPaperSizeChange={handlePaperSizeChange}
+        customWidth={customWidth}
+        customHeight={customHeight}
+        onCustomDimensionChange={(w, h) => {
+          setCustomWidth(w);
+          setCustomHeight(h);
+          setDirty(true);
+        }}
         onPreview={() => setShowPreview(true)}
         onSave={handleSave}
         onDownloadPdf={handleExportPdf}
