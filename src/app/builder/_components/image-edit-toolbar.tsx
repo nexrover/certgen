@@ -595,24 +595,27 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
     label,
     active,
     onClick,
+    title,
   }: {
     id: string;
     icon: React.ReactNode;
     label: string;
     active?: boolean;
     onClick: () => void;
+    title?: string;
   }) => (
     <button
       ref={(el) => { btnRefs.current[id] = el; }}
       id={`img-${id}`}
       onClick={onClick}
-      title={label}
-      className={`flex h-8 w-8 items-center justify-center rounded-md transition-all duration-50 ${active
-        ? "bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200"
+      title={title || label}
+      className={`flex h-8 items-center gap-1.5 px-2.5 rounded-md transition-all duration-150 text-xs font-medium ${active
+        ? "bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200"
         : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
         }`}
     >
       {icon}
+      <span>{label}</span>
     </button>
   );
 
@@ -656,7 +659,8 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
         <ToolBtn
           id="radius"
           icon={<LuSquare className="w-4 h-4" />}
-          label="Border Radius"
+          label="Radius"
+          title="Border Radius"
           active={activePanel === "radius"}
           onClick={() => togglePanel("radius")}
         />
@@ -667,7 +671,8 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
         <ToolBtn
           id="flipH"
           icon={<LuFlipHorizontal2 className="w-4 h-4" />}
-          label="Flip Horizontal"
+          label="Flip H"
+          title="Flip Horizontal"
           active={flipX}
           onClick={handleFlipH}
         />
@@ -676,7 +681,8 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
         <ToolBtn
           id="flipV"
           icon={<LuFlipVertical2 className="w-4 h-4" />}
-          label="Flip Vertical"
+          label="Flip V"
+          title="Flip Vertical"
           active={flipY}
           onClick={handleFlipV}
         />
@@ -687,7 +693,8 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
         <ToolBtn
           id="opacity"
           icon={<LuSunDim className="w-4 h-4" />}
-          label="Transparency"
+          label="Opacity"
+          title="Transparency"
           active={activePanel === "opacity"}
           onClick={() => togglePanel("opacity")}
         />
