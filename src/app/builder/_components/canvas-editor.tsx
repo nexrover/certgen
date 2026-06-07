@@ -29,6 +29,10 @@ interface CanvasEditorProps {
   height: number;
   onSelectionChange?: (hasSelection: boolean) => void;
   onCanvasModified?: () => void;
+  showRuler?: boolean;
+  onShowRulerChange?: (v: boolean) => void;
+  showGrid?: boolean;
+  onShowGridChange?: (v: boolean) => void;
 }
 
 interface SelectionBounds {
@@ -45,8 +49,28 @@ let clipboard: FabricObject | null = null;
 
 /* ── Component ────────────────────────────────────────── */
 
+/* ── Ruler tick helper ───────────────────────────────── */
+const RULER_SIZE = 24; // px — thickness of the ruler strip
+const MIN_TICK_PX = 40; // minimum pixels between labelled ticks
+
+function buildRulerTicks(lengthPx: number, scale: number) {
+  const docLength = lengthPx; // document units at current scale
+  // Nice intervals in document-space pixels
+  const candidates = [5, 10, 25, 50, 100, 200, 500, 1000];
+  let step = candidates.find((c) => c * scale >= MIN_TICK_PX) ?? 1000;
+  const ticks: { pos: number; label: string }[] = [];
+  const count = Math.ceil(docLength / step) + 1;
+  for (let i = 0; i <= count; i++) {
+    const docPos = i * step;
+    const screenPos = docPos * scale;
+    if (screenPos > lengthPx * scale + 2) break;
+    ticks.push({ pos: screenPos, label: String(docPos) });
+  }
+  return ticks;
+}
+
 export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
-  function CanvasEditor({ width, height, onSelectionChange, onCanvasModified }, ref) {
+  function CanvasEditor({ width, height, onSelectionChange, onCanvasModified, showRuler = false, onShowRulerChange, showGrid = false, onShowGridChange }, ref) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasElRef = useRef<HTMLCanvasElement>(null);
     const canvasWrapperRef = useRef<HTMLDivElement>(null);
@@ -605,10 +629,123 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
 
     /* ── Render ────────────────────────────────────────── */
 
+    const hTicks = buildRulerTicks(width, scale);
+    const vTicks = buildRulerTicks(height, scale);
+    const rulerOffset = showRuler ? RULER_SIZE : 0;
+
     return (
       <div className="relative flex flex-1 overflow-hidden bg-gray-100">
         <div ref={containerRef} className="flex flex-1 overflow-auto">
-          <div className="m-auto p-8 md:p-12 flex-shrink-0">
+          {/* Ruler corner square */}
+          {showRuler && (
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: RULER_SIZE,
+                height: RULER_SIZE,
+                background: "#f1f5f9",
+                borderRight: "1px solid #cbd5e1",
+                borderBottom: "1px solid #cbd5e1",
+                zIndex: 20,
+              }}
+            />
+          )}
+
+          {/* Horizontal ruler (top) */}
+          {showRuler && (
+            <div
+              style={{
+                position: "absolute",
+                left: rulerOffset,
+                top: 0,
+                right: 0,
+                height: RULER_SIZE,
+                background: "#f1f5f9",
+                borderBottom: "1px solid #cbd5e1",
+                overflow: "hidden",
+                zIndex: 19,
+                pointerEvents: "none",
+              }}
+            >
+              {/* We use a relative inner that scrolls with the content */}
+              <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                {hTicks.map(({ pos, label }) => (
+                  <div
+                    key={pos}
+                    style={{
+                      position: "absolute",
+                      left: pos + (containerRef.current ? containerRef.current.scrollLeft : 0),
+                      top: 0,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span style={{ fontSize: 8, color: "#64748b", lineHeight: 1, paddingTop: 2, paddingLeft: 2 }}>{label}</span>
+                    <div style={{ width: 1, height: 6, background: "#94a3b8", marginTop: 2 }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Vertical ruler (left) */}
+          {showRuler && (
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                top: rulerOffset,
+                bottom: 0,
+                width: RULER_SIZE,
+                background: "#f1f5f9",
+                borderRight: "1px solid #cbd5e1",
+                overflow: "hidden",
+                zIndex: 19,
+                pointerEvents: "none",
+              }}
+            >
+              <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                {vTicks.map(({ pos, label }) => (
+                  <div
+                    key={pos}
+                    style={{
+                      position: "absolute",
+                      top: pos,
+                      left: 0,
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div style={{ height: 1, width: 6, background: "#94a3b8", marginLeft: 2 }} />
+                    <span
+                      style={{
+                        fontSize: 8,
+                        color: "#64748b",
+                        lineHeight: 1,
+                        writingMode: "vertical-lr",
+                        transform: "rotate(180deg)",
+                        paddingBottom: 2,
+                      }}
+                    >
+                      {label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div
+            style={{
+              paddingTop: showRuler ? `${RULER_SIZE + 32}px` : undefined,
+              paddingLeft: showRuler ? `${RULER_SIZE + 32}px` : undefined,
+            }}
+            className="m-auto p-8 md:p-12 flex-shrink-0"
+          >
           <div
             style={{
               width: width * scale,
@@ -628,6 +765,24 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
             className="shadow-xl"
           >
             <canvas ref={canvasElRef} />
+
+            {/* Grid overlay */}
+            {showGrid && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  pointerEvents: "none",
+                  zIndex: 10,
+                  backgroundImage:
+                    "linear-gradient(rgba(99,102,241,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.15) 1px, transparent 1px)," +
+                    "linear-gradient(rgba(99,102,241,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.07) 1px, transparent 1px)",
+                  backgroundSize: "100px 100px, 100px 100px, 20px 20px, 20px 20px",
+                  backgroundPosition: "-1px -1px, -1px -1px, -1px -1px, -1px -1px",
+                }}
+              />
+            )}
+
             {/* Boundary-hit overlay — rendered once, toggled via CSS class on parent */}
             <div
               style={{
@@ -663,6 +818,7 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
           </div>
         </div>
         </div>
+
 
         {/* Zoom indicator */}
         <div className="absolute bottom-4 right-4 flex flex-col items-center gap-1 rounded bg-white/90 p-1 text-xs font-medium text-gray-600 shadow-lg ring-1 ring-black/5 backdrop-blur-sm">

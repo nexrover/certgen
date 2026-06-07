@@ -42,6 +42,8 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
   const bgFileRef = useRef<HTMLInputElement>(null);
   const [customWidth, setCustomWidth] = useState(1080);
   const [customHeight, setCustomHeight] = useState(1080);
+  const [showRuler, setShowRuler] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
 
   /* ── Custom Templates (auto-save) ──────────────────── */
   const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
@@ -324,6 +326,10 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
             onBgColorChange={handleBgColorChange}
             onBgImageUpload={handleBgImageUpload}
             onBgImageRemove={handleBgImageRemove}
+            showRuler={showRuler}
+            onShowRulerChange={setShowRuler}
+            showGrid={showGrid}
+            onShowGridChange={setShowGrid}
           />
 
           <CanvasEditor
@@ -332,6 +338,10 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
             height={dims.height}
             onSelectionChange={handleSelectionChange}
             onCanvasModified={handleCanvasModified}
+            showRuler={showRuler}
+            onShowRulerChange={setShowRuler}
+            showGrid={showGrid}
+            onShowGridChange={setShowGrid}
           />
         </div>
       </div>

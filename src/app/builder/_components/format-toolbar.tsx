@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { Canvas } from "fabric";
-import { LuMinus, LuPlus, LuBold, LuItalic, LuUnderline, LuAlignLeft, LuAlignCenter, LuAlignRight, LuUndo2, LuRedo2, LuTrash2, LuImage } from "react-icons/lu";
-import { MdOutlineColorLens } from "react-icons/md";
+import { LuMinus, LuPlus, LuBold, LuItalic, LuUnderline, LuAlignLeft, LuAlignCenter, LuAlignRight, LuUndo2, LuRedo2, LuImage, LuRuler, LuGrid3X3, LuCheck } from "react-icons/lu";
 import { ImageEditToolbar } from "./image-edit-toolbar";
 
 /* ── Font catalogue (Google + system-safe) ────────────── */
@@ -54,6 +53,10 @@ interface FormatToolbarProps {
   onBgColorChange?: (color: string) => void;
   onBgImageUpload?: () => void;
   onBgImageRemove?: () => void;
+  showRuler?: boolean;
+  onShowRulerChange?: (v: boolean) => void;
+  showGrid?: boolean;
+  onShowGridChange?: (v: boolean) => void;
 }
 
 /* ── Component ────────────────────────────────────────── */
@@ -67,11 +70,14 @@ export function FormatToolbar({
   onBgColorChange,
   onBgImageUpload,
   onBgImageRemove,
+  showRuler = false,
+  onShowRulerChange,
+  showGrid = false,
+  onShowGridChange,
 }: FormatToolbarProps) {
   const [fontFamily, setFontFamily] = useState("Georgia");
   const [fontWeight, setFontWeight] = useState("normal");
   const [fontSize, setFontSize] = useState(24);
-  const [scaling, setScaling] = useState(true);
   const [fontColor, setFontColor] = useState("#000000");
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
@@ -124,7 +130,6 @@ export function FormatToolbar({
       if (typeof o.fill === "string") setFontColor(o.fill);
     }
 
-    setScaling((obj as unknown as Record<string, unknown>).lockUniScaling !== true);
   }, [canvas]);
 
   useEffect(() => {
@@ -184,13 +189,7 @@ export function FormatToolbar({
     apply({ strokeWidth: next });
   }
 
-  function handleScalingToggle() {
-    const next = !scaling;
-    setScaling(next);
-    apply({ lockUniScaling: !next } as Record<string, unknown>);
-  }
-
-  function handleColorChange(c: string) {
+function handleColorChange(c: string) {
     setFontColor(c);
     if (isLine) {
       apply({ stroke: c });
@@ -238,6 +237,16 @@ export function FormatToolbar({
     >
       {bgSelected ? (
         <>
+          {/* ─ Scale & Grid ─ always-first on left */}
+          <ScaleGridControls
+            showRuler={showRuler}
+            onShowRulerChange={onShowRulerChange}
+            showGrid={showGrid}
+            onShowGridChange={onShowGridChange}
+          />
+
+          <div className="mx-2 h-5 w-px bg-gray-200" />
+
           {/* Background color swatch */}
           <div className="relative" title="Background color">
             <div
@@ -263,16 +272,6 @@ export function FormatToolbar({
           >
             <LuImage className="w-3.5 h-3.5" />
             Replace Background
-          </button>
-
-          {/* Remove Background button */}
-          <button
-            onClick={onBgImageRemove}
-            className="flex h-7 items-center gap-1.5 rounded border border-gray-300 px-2.5 text-xs text-gray-600 transition-colors hover:border-red-400 hover:bg-red-50 hover:text-red-600"
-            title="Remove background image"
-          >
-            <LuTrash2 className="w-3.5 h-3.5" />
-            Remove
           </button>
 
           {/* Spacer */}
@@ -303,6 +302,16 @@ export function FormatToolbar({
         </>
       ) : (
         <>
+          {/* ─ Scale & Grid ─ always-first on left */}
+          <ScaleGridControls
+            showRuler={showRuler}
+            onShowRulerChange={onShowRulerChange}
+            showGrid={showGrid}
+            onShowGridChange={onShowGridChange}
+          />
+
+          <div className="mx-2 h-5 w-px bg-gray-200" />
+
           {/* ─ Font Family ─ */}
           {isText && (
             <select
@@ -361,47 +370,6 @@ export function FormatToolbar({
               </button>
             </div>
           )}
-
-          {/* ─ Separator ─ */}
-          <div className="mx-1.5 h-5 w-px bg-gray-200" />
-
-          {/* ─ Scaling ─ */}
-          {!isLine && (
-            <>
-              <label className="flex cursor-pointer items-center gap-1.5 select-none text-xs text-gray-600 transition-colors hover:text-gray-800">
-                <input
-                  id="format-scaling"
-                  type="checkbox"
-                  checked={scaling}
-                  onChange={handleScalingToggle}
-                  className="h-3.5 w-3.5 cursor-pointer rounded border-gray-300 text-indigo-600 accent-indigo-600"
-                />
-                Scaling
-              </label>
-              <div className="mx-1.5 h-5 w-px bg-gray-200" />
-            </>
-          )}
-
-          {/* ─ Color picker ─ */}
-          <div className="relative" title={isLine ? "Line color" : "Color"}>
-            <button
-              id="format-font-color"
-              className="flex h-7 w-8 items-center justify-center rounded border border-gray-300 transition-colors hover:border-gray-400 group"
-            >
-              <MdOutlineColorLens className="w-4 h-4" style={{ color: fontColor }} />
-            </button>
-            <div
-              className="absolute bottom-0.5 left-1.5 right-1.5 h-[2px] rounded-full"
-              style={{ backgroundColor: fontColor }}
-            />
-            <input
-              type="color"
-              value={fontColor}
-              onChange={(e) => handleColorChange(e.target.value)}
-              className="absolute inset-0 cursor-pointer opacity-0"
-              title={isLine ? "Choose line color" : "Choose color"}
-            />
-          </div>
 
           {/* ─ Bold ─ */}
           {isText && (
@@ -517,6 +485,67 @@ export function FormatToolbar({
           </button>
         </>
       )}
+    </div>
+  );
+}
+
+/* ── Scale & Grid toggle controls ──────────────────────── */
+function ScaleGridControls({
+  showRuler,
+  onShowRulerChange,
+  showGrid,
+  onShowGridChange,
+}: {
+  showRuler?: boolean;
+  onShowRulerChange?: (v: boolean) => void;
+  showGrid?: boolean;
+  onShowGridChange?: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      {/* ─ Scale / Ruler ─ */}
+      <label
+        className="flex cursor-pointer items-center gap-1.5 select-none group"
+        title="Toggle ruler"
+      >
+        <LuRuler className={`w-3.5 h-3.5 transition-colors ${showRuler ? "text-indigo-600" : "text-gray-500"}`} />
+        <span className={`text-xs font-medium transition-colors ${showRuler ? "text-indigo-700" : "text-gray-600"}`}>
+          Scale
+        </span>
+        {/* custom checkbox — right of title */}
+        <span
+          onClick={() => onShowRulerChange?.(!showRuler)}
+          className={`flex h-4 w-4 items-center justify-center rounded border transition-all duration-150 ${
+            showRuler
+              ? "bg-indigo-600 border-indigo-600 shadow-sm shadow-indigo-200"
+              : "border-gray-300 bg-white group-hover:border-indigo-400"
+          }`}
+        >
+          {showRuler && <LuCheck className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
+        </span>
+      </label>
+
+      {/* ─ Grid ─ */}
+      <label
+        className="flex cursor-pointer items-center gap-1.5 select-none group"
+        title="Toggle grid"
+      >
+        <LuGrid3X3 className={`w-3.5 h-3.5 transition-colors ${showGrid ? "text-indigo-600" : "text-gray-500"}`} />
+        <span className={`text-xs font-medium transition-colors ${showGrid ? "text-indigo-700" : "text-gray-600"}`}>
+          Grid
+        </span>
+        {/* custom checkbox — right of title */}
+        <span
+          onClick={() => onShowGridChange?.(!showGrid)}
+          className={`flex h-4 w-4 items-center justify-center rounded border transition-all duration-150 ${
+            showGrid
+              ? "bg-indigo-600 border-indigo-600 shadow-sm shadow-indigo-200"
+              : "border-gray-300 bg-white group-hover:border-indigo-400"
+          }`}
+        >
+          {showGrid && <LuCheck className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
+        </span>
+      </label>
     </div>
   );
 }
