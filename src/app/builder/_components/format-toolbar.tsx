@@ -244,7 +244,6 @@ function handleColorChange(c: string) {
             showGrid={showGrid}
             onShowGridChange={onShowGridChange}
           />
-
           <div className="mx-2 h-5 w-px bg-gray-200" />
 
           {/* Background color swatch */}
@@ -309,7 +308,6 @@ function handleColorChange(c: string) {
             showGrid={showGrid}
             onShowGridChange={onShowGridChange}
           />
-
           <div className="mx-2 h-5 w-px bg-gray-200" />
 
           {/* ─ Font Family ─ */}

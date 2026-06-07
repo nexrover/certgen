@@ -70,7 +70,19 @@ function buildRulerTicks(lengthPx: number, scale: number) {
 }
 
 export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
-  function CanvasEditor({ width, height, onSelectionChange, onCanvasModified, showRuler = false, onShowRulerChange, showGrid = false, onShowGridChange }, ref) {
+  function CanvasEditor(
+    {
+      width,
+      height,
+      onSelectionChange,
+      onCanvasModified,
+      showRuler = false,
+      onShowRulerChange,
+      showGrid = false,
+      onShowGridChange,
+    },
+    ref
+  ) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasElRef = useRef<HTMLCanvasElement>(null);
     const canvasWrapperRef = useRef<HTMLDivElement>(null);
