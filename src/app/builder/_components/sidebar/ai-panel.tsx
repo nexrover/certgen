@@ -45,13 +45,14 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
   const [style, setStyle] = useState<StyleTheme>("modern");
   const [generating, setGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const suggestions = SUGGESTIONS[category] || SUGGESTIONS.default;
 
-  // Simulate loading steps for the UI demo
-  const startSimulation = () => {
+  const handleGenerate = async () => {
     if (!prompt.trim()) return;
     setGenerating(true);
+    setError(null);
     setCurrentStep(0);
 
     const steps = [
@@ -62,17 +63,50 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
       "Finalizing canvas template JSON..."
     ];
 
-    let stepIndex = 0;
+    // Simulate progress updates
     const interval = setInterval(() => {
-      if (stepIndex < steps.length - 1) {
-        stepIndex++;
-        setCurrentStep(stepIndex);
-      } else {
-        clearInterval(interval);
-        setGenerating(false);
-        alert("Functionality will be integrated in the next step!");
-      }
+      setCurrentStep((prev) => {
+        if (prev < steps.length - 1) {
+          return prev + 1;
+        }
+        return prev;
+      });
     }, 1200);
+
+    try {
+      const response = await fetch("/api/templates/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt,
+          category,
+          orientation,
+          style,
+        }),
+      });
+
+      const data = await response.json();
+      clearInterval(interval);
+
+      if (data.success) {
+        onLoadTemplate({
+          canvasJson: data.canvasJson,
+          paperSize: data.paperSize,
+          width: data.width,
+          height: data.height,
+        });
+      } else {
+        setError(data.error || "Failed to generate template. Please try again.");
+      }
+    } catch (err) {
+      clearInterval(interval);
+      setError("An unexpected network error occurred. Please try again.");
+      console.error(err);
+    } finally {
+      setGenerating(false);
+    }
   };
 
   return (
@@ -205,9 +239,17 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
             </div>
           </div>
 
+          {/* Error Banner */}
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-red-700 text-xs flex flex-col space-y-1 shadow-sm animate-in fade-in duration-200">
+              <span className="font-bold">Generation Failed</span>
+              <p className="text-[10px] text-red-650 leading-normal">{error}</p>
+            </div>
+          )}
+
           {/* Generate Action Button */}
           <button
-            onClick={startSimulation}
+            onClick={handleGenerate}
             disabled={!prompt.trim()}
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 shadow-md hover:shadow-lg disabled:opacity-40 disabled:pointer-events-none transition-all duration-200 cursor-pointer uppercase tracking-wider"
           >
