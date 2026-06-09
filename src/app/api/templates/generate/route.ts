@@ -10,12 +10,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    let apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
         { success: false, error: "Gemini API key is not configured in .env.local" },
         { status: 500 }
       );
+    }
+    apiKey = apiKey.trim();
+    if (apiKey.endsWith(";")) {
+      apiKey = apiKey.slice(0, -1).trim();
     }
 
     // 3. Determine dimensions based on category and orientation
@@ -64,8 +68,6 @@ export async function POST(req: Request) {
     }
 
     // 4. Construct Gemini request
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
     const systemPrompt = `You are a professional graphic designer and Fabric.js canvas template generator.
 Your task is to generate a beautiful, highly aesthetic canvas design layout based on the user's prompt, style theme, and dimensions.
 
@@ -213,29 +215,63 @@ Return the template in the exact JSON format specified in the JSON schema.`;
       },
     };
 
-    // 5. Fetch from Gemini API
-    const response = await fetch(geminiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(geminiPayload),
-    });
+    // 5. Fetch from Gemini API with fallback models
+    const modelsToTry = [
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-2.5-pro",
+      "gemini-flash-latest",
+      "gemini-pro-latest"
+    ];
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Gemini API error response:", errorText);
-      return NextResponse.json(
-        { success: false, error: `Gemini API returned error: ${response.statusText}` },
-        { status: 500 }
-      );
+    let candidateText = "";
+    let lastErrorMsg = "";
+
+    for (const model of modelsToTry) {
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8-second timeout per model
+      
+      try {
+        console.log(`Attempting generation with model: ${model}`);
+        const response = await fetch(geminiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(geminiPayload),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const resultData = await response.json();
+          const text = resultData.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            candidateText = text;
+            console.log(`Successfully generated using model: ${model}`);
+            break;
+          }
+        } else {
+          const errBody = await response.json().catch(() => ({}));
+          const errText = errBody.error?.message || response.statusText;
+          console.warn(`Model ${model} failed with status ${response.status}: ${errText}`);
+          lastErrorMsg = errText;
+        }
+      } catch (err: unknown) {
+        clearTimeout(timeoutId);
+        const errMsg = err instanceof Error ? err.message : "Network Error";
+        console.warn(`Model ${model} network error:`, errMsg);
+        lastErrorMsg = errMsg;
+      }
     }
 
-    const resultData = await response.json();
-    const candidateText = resultData.candidates?.[0]?.content?.parts?.[0]?.text;
-
     if (!candidateText) {
-      return NextResponse.json({ success: false, error: "Failed to receive template from AI" }, { status: 502 });
+      return NextResponse.json(
+        { success: false, error: `AI Generation failed. Last error: ${lastErrorMsg}` },
+        { status: 502 }
+      );
     }
 
     const parsedTemplate = JSON.parse(candidateText);
