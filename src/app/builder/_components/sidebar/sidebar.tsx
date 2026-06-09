@@ -8,6 +8,7 @@ import { TextPanel } from "./text-panel";
 import { AttributesPanel } from "./attributes-panel";
 import { QrCodesPanel } from "./qrcodes-panel";
 import { LayersPanel } from "./layers-panel";
+import { AIPanel } from "./ai-panel";
 import type { Canvas } from "fabric";
 import type { CustomTemplate } from "@/lib/custom-templates-store";
 import {
@@ -17,7 +18,8 @@ import {
   LuType,
   LuFileText,
   LuQrCode,
-  LuLayers
+  LuLayers,
+  LuSparkles
 } from "react-icons/lu";
 
 const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
@@ -25,6 +27,11 @@ const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
     id: "templates",
     label: "Templates",
     icon: <LuLayoutTemplate className="w-6 h-6" />,
+  },
+  {
+    id: "ai",
+    label: "AI Design",
+    icon: <LuSparkles className="w-6 h-6" />,
   },
   {
     id: "uploads",
@@ -58,7 +65,7 @@ const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
   },
 ];
 
-type TabId = "templates" | "uploads" | "elements" | "text" | "attributes" | "qrcodes" | "layers";
+type TabId = "templates" | "uploads" | "elements" | "text" | "attributes" | "qrcodes" | "layers" | "ai";
 
 interface SidebarProps {
   canvas: Canvas | null;
@@ -102,6 +109,7 @@ export function Sidebar({ canvas, onLoadTemplate, onBgSelected, customTemplates,
 
       <div className="flex-1 overflow-y-auto p-4">
         {activeTab === "templates" && <TemplatesPanel onLoadTemplate={onLoadTemplate} customTemplates={customTemplates} onDeleteCustomTemplate={onDeleteCustomTemplate} category={category} isLoading={isLoading} />}
+        {activeTab === "ai" && <AIPanel onLoadTemplate={onLoadTemplate} category={category} />}
         {activeTab === "uploads" && <UploadsPanel canvas={canvas} />}
         {activeTab === "elements" && <ElementsPanel canvas={canvas} />}
         {activeTab === "text" && <TextPanel canvas={canvas} />}
