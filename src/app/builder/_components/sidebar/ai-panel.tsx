@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { LuSparkles, LuCompass, LuRefreshCw, LuLayoutTemplate, LuPaintbrush, LuMessageSquareCode } from "react-icons/lu";
+import { useState, useEffect, useCallback } from "react";
+import { LuSparkles, LuCompass, LuRefreshCw, LuLayoutTemplate, LuPaintbrush, LuMessageSquareCode, LuClock } from "react-icons/lu";
 
 interface AIPanelProps {
   onLoadTemplate: (payload: {
@@ -15,6 +15,44 @@ interface AIPanelProps {
 
 type Orientation = "landscape" | "portrait" | "square";
 type StyleTheme = "classic" | "modern" | "minimal" | "bold";
+
+const MAX_FREE_GENERATIONS = 5;
+const COOLDOWN_MS = 6 * 60 * 60 * 1000; // 6 hours
+const STORAGE_KEY = "ai_gen_usage";
+
+interface UsageData {
+  count: number;
+  blockedUntil: number | null; // timestamp
+}
+
+function loadUsage(): UsageData {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { count: 0, blockedUntil: null };
+    const data = JSON.parse(raw) as UsageData;
+    // If cooldown has expired, reset
+    if (data.blockedUntil && Date.now() >= data.blockedUntil) {
+      const reset: UsageData = { count: 0, blockedUntil: null };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(reset));
+      return reset;
+    }
+    return data;
+  } catch {
+    return { count: 0, blockedUntil: null };
+  }
+}
+
+function saveUsage(data: UsageData) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function formatTimeLeft(ms: number): string {
+  if (ms <= 0) return "0m";
+  const hours = Math.floor(ms / (1000 * 60 * 60));
+  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
 
 const SUGGESTIONS: Record<string, string[]> = {
   certificate: [
@@ -47,30 +85,61 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
   const [currentStep, setCurrentStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
+  // Usage tracking
+  const [usage, setUsage] = useState<UsageData>({ count: 0, blockedUntil: null });
+  const [timeLeft, setTimeLeft] = useState("");
+
+  const remaining = MAX_FREE_GENERATIONS - usage.count;
+  const isBlocked = usage.blockedUntil !== null && Date.now() < usage.blockedUntil;
+
+  // Load usage from localStorage on mount
+  useEffect(() => {
+    setUsage(loadUsage());
+  }, []);
+
+  // Countdown timer when blocked
+  useEffect(() => {
+    if (!isBlocked || !usage.blockedUntil) return;
+
+    const tick = () => {
+      const left = (usage.blockedUntil ?? 0) - Date.now();
+      if (left <= 0) {
+        // Cooldown expired — reset
+        const reset: UsageData = { count: 0, blockedUntil: null };
+        saveUsage(reset);
+        setUsage(reset);
+        setTimeLeft("");
+      } else {
+        setTimeLeft(formatTimeLeft(left));
+      }
+    };
+
+    tick();
+    const interval = setInterval(tick, 30_000); // update every 30s
+    return () => clearInterval(interval);
+  }, [isBlocked, usage.blockedUntil]);
+
   const suggestions = SUGGESTIONS[category] || SUGGESTIONS.default;
 
+  const recordGeneration = useCallback(() => {
+    const newCount = usage.count + 1;
+    const newUsage: UsageData = {
+      count: newCount,
+      blockedUntil: newCount >= MAX_FREE_GENERATIONS ? Date.now() + COOLDOWN_MS : null,
+    };
+    saveUsage(newUsage);
+    setUsage(newUsage);
+  }, [usage.count]);
+
   const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || isBlocked) return;
     setGenerating(true);
     setError(null);
     setCurrentStep(0);
 
-    const steps = [
-      "Analyzing prompt requirements...",
-      "Selecting cohesive color palette...",
-      "Arranging elements & coordinates...",
-      "Polishing typography hierarchy...",
-      "Finalizing canvas template JSON..."
-    ];
-
     // Simulate progress updates
     const interval = setInterval(() => {
-      setCurrentStep((prev) => {
-        if (prev < steps.length - 1) {
-          return prev + 1;
-        }
-        return prev;
-      });
+      setCurrentStep((prev) => (prev < 4 ? prev + 1 : prev));
     }, 1200);
 
     try {
@@ -91,6 +160,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
       clearInterval(interval);
 
       if (data.success) {
+        recordGeneration();
         onLoadTemplate({
           canvasJson: data.canvasJson,
           paperSize: data.paperSize,
@@ -117,7 +187,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
           <LuSparkles className="w-3.5 h-3.5 text-indigo-600 animate-pulse" />
           AI Design Assistant
         </h3>
-        <p className="text-[10px] text-gray-400 mt-0.5">Describe your dream template & let AI build it</p>
+        <p className="text-[10px] text-gray-400 mt-0.5">Describe your dream template &amp; let AI build it</p>
       </div>
 
       {generating ? (
@@ -154,16 +224,32 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
               <LuMessageSquareCode className="w-3.5 h-3.5 text-gray-400" />
-              Describe your Template
+              <span className="flex items-center gap-1.5">
+                Describe your Template
+                <span className={`ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                  isBlocked
+                    ? "bg-red-100 text-red-600"
+                    : remaining <= 2
+                      ? "bg-amber-100 text-amber-700"
+                      : "bg-indigo-50 text-indigo-600"
+                }`}>
+                  {isBlocked ? "0" : remaining}/{MAX_FREE_GENERATIONS}
+                </span>
+              </span>
             </label>
             <div className="relative">
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="e.g., An elegant modern certificate for web development course completion, navy blue colors with golden border ribbons, bold centered name..."
-                className="w-full h-28 rounded-xl border border-gray-200 p-3 text-xs focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all placeholder:text-gray-400 resize-none shadow-sm leading-relaxed"
+                placeholder={isBlocked ? "Free generation limit reached. Please wait for cooldown..." : "e.g., An elegant modern certificate for web development course completion, navy blue colors with golden border ribbons, bold centered name..."}
+                disabled={isBlocked}
+                className={`w-full h-28 rounded-xl border p-3 text-xs outline-none transition-all placeholder:text-gray-400 resize-none shadow-sm leading-relaxed ${
+                  isBlocked 
+                    ? "border-gray-200 bg-gray-50 cursor-not-allowed text-gray-400" 
+                    : "border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                }`}
               />
-              {prompt && (
+              {prompt && !isBlocked && (
                 <button 
                   onClick={() => setPrompt("")}
                   className="absolute right-2.5 bottom-2.5 text-[9px] font-medium text-gray-400 hover:text-red-500 transition-colors uppercase tracking-tight"
@@ -173,6 +259,31 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
               )}
             </div>
           </div>
+
+          {/* Cooldown Notice — shown when blocked */}
+          {isBlocked && (
+            <div className="flex items-start gap-2.5 p-3 bg-amber-50 border border-amber-200 rounded-xl shadow-sm animate-in fade-in duration-300">
+              <div className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-amber-100">
+                <LuClock className="w-4 h-4 text-amber-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold text-amber-800">Free Limit Reached</p>
+                <p className="text-[10px] text-amber-600 leading-relaxed mt-0.5">
+                  You&apos;ve used all {MAX_FREE_GENERATIONS} free generations. Resets in <span className="font-bold">{timeLeft || "calculating..."}</span>
+                </p>
+                <div className="mt-1.5 w-full bg-amber-200/60 rounded-full h-1 overflow-hidden">
+                  <div 
+                    className="bg-amber-500 h-1 rounded-full transition-all duration-1000"
+                    style={{ 
+                      width: usage.blockedUntil 
+                        ? `${Math.max(0, 100 - ((usage.blockedUntil - Date.now()) / COOLDOWN_MS) * 100)}%`
+                        : "0%" 
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Orientation Selector */}
           <div className="space-y-2">
@@ -184,11 +295,12 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                 <button
                   key={o}
                   onClick={() => setOrientation(o)}
+                  disabled={isBlocked}
                   className={`flex flex-col items-center justify-center py-2.5 px-1.5 rounded-xl border text-xs font-semibold capitalize transition-all duration-200 cursor-pointer ${
                     orientation === o
                       ? "border-indigo-600 bg-indigo-50/40 text-indigo-700 shadow-sm ring-1 ring-indigo-600"
                       : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:border-gray-300"
-                  }`}
+                  } ${isBlocked ? "opacity-50 pointer-events-none" : ""}`}
                 >
                   <div className={`mb-1.5 border border-gray-300 rounded transition-all duration-300 ${
                     o === "landscape" ? "w-6 h-4" : o === "portrait" ? "w-4 h-6" : "w-5 h-5"
@@ -209,11 +321,12 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                 <button
                   key={s}
                   onClick={() => setStyle(s)}
+                  disabled={isBlocked}
                   className={`py-2 px-3 rounded-xl border text-[11px] font-semibold capitalize transition-all duration-200 cursor-pointer text-center ${
                     style === s
                       ? "border-indigo-600 bg-indigo-50/40 text-indigo-700 shadow-sm ring-1 ring-indigo-600"
                       : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:border-gray-300"
-                  }`}
+                  } ${isBlocked ? "opacity-50 pointer-events-none" : ""}`}
                 >
                   {s}
                 </button>
@@ -222,7 +335,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
           </div>
 
           {/* Prompt Suggestions */}
-          <div className="space-y-2 bg-gray-50/50 p-3 rounded-xl border border-gray-100">
+          <div className={`space-y-2 bg-gray-50/50 p-3 rounded-xl border border-gray-100 ${isBlocked ? "opacity-50 pointer-events-none" : ""}`}>
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
               <LuCompass className="w-3.5 h-3.5 text-gray-400" /> Quick Ideas
             </label>
@@ -231,6 +344,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                 <button
                   key={i}
                   onClick={() => setPrompt(suggestion)}
+                  disabled={isBlocked}
                   className="w-full text-left text-[11px] p-2 rounded-lg bg-white border border-gray-150 hover:bg-indigo-50/20 hover:border-indigo-100 hover:shadow-sm text-gray-600 hover:text-indigo-700 transition-all cursor-pointer"
                 >
                   {suggestion}
@@ -250,10 +364,10 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
           {/* Generate Action Button */}
           <button
             onClick={handleGenerate}
-            disabled={!prompt.trim()}
+            disabled={!prompt.trim() || isBlocked}
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 shadow-md hover:shadow-lg disabled:opacity-40 disabled:pointer-events-none transition-all duration-200 cursor-pointer uppercase tracking-wider"
           >
-            <LuSparkles className="w-4 h-4 animate-spin duration-3000" />
+            <LuSparkles className="w-4 h-4" />
             Generate with AI
           </button>
         </div>
