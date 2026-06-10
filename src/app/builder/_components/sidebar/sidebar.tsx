@@ -19,8 +19,10 @@ import {
   LuFileText,
   LuQrCode,
   LuLayers,
-  LuSparkles
+  LuSparkles,
+  LuImport
 } from "react-icons/lu";
+import { ImportPanel } from "./import-panel";
 
 const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
   {
@@ -32,6 +34,11 @@ const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
     id: "ai",
     label: "AI Design",
     icon: <LuSparkles className="w-6 h-6" />,
+  },
+  {
+    id: "import",
+    label: "Import",
+    icon: <LuImport className="w-6 h-6" />,
   },
   {
     id: "uploads",
@@ -65,7 +72,7 @@ const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
   },
 ];
 
-type TabId = "templates" | "uploads" | "elements" | "text" | "attributes" | "qrcodes" | "layers" | "ai";
+type TabId = "templates" | "uploads" | "elements" | "text" | "attributes" | "qrcodes" | "layers" | "ai" | "import";
 
 interface SidebarProps {
   canvas: Canvas | null;
@@ -110,6 +117,7 @@ export function Sidebar({ canvas, onLoadTemplate, onBgSelected, customTemplates,
       <div className="flex-1 overflow-y-auto p-4">
         {activeTab === "templates" && <TemplatesPanel onLoadTemplate={onLoadTemplate} customTemplates={customTemplates} onDeleteCustomTemplate={onDeleteCustomTemplate} category={category} isLoading={isLoading} />}
         {activeTab === "ai" && <AIPanel onLoadTemplate={onLoadTemplate} category={category} />}
+        {activeTab === "import" && <ImportPanel canvas={canvas} />}
         {activeTab === "uploads" && <UploadsPanel canvas={canvas} />}
         {activeTab === "elements" && <ElementsPanel canvas={canvas} />}
         {activeTab === "text" && <TextPanel canvas={canvas} />}
