@@ -1,5 +1,69 @@
 import { Canvas, Textbox, Rect, Circle, Triangle, Line, FabricImage, Path, Group, loadSVGFromURL, type FabricObject } from "fabric";
 
+export type FabricObjectMetadata = {
+  __isBackground?: boolean;
+  name?: string;
+};
+
+/** Re-apply custom layer metadata that Fabric loadFromJSON does not preserve. */
+export function applyImportedObjectMetadata(
+  canvas: Canvas,
+  json: Record<string, unknown>
+): void {
+  const jsonObjects = json.objects as Record<string, unknown>[] | undefined;
+  if (!jsonObjects) return;
+
+  const canvasObjects = canvas.getObjects();
+  jsonObjects.forEach((jsonObj, index) => {
+    const fabricObj = canvasObjects[index];
+    if (!fabricObj) return;
+
+    const metadata = jsonObj as FabricObjectMetadata & Record<string, unknown>;
+    const extended = fabricObj as FabricObject & FabricObjectMetadata;
+
+    if (metadata.name) extended.name = metadata.name;
+    if (metadata.__isBackground) {
+      extended.__isBackground = true;
+      fabricObj.set({
+        selectable: false,
+        evented: false,
+        lockMovementX: true,
+        lockMovementY: true,
+        lockScalingX: true,
+        lockScalingY: true,
+        lockRotation: true,
+        hasControls: false,
+        hasBorders: false,
+      });
+    }
+  });
+}
+
+/** Scale background image layers to fill the canvas after import. */
+export function fitBackgroundLayersToCanvas(canvas: Canvas): void {
+  const canvasWidth = canvas.width ?? 0;
+  const canvasHeight = canvas.height ?? 0;
+
+  for (const obj of canvas.getObjects()) {
+    const isBackground = (obj as FabricObject & FabricObjectMetadata).__isBackground;
+    if (!isBackground) continue;
+
+    const objWidth = obj.width ?? canvasWidth;
+    const objHeight = obj.height ?? canvasHeight;
+    if (objWidth <= 0 || objHeight <= 0) continue;
+
+    obj.set({
+      left: 0,
+      top: 0,
+      originX: "left",
+      originY: "top",
+      scaleX: canvasWidth / objWidth,
+      scaleY: canvasHeight / objHeight,
+    });
+    obj.setCoords();
+  }
+}
+
 export function addTextbox(canvas: Canvas, text: string, opts: Partial<{ fontSize: number; fontWeight: string; fill: string; fontFamily: string; left: number; top: number }> = {}) {
   const tb = new Textbox(text, {
     left: opts.left ?? canvas.width! / 2 - 100,

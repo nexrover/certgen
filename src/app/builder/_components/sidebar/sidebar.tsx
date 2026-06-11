@@ -81,7 +81,7 @@ interface SidebarProps {
     paperSize?: string;
     width?: number;
     height?: number;
-  }) => void;
+  }) => void | Promise<void>;
   onBgSelected?: (selected: boolean) => void;
   customTemplates?: CustomTemplate[];
   onDeleteCustomTemplate?: (id: string) => void;
@@ -94,8 +94,8 @@ export function Sidebar({ canvas, onLoadTemplate, onBgSelected, customTemplates,
   const [activeTab, setActiveTab] = useState<TabId>("templates");
 
   return (
-    <div className="flex h-full w-[360px] shrink-0 border-r border-gray-200 bg-white">
-      <div className="flex w-20 flex-col border-r border-gray-100 bg-gray-50 py-1">
+    <div className="sidebar-panel flex h-full min-h-0 w-[360px] shrink-0 overflow-hidden border-r border-gray-200 bg-white">
+      <div className="sidebar-panel-scroll flex w-20 shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-gray-100 bg-gray-50 py-1">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -114,16 +114,24 @@ export function Sidebar({ canvas, onLoadTemplate, onBgSelected, customTemplates,
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="sidebar-panel-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
         {activeTab === "templates" && <TemplatesPanel onLoadTemplate={onLoadTemplate} customTemplates={customTemplates} onDeleteCustomTemplate={onDeleteCustomTemplate} category={category} isLoading={isLoading} />}
         {activeTab === "ai" && <AIPanel onLoadTemplate={onLoadTemplate} category={category} />}
-        {activeTab === "import" && <ImportPanel canvas={canvas} />}
+        {activeTab === "import" && (
+          <ImportPanel
+            canvas={canvas}
+            onLoadTemplate={onLoadTemplate}
+            onImportSuccess={() => setActiveTab("layers")}
+          />
+        )}
         {activeTab === "uploads" && <UploadsPanel canvas={canvas} />}
         {activeTab === "elements" && <ElementsPanel canvas={canvas} />}
         {activeTab === "text" && <TextPanel canvas={canvas} />}
         {activeTab === "attributes" && <AttributesPanel canvas={canvas} />}
         {activeTab === "qrcodes" && <QrCodesPanel canvas={canvas} />}
         {activeTab === "layers" && <LayersPanel canvas={canvas} onBgSelected={onBgSelected} />}
+        </div>
       </div>
     </div>
   );

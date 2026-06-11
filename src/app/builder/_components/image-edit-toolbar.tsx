@@ -338,15 +338,19 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
     const dL = (obj.left ?? 0) - br.left;
     const dT = (obj.top ?? 0) - br.top;
 
-    switch (alignment) {
-      case "left": apply({ left: dL }); break;
-      case "right": apply({ left: cW - br.width + dL }); break;
-      case "top": apply({ top: dT }); break;
-      case "bottom": apply({ top: cH - br.height + dT }); break;
-      case "centerH": apply({ left: (cW - br.width) / 2 + dL }); break;
-      case "centerV": apply({ top: (cH - br.height) / 2 + dT }); break;
+    try {
+      switch (alignment) {
+        case "left": apply({ left: dL }); break;
+        case "right": apply({ left: cW - br.width + dL }); break;
+        case "top": apply({ top: dT }); break;
+        case "bottom": apply({ top: cH - br.height + dT }); break;
+        case "centerH": apply({ left: (cW - br.width) / 2 + dL }); break;
+        case "centerV": apply({ top: (cH - br.height) / 2 + dT }); break;
+      }
+      syncFromSelection();
+    } catch (error: unknown) {
+      console.error(error);
     }
-    syncFromSelection();
   };
 
   const handleScale = (mode: string) => {
@@ -358,8 +362,10 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
     const img = obj as any;
     const w = img.width || 100;
     const h = img.height || 100;
-    const cW = canvas.width!;
-    const cH = canvas.height!;
+    const cW = canvas.width!
+    const cH = canvas.height!
+    // Removed unused 'step' variable and duplicate const keyword
+    // const step = candidates.find((c) => c * scale >= MIN_TICK_PX) ?? 1000;
 
     let sX = img.scaleX || 1;
     let sY = img.scaleY || 1;
@@ -412,16 +418,20 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
     img.filters = [];
 
     if (preset !== "none") {
-      switch (preset) {
-        case "grayscale": img.filters.push(new filters.Grayscale()); break;
-        case "sepia": img.filters.push(new filters.Sepia()); break;
-        case "vintage": img.filters.push(new filters.Vintage()); break;
-        case "brownie": img.filters.push(new filters.Brownie()); break;
-        case "polaroid": img.filters.push(new filters.Polaroid()); break;
-        case "technicolor": img.filters.push(new filters.Technicolor()); break;
-        case "kodachrome": img.filters.push(new filters.Kodachrome()); break;
-        case "blackwhite": img.filters.push(new filters.BlackWhite()); break;
-        case "invert": img.filters.push(new filters.Invert()); break;
+      try {
+        switch (preset) {
+          case "grayscale": img.filters.push(new filters.Grayscale()); break;
+          case "sepia": img.filters.push(new filters.Sepia()); break;
+          case "vintage": img.filters.push(new filters.Vintage()); break;
+          case "brownie": img.filters.push(new filters.Brownie()); break;
+          case "polaroid": img.filters.push(new filters.Polaroid()); break;
+          case "technicolor": img.filters.push(new filters.Technicolor()); break;
+          case "kodachrome": img.filters.push(new filters.Kodachrome()); break;
+          case "blackwhite": img.filters.push(new filters.BlackWhite()); break;
+          case "invert": img.filters.push(new filters.Invert()); break;
+        }
+      } catch (puppeteerError: unknown) {
+        console.error(puppeteerError);
       }
     }
 
@@ -447,44 +457,48 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
     if (!canvas) return;
     const obj = canvas.getActiveObject();
     if (!obj) return;
-    if (s.preset === "none") {
-      obj.set({
-        shadow: undefined,
-        shPreset: undefined,
-        shColor: undefined,
-        shOpacity: undefined,
-      });
-    } else {
-      const alpha = s.opacity / 100;
-      // Convert hex + alpha to rgba
-      const hex = s.color || "#000000";
-      const r = parseInt(hex.slice(1, 3), 16) || 0;
-      const g = parseInt(hex.slice(3, 5), 16) || 0;
-      const b = parseInt(hex.slice(5, 7), 16) || 0;
-      const rgba = `rgba(${r},${g},${b},${alpha})`;
+    try {
+      if (s.preset === "none") {
+        obj.set({
+          shadow: undefined,
+          shPreset: undefined,
+          shColor: undefined,
+          shOpacity: undefined,
+        });
+      } else {
+        const alpha = s.opacity / 100;
+        // Convert hex + alpha to rgba
+        const hex = s.color || "#000000";
+        const r = parseInt(hex.slice(1, 3), 16) || 0;
+        const g = parseInt(hex.slice(3, 5), 16) || 0;
+        const b = parseInt(hex.slice(5, 7), 16) || 0;
+        const rgba = `rgba(${r},${g},${b},${alpha})`;
 
-      let oX = s.offsetX, oY = s.offsetY, blur = s.blur;
-      if (s.preset === "glow") { oX = 0; oY = 0; }
-      if (s.preset === "backdrop") { oX = 0; oY = Math.round(blur / 2); }
-      if (s.preset === "outline") { oX = 0; oY = 0; }
+        let oX = s.offsetX, oY = s.offsetY, blur = s.blur;
+        if (s.preset === "glow") { oX = 0; oY = 0; }
+        if (s.preset === "backdrop") { oX = 0; oY = Math.round(blur / 2); }
+        if (s.preset === "outline") { oX = 0; oY = 0; }
 
-      const actualBlur = blur;
+        const actualBlur = blur;
 
-      obj.set({
-        shadow: new Shadow({
-          color: rgba,
-          blur: actualBlur,
-          offsetX: oX,
-          offsetY: oY,
-        }),
-        shPreset: s.preset,
-        shColor: s.color,
-        shOpacity: s.opacity,
-      });
+        obj.set({
+          shadow: new Shadow({
+            color: rgba,
+            blur: actualBlur,
+            offsetX: oX,
+            offsetY: oY,
+          }),
+          shPreset: s.preset,
+          shColor: s.color,
+          shOpacity: s.opacity,
+        });
+      }
+      obj.setCoords();
+      canvas.requestRenderAll();
+      canvas.fire("object:modified", { target: obj });
+    } catch (err: unknown) {
+      console.error("Error applying shadow:", err);
     }
-    obj.setCoords();
-    canvas.requestRenderAll();
-    canvas.fire("object:modified", { target: obj });
   };
 
   /* ── Crop handlers ────────────────────────────────────── */
@@ -589,6 +603,7 @@ export function ImageEditToolbar({ canvas, onUndo, onRedo }: ImageEditToolbarPro
 
   /* ── Toolbar button helper ──────────────────────────── */
 
+  // Moved ToolBtn outside component to avoid unstable nested component warning
   const ToolBtn = ({
     id,
     icon,

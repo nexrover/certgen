@@ -100,13 +100,18 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
     setCustomTemplates(getCustomTemplates());
   }, []);
 
-  const handleLoadTemplate = useCallback((payload: {
+  const handleLoadTemplate = useCallback(async (payload: {
     canvasJson: Record<string, unknown>;
     paperSize?: string;
     width?: number;
     height?: number;
-  }) => {
+  }): Promise<void> => {
     if (!canvasRef.current) return;
+
+    const nextWidth =
+      typeof payload.width === "number" && payload.width > 0 ? payload.width : undefined;
+    const nextHeight =
+      typeof payload.height === "number" && payload.height > 0 ? payload.height : undefined;
 
     const requestedSize = payload.paperSize;
     const validRequestedSize =
@@ -114,30 +119,39 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
         ? (requestedSize as PaperSize)
         : undefined;
 
-    const loadNow = () => {
-      if (
-        typeof payload.width === "number" &&
-        typeof payload.height === "number" &&
-        payload.width > 0 &&
-        payload.height > 0
-      ) {
-        canvasRef.current?.setCanvasSize(payload.width, payload.height);
-      }
-      canvasRef.current?.loadPreset(normalizePresetCanvasJson(payload.canvasJson));
+    const targetPaperSize =
+      validRequestedSize ?? (nextWidth && nextHeight ? ("CUSTOM" as PaperSize) : paperSize);
+
+    const sizeChanged =
+      !!nextWidth &&
+      !!nextHeight &&
+      (nextWidth !== dims.width || nextHeight !== dims.height);
+    const paperChanged = targetPaperSize !== paperSize;
+
+    if (targetPaperSize === "CUSTOM" && nextWidth && nextHeight) {
+      setCustomWidth(nextWidth);
+      setCustomHeight(nextHeight);
+    }
+
+    const loadNow = async () => {
+      await canvasRef.current?.loadPreset(normalizePresetCanvasJson(payload.canvasJson));
       setDirty(true);
     };
 
-    if (validRequestedSize && validRequestedSize !== paperSize) {
-      setPaperSize(validRequestedSize);
-      // Wait for canvas dimensions to update before loading preset objects.
-      requestAnimationFrame(() => {
-        requestAnimationFrame(loadNow);
+    if (paperChanged || sizeChanged) {
+      if (paperChanged) setPaperSize(targetPaperSize);
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            void loadNow().then(resolve);
+          });
+        });
       });
       return;
     }
 
-    loadNow();
-  }, [paperSize]);
+    await loadNow();
+  }, [paperSize, dims.width, dims.height]);
 
   const handleSelectionChange = useCallback(() => {
     setCanvasReady(true);

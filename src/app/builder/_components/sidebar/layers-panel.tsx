@@ -14,6 +14,7 @@ interface LayerItem {
   type: string;
   visible: boolean;
   selectable: boolean;
+  isBackground: boolean;
 }
 
 /* ── Component ─────────────────────────────────────────── */
@@ -40,6 +41,7 @@ export function LayersPanel({ canvas, onBgSelected }: LayersPanelProps) {
           type: obj.type || "object",
           visible: obj.visible !== false,
           selectable: obj.selectable !== false,
+          isBackground: !!(obj as FabricObject & { __isBackground?: boolean }).__isBackground,
         }))
         .reverse()
     );
@@ -83,11 +85,20 @@ export function LayersPanel({ canvas, onBgSelected }: LayersPanelProps) {
   function selectObject(layer: LayerItem) {
     if (!canvas) return;
     const obj = canvas.getObjects()[layer.index];
-    if (!obj || !obj.selectable) return;
+    if (!obj) return;
+
+    if (layer.isBackground) {
+      selectBackground();
+      return;
+    }
+
+    if (!obj.selectable) return;
+
     canvas.setActiveObject(obj);
     canvas.requestRenderAll();
     setBgActive(false);
     onBgSelected?.(false);
+    setActiveIdx(layer.index);
   }
 
   function toggleVisibility(layer: LayerItem) {
@@ -155,27 +166,29 @@ export function LayersPanel({ canvas, onBgSelected }: LayersPanelProps) {
   if (!canvas) return <p className="text-xs text-gray-400">Loading canvas…</p>;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full min-h-0 flex-col">
       {layers.length === 0 && (
-        <p className="text-xs text-gray-400 mb-4">No objects on canvas</p>
+        <p className="mb-4 text-xs text-gray-400">No objects on canvas</p>
       )}
 
       {/* Draggable layer list */}
-      <div className="flex-1 space-y-0.5 overflow-y-auto mb-2">
+      <div className="sidebar-panel-scroll mb-2 min-h-0 flex-1 space-y-0.5 overflow-y-auto overscroll-contain">
         {layers.map((layer, displayIdx) => {
-          const isActive = layer.index === activeIdx;
+          const isActive = layer.isBackground ? bgActive : layer.index === activeIdx;
           const isDragOver = dragOverIdx === displayIdx;
 
           return (
             <div
               key={`${layer.index}-${layer.name}`}
-              draggable
+              draggable={!layer.isBackground}
               onDragStart={() => handleDragStart(displayIdx)}
               onDragOver={(e) => handleDragOver(e, displayIdx)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, displayIdx)}
               onDragEnd={handleDragEnd}
-              className={`group flex items-center gap-2 rounded-lg border p-2 text-[13px] transition-all cursor-grab active:cursor-grabbing select-none ${
+              className={`group flex items-center gap-2 rounded-lg border p-2 text-[13px] transition-all select-none ${
+                layer.isBackground ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"
+              } ${
                 isActive
                   ? "border-indigo-400 bg-indigo-50 shadow-sm"
                   : "border-gray-200 bg-white hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-sm"
@@ -207,6 +220,15 @@ export function LayersPanel({ canvas, onBgSelected }: LayersPanelProps) {
               >
                 {layer.name}
               </span>
+
+              {layer.isBackground && (
+                <span
+                  className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500"
+                  title="Locked background layer"
+                >
+                  BG
+                </span>
+              )}
 
               {/* Visibility toggle */}
               <button
@@ -271,8 +293,11 @@ export function LayersPanel({ canvas, onBgSelected }: LayersPanelProps) {
 /* ── Helpers ───────────────────────────────────────────── */
 
 function getObjectName(obj: FabricObject, index: number): string {
-  if ((obj as any).name) {
-    return (obj as any).name;
+  if ((obj as FabricObject & { __isBackground?: boolean }).__isBackground) {
+    return (obj as FabricObject & { name?: string }).name || "Canva Design";
+  }
+  if ((obj as FabricObject & { name?: string }).name) {
+    return (obj as FabricObject & { name?: string }).name!;
   }
   if ("text" in obj && typeof obj.text === "string") {
     const t = obj.text.trim();

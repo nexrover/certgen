@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle, useState } from "react";
 import { Canvas, FabricImage, Textbox, type FabricObject } from "fabric";
+import { applyImportedObjectMetadata, fitBackgroundLayersToCanvas } from "@/lib/builder/fabric-utils";
 import { FloatingContextMenu } from "./floating-context-menu";
 import { SmartGuideManager } from "./smart-guides";
 
@@ -15,7 +16,7 @@ export interface CanvasEditorHandle {
   toJSON: () => Record<string, unknown>;
   toDataURL: (opts?: { multiplier?: number; format?: string }) => string;
   loadFromJSON: (json: Record<string, unknown>) => Promise<void>;
-  loadPreset: (json: Record<string, unknown>) => void;
+  loadPreset: (json: Record<string, unknown>) => Promise<void>;
   undo: () => void;
   redo: () => void;
   zoomIn: () => void;
@@ -57,7 +58,7 @@ function buildRulerTicks(lengthPx: number, scale: number) {
   const docLength = lengthPx; // document units at current scale
   // Nice intervals in document-space pixels
   const candidates = [5, 10, 25, 50, 100, 200, 500, 1000];
-  let step = candidates.find((c) => c * scale >= MIN_TICK_PX) ?? 1000;
+  const step = candidates.find((c) => c * scale >= MIN_TICK_PX) ?? 1000;
   const ticks: { pos: number; label: string }[] = [];
   const count = Math.ceil(docLength / step) + 1;
   for (let i = 0; i <= count; i++) {
@@ -621,10 +622,14 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
       },
       loadPreset: (json: Record<string, unknown>) => {
         const fc = fabricRef.current;
-        if (!fc) return;
+        if (!fc) return Promise.resolve();
+
         suppressHistoryRef.current = true;
         fc.setViewportTransform([1, 0, 0, 1, 0, 0]);
-        fc.loadFromJSON(json).then(() => {
+
+        return fc.loadFromJSON(json).then(() => {
+          applyImportedObjectMetadata(fc, json);
+          fitBackgroundLayersToCanvas(fc);
           fc.renderAll();
           suppressHistoryRef.current = false;
           saveHistory();
