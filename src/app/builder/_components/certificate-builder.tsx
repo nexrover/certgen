@@ -18,6 +18,7 @@ import {
   newCustomTemplateId,
   type CustomTemplate,
 } from "@/lib/custom-templates-store";
+import { type CustomFont, loadFont, loadAllCustomFonts } from "@/lib/builder/font-loader";
 
 interface CertificateBuilderProps {
   initialTemplate?: CertificateTemplate;
@@ -55,6 +56,63 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
     setCustomTemplates(getCustomTemplates());
   }, []);
 
+  /* ── Custom Fonts State & Loading ──────────────────── */
+  const [customFonts, setCustomFonts] = useState<CustomFont[]>([]);
+
+  // Load custom fonts from localStorage and loaded template on mount
+  useEffect(() => {
+    let localFonts: CustomFont[] = [];
+    try {
+      const saved = localStorage.getItem("localCustomFonts");
+      if (saved) {
+        localFonts = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error("Failed to load local custom fonts:", e);
+    }
+
+    const templateFonts = (initialTemplate?.canvas_json?.customFonts as CustomFont[]) || [];
+
+    // Merge fonts avoiding name duplicates
+    const merged = [...localFonts];
+    templateFonts.forEach((tf) => {
+      if (!merged.some((lf) => lf.name.toLowerCase() === tf.name.toLowerCase())) {
+        merged.push(tf);
+      }
+    });
+
+    setCustomFonts(merged);
+
+    if (merged.length > 0) {
+      loadAllCustomFonts(merged).then(() => {
+        const fc = canvasRef.current?.getCanvas();
+        if (fc) {
+          fc.requestRenderAll();
+        }
+      });
+    }
+  }, [initialTemplate]);
+
+  const handleAddCustomFont = useCallback((font: CustomFont) => {
+    setCustomFonts((prev) => {
+      const filtered = prev.filter((f) => f.name.toLowerCase() !== font.name.toLowerCase());
+      const next = [...filtered, font];
+      try {
+        localStorage.setItem("localCustomFonts", JSON.stringify(next));
+      } catch (e) {
+        console.error("Failed to save local custom fonts:", e);
+      }
+      return next;
+    });
+
+    loadFont(font).then(() => {
+      const fc = canvasRef.current?.getCanvas();
+      if (fc) {
+        fc.requestRenderAll();
+      }
+    });
+  }, []);
+
   const dims = paperSize === "CUSTOM" ? { width: customWidth, height: customHeight } : PAPER_DIMENSIONS[paperSize];
 
   const handlePaperSizeChange = useCallback((size: PaperSize) => {
@@ -74,6 +132,7 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
 
       const thumbnail = cr.toDataURL({ multiplier: 0.15, format: "png" });
       const canvasJson = cr.toJSON();
+      canvasJson.customFonts = customFonts;
       const currentDims = PAPER_DIMENSIONS[paperSize];
 
       const entry: CustomTemplate = {
@@ -174,6 +233,7 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
     setSaving(true);
     try {
       const canvasJson = canvasRef.current.toJSON();
+      canvasJson.customFonts = customFonts;
       const thumbnailDataUrl = canvasRef.current.toDataURL({
         // Keep thumbnail crisp enough for dashboard card previews.
         multiplier: 1,
@@ -344,6 +404,8 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
             onShowRulerChange={setShowRuler}
             showGrid={showGrid}
             onShowGridChange={setShowGrid}
+            customFonts={customFonts}
+            onAddCustomFont={handleAddCustomFont}
           />
 
           <CanvasEditor

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { Canvas } from "fabric";
-import { LuMinus, LuPlus, LuBold, LuItalic, LuUnderline, LuAlignLeft, LuAlignCenter, LuAlignRight, LuUndo2, LuRedo2, LuImage, LuRuler, LuGrid3X3, LuCheck } from "react-icons/lu";
+import { LuMinus, LuPlus, LuBold, LuItalic, LuUnderline, LuAlignLeft, LuAlignCenter, LuAlignRight, LuUndo2, LuRedo2, LuImage, LuRuler, LuGrid3X3, LuCheck, LuX } from "react-icons/lu";
 import { ImageEditToolbar } from "./image-edit-toolbar";
+import { type CustomFont, extractFontsFromZip, parseGoogleFontUrl } from "@/lib/builder/font-loader";
 
 /* ── Font catalogue (Google + system-safe) ────────────── */
 
@@ -57,6 +58,8 @@ interface FormatToolbarProps {
   onShowRulerChange?: (v: boolean) => void;
   showGrid?: boolean;
   onShowGridChange?: (v: boolean) => void;
+  customFonts?: CustomFont[];
+  onAddCustomFont?: (font: CustomFont) => void;
 }
 
 /* ── Component ────────────────────────────────────────── */
@@ -74,6 +77,8 @@ export function FormatToolbar({
   onShowRulerChange,
   showGrid = false,
   onShowGridChange,
+  customFonts = [],
+  onAddCustomFont,
 }: FormatToolbarProps) {
   const [fontFamily, setFontFamily] = useState("Georgia");
   const [fontWeight, setFontWeight] = useState("normal");
@@ -86,6 +91,112 @@ export function FormatToolbar({
   const [isLine, setIsLine] = useState(false);
   const [isImage, setIsImage] = useState(false);
   const [strokeWidth, setStrokeWidth] = useState(2);
+
+  /* ── Custom Font Dropdown and Modals State ── */
+  const [isFontDropdownOpen, setIsFontDropdownOpen] = useState(false);
+  const [fontSearchQuery, setFontSearchQuery] = useState("");
+  const [googleFontModalOpen, setGoogleFontModalOpen] = useState(false);
+  const [googleFontInput, setGoogleFontInput] = useState("");
+  const [googleFontError, setGoogleFontError] = useState("");
+  const [fontLoading, setFontLoading] = useState(false);
+
+  const fontDropdownRef = useRef<HTMLDivElement>(null);
+  const fontFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Click outside listener to close custom dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (fontDropdownRef.current && !fontDropdownRef.current.contains(event.target as Node)) {
+        setIsFontDropdownOpen(false);
+      }
+    }
+    if (isFontDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isFontDropdownOpen]);
+
+  const allFonts = Array.from(new Set([
+    ...FONT_FAMILIES,
+    ...customFonts.map(f => f.name)
+  ])).sort((a, b) => a.localeCompare(b));
+
+  const filteredFonts = allFonts.filter((f) =>
+    f.toLowerCase().includes(fontSearchQuery.toLowerCase())
+  );
+
+  const handleFontFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onAddCustomFont) return;
+
+    setFontLoading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      if (ext === "zip") {
+        const fonts = await extractFontsFromZip(file);
+        fonts.forEach((f) => onAddCustomFont(f));
+        if (fonts.length > 0) {
+          handleFontFamilyChange(fonts[0].name);
+        }
+        alert(`Successfully imported ${fonts.length} font(s) from zip!`);
+      } else if (["ttf", "otf", "woff", "woff2"].includes(ext || "")) {
+        const reader = new FileReader();
+        let mimeType = "font/ttf";
+        if (ext === "otf") mimeType = "font/otf";
+        else if (ext === "woff") mimeType = "font/woff";
+        else if (ext === "woff2") mimeType = "font/woff2";
+
+        reader.onload = () => {
+          const fontName = file.name.replace(/\.[^/.]+$/, "");
+          onAddCustomFont({
+            name: fontName,
+            url: reader.result as string,
+            type: "upload"
+          });
+          handleFontFamilyChange(fontName);
+          alert(`Successfully imported font "${fontName}"!`);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert("Invalid file format. Please upload a .zip file containing fonts, or raw .ttf, .otf, .woff, .woff2 files.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Failed to import font from file.");
+    } finally {
+      setFontLoading(false);
+      e.target.value = ""; // Reset input
+    }
+  };
+
+  const handleGoogleFontSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setGoogleFontError("");
+
+    if (!googleFontInput.trim()) {
+      setGoogleFontError("Please enter a Google font name or link.");
+      return;
+    }
+
+    const parsed = parseGoogleFontUrl(googleFontInput);
+    if (!parsed) {
+      setGoogleFontError("Invalid Google font name or URL format.");
+      return;
+    }
+
+    if (onAddCustomFont) {
+      onAddCustomFont({
+        name: parsed.name,
+        url: parsed.url,
+        type: "google"
+      });
+      handleFontFamilyChange(parsed.name);
+      setGoogleFontModalOpen(false);
+      setGoogleFontInput("");
+    }
+  };
 
   /* ── Sync state from the currently-selected Fabric object ── */
 
@@ -312,19 +423,106 @@ function handleColorChange(c: string) {
 
           {/* ─ Font Family ─ */}
           {isText && (
-            <select
-              id="format-font-family"
-              value={fontFamily}
-              onChange={(e) => handleFontFamilyChange(e.target.value)}
-              className="h-7 w-36 cursor-pointer rounded border border-gray-300 px-2 text-xs text-gray-700 transition-colors hover:border-gray-400 focus:border-indigo-500 focus:outline-none"
-              style={{ fontFamily }}
-            >
-              {FONT_FAMILIES.map((f) => (
-                <option key={f} value={f} style={{ fontFamily: f }}>
-                  {f}
-                </option>
-              ))}
-            </select>
+            <div className="relative" ref={fontDropdownRef}>
+              <button
+                type="button"
+                id="format-font-family-btn"
+                onClick={() => setIsFontDropdownOpen(!isFontDropdownOpen)}
+                className="flex h-7 w-36 cursor-pointer items-center justify-between rounded border border-gray-300 px-2 text-xs text-gray-700 transition-colors hover:border-gray-400 focus:border-indigo-500 focus:outline-none bg-white text-left font-medium"
+                style={{ fontFamily }}
+              >
+                <span className="truncate">{fontFamily}</span>
+                <svg
+                  className={`h-3.5 w-3.5 text-gray-500 transition-transform duration-200 shrink-0 ml-1 ${isFontDropdownOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {isFontDropdownOpen && (
+                <div
+                  className="absolute left-0 mt-1 z-[9999] w-64 rounded-xl border border-gray-100 bg-white p-1.5 shadow-2xl flex flex-col max-h-[340px]"
+                  style={{ animation: "dropdown-fade 0.15s ease-out" }}
+                >
+                  {/* Search Bar */}
+                  <div className="px-2 py-1.5 border-b border-gray-100 mb-1 flex items-center gap-1.5 shrink-0">
+                    <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Search fonts..."
+                      value={fontSearchQuery}
+                      onChange={(e) => setFontSearchQuery(e.target.value)}
+                      className="w-full bg-transparent text-xs text-gray-800 placeholder-gray-400 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Options list */}
+                  <div className="flex-1 overflow-y-auto max-h-[200px] pr-0.5">
+                    {filteredFonts.map((f) => (
+                      <button
+                        key={f}
+                        type="button"
+                        onClick={() => {
+                          handleFontFamilyChange(f);
+                          setIsFontDropdownOpen(false);
+                        }}
+                        className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs text-left transition-all hover:bg-indigo-50/50 ${
+                          fontFamily === f ? "bg-indigo-50 font-semibold text-indigo-700" : "text-gray-700 hover:text-gray-900"
+                        }`}
+                        style={{ fontFamily: f }}
+                      >
+                        <span className="truncate">{f}</span>
+                        {fontFamily === f && <LuCheck className="w-3.5 h-3.5 text-indigo-600 shrink-0" />}
+                      </button>
+                    ))}
+                    {filteredFonts.length === 0 && (
+                      <div className="px-3 py-6 text-xs text-gray-400 text-center font-medium">No fonts found</div>
+                    )}
+                  </div>
+
+                  {/* Dropdown Buttons Footer */}
+                  <div className="border-t border-gray-100 bg-gray-50/80 rounded-b-lg p-1 mt-1 flex flex-col gap-0.5 shrink-0">
+                    {/* Font upload button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsFontDropdownOpen(false);
+                        fontFileInputRef.current?.click();
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-white hover:text-indigo-600 border border-transparent hover:border-gray-200/60 shadow-sm shadow-transparent hover:shadow-gray-100/50 transition-all text-left"
+                    >
+                      <svg className="h-4 w-4 text-indigo-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                      </svg>
+                      Font Upload
+                    </button>
+
+                    {/* Google Font button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsFontDropdownOpen(false);
+                        setGoogleFontModalOpen(true);
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-white hover:text-indigo-600 border border-transparent hover:border-gray-200/60 shadow-sm shadow-transparent hover:shadow-gray-100/50 transition-all text-left"
+                    >
+                      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2a10 10 0 0 1 8 4l-3 3.5a5 5 0 0 0-5-1.5c-2.5.5-4 3-3.5 5.5s3 4 5.5 3.5c1.5-.3 2.5-1.3 3-2.5h-3.5v-3H22v8h-3l-.5-2a7.5 7.5 0 0 1-6.5 2 8 8 0 0 1 0-16z"/>
+                      </svg>
+                      Google Font
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
           {/* ─ Font Weight ─ */}
@@ -482,6 +680,103 @@ function handleColorChange(c: string) {
             <LuRedo2 className="w-4 h-4" />
           </button>
         </>
+      )}
+
+      {/* Hidden file input for font uploading */}
+      <input
+        ref={fontFileInputRef}
+        type="file"
+        accept=".zip, .ttf, .otf, .woff, .woff2"
+        onChange={handleFontFileChange}
+        className="hidden"
+      />
+
+      {/* Google Font Import Modal */}
+      {googleFontModalOpen && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/55 backdrop-blur-[2px] animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl border border-gray-100 flex flex-col gap-4 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                <svg className="w-4 h-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a10 10 0 0 1 8 4l-3 3.5a5 5 0 0 0-5-1.5c-2.5.5-4 3-3.5 5.5s3 4 5.5 3.5c1.5-.3 2.5-1.3 3-2.5h-3.5v-3H22v8h-3l-.5-2a7.5 7.5 0 0 1-6.5 2 8 8 0 0 1 0-16z"/>
+                </svg>
+                Import Google Font
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setGoogleFontModalOpen(false);
+                  setGoogleFontInput("");
+                  setGoogleFontError("");
+                }}
+                className="rounded-full p-1 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <LuX className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleGoogleFontSubmit} className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-semibold text-gray-600">
+                  Google Font Link or Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Montserrat or specification URL"
+                  value={googleFontInput}
+                  onChange={(e) => {
+                    setGoogleFontInput(e.target.value);
+                    if (googleFontError) setGoogleFontError("");
+                  }}
+                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2 text-xs outline-none transition-all placeholder:text-gray-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                  autoFocus
+                />
+                {googleFontError && (
+                  <span className="text-[10px] font-medium text-red-500 pl-1 mt-0.5">
+                    {googleFontError}
+                  </span>
+                )}
+              </div>
+
+              <div className="text-[10px] leading-relaxed text-gray-500 bg-gray-50 rounded-lg p-2.5 border border-gray-100">
+                Type the font name (e.g. <b>Lobster</b> or <b>Dancing Script</b>), or paste a Google Fonts URL. The font will load dynamically and appear in the dropdown list.
+              </div>
+
+              <div className="flex justify-end gap-2 mt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGoogleFontModalOpen(false);
+                    setGoogleFontInput("");
+                    setGoogleFontError("");
+                  }}
+                  className="rounded-xl px-3.5 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-gray-900 px-4 py-2 text-xs font-bold text-white shadow-md shadow-gray-200 hover:bg-gray-800 transition-all"
+                >
+                  Import Font
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Spinner */}
+      {fontLoading && (
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3 bg-white px-6 py-5 rounded-2xl shadow-2xl border border-gray-100">
+            <svg className="animate-spin h-6 w-6 text-indigo-600" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            <span className="text-xs font-semibold text-gray-800">Processing Font File...</span>
+          </div>
+        </div>
       )}
     </div>
   );
