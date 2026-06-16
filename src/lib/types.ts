@@ -90,6 +90,26 @@ export const CATEGORY_DEFAULT_PAPER_SIZE: Record<string, PaperSize> = {
 };
 
 
+export interface BrandKitTypography {
+  title?: string;
+  subtitle?: string;
+  body?: string;
+}
+
+export interface BrandKit {
+  id: string;
+  user_id: string;
+  name: string;
+  colors: string[];
+  typography: BrandKitTypography;
+  logos: string[];
+  graphics: string[];
+  photos: string[];
+  elements: string[];
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CertificateTemplate {
   id: string;
   name: string;
