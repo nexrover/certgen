@@ -115,23 +115,26 @@ export function Sidebar({ canvas, onLoadTemplate, onBgSelected, customTemplates,
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="sidebar-panel-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
-        {activeTab === "templates" && <TemplatesPanel onLoadTemplate={onLoadTemplate} customTemplates={customTemplates} onDeleteCustomTemplate={onDeleteCustomTemplate} category={category} isLoading={isLoading} />}
-        {activeTab === "ai" && <AIPanel onLoadTemplate={onLoadTemplate} category={category} />}
-        {activeTab === "import" && (
-          <ImportPanel
-            canvas={canvas}
-            onLoadTemplate={onLoadTemplate}
-            onImportSuccess={() => setActiveTab("layers")}
-          />
+        {activeTab === "ai" ? (
+          <AIPanel onLoadTemplate={onLoadTemplate} category={category} />
+        ) : (
+          <div className="sidebar-panel-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
+            {activeTab === "templates" && <TemplatesPanel onLoadTemplate={onLoadTemplate} customTemplates={customTemplates} onDeleteCustomTemplate={onDeleteCustomTemplate} category={category} isLoading={isLoading} />}
+            {activeTab === "import" && (
+              <ImportPanel
+                canvas={canvas}
+                onLoadTemplate={onLoadTemplate}
+                onImportSuccess={() => setActiveTab("layers")}
+              />
+            )}
+            {activeTab === "uploads" && <UploadsPanel canvas={canvas} />}
+            {activeTab === "elements" && <ElementsPanel canvas={canvas} />}
+            {activeTab === "text" && <TextPanel canvas={canvas} />}
+            {activeTab === "attributes" && <AttributesPanel canvas={canvas} />}
+            {activeTab === "qrcodes" && <QrCodesPanel canvas={canvas} />}
+            {activeTab === "layers" && <LayersPanel canvas={canvas} onBgSelected={onBgSelected} />}
+          </div>
         )}
-        {activeTab === "uploads" && <UploadsPanel canvas={canvas} />}
-        {activeTab === "elements" && <ElementsPanel canvas={canvas} />}
-        {activeTab === "text" && <TextPanel canvas={canvas} />}
-        {activeTab === "attributes" && <AttributesPanel canvas={canvas} />}
-        {activeTab === "qrcodes" && <QrCodesPanel canvas={canvas} />}
-        {activeTab === "layers" && <LayersPanel canvas={canvas} onBgSelected={onBgSelected} />}
-        </div>
       </div>
     </div>
   );
