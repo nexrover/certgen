@@ -12,6 +12,33 @@ import type { BrandKit, PaperSize } from "@/lib/types";
 import { ALL_PAPER_OPTIONS } from "../toolbar";
 import { generateBrandKitSuggestionPrompt } from "@/lib/services/prompt-orchestrator";
 
+function detectCategoryFromPaperSize(paperSize: PaperSize, defaultCategory: string): string {
+  switch (paperSize) {
+    case "A4_LANDSCAPE":
+      return "certificate";
+    case "YOUTUBE_THUMBNAIL":
+      return "youtube";
+    case "A4":
+      return "email";
+    case "SQUARE_500":
+      return "ecommerce";
+    case "SQUARE_1024":
+      return "real-estate";
+    case "SQUARE_1200":
+      return "social-media";
+    case "RESUME":
+      return "resume";
+    case "CHRISTMAS_CARD":
+      return "christmas-card";
+    case "RECEIPT":
+      return "receipt";
+    case "INVOICE":
+      return "invoice";
+    default:
+      return defaultCategory;
+  }
+}
+
 interface AIPanelProps {
   onLoadTemplate: (payload: {
     canvasJson: Record<string, unknown>;
@@ -27,6 +54,35 @@ type StyleTheme = "classic" | "modern" | "minimal" | "bold";
 const MAX_FREE_GENERATIONS = 5;
 const COOLDOWN_MS = 6 * 60 * 60 * 1000; // 6 hours
 const STORAGE_KEY = "ai_gen_usage";
+
+const DEFAULT_BRAND_KITS: BrandKit[] = [
+  {
+    id: "default-1",
+    user_id: "default",
+    name: "Tech Startup",
+    colors: ["#3B82F6", "#1D4ED8", "#1E40AF", "#172554"],
+    typography: { title: "Inter", subtitle: "Inter", body: "Inter" },
+    logos: [],
+    graphics: [],
+    photos: [],
+    elements: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "default-2",
+    user_id: "default",
+    name: "Elegant Studio",
+    colors: ["#D97706", "#92400E", "#78350F", "#451A03"],
+    typography: { title: "Playfair Display", subtitle: "Playfair Display", body: "Playfair Display" },
+    logos: [],
+    graphics: [],
+    photos: [],
+    elements: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
 
 interface UsageData {
   count: number;
@@ -74,12 +130,26 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
   const [error, setError] = useState<string | null>(null);
 
   // ── Brand Kit State ────────────────────────────────────
-  const [brandKits, setBrandKits] = useState<BrandKit[]>([]);
+  const [brandKits, setBrandKits] = useState<BrandKit[]>(() => {
+    if (typeof window === 'undefined') return DEFAULT_BRAND_KITS;
+    try {
+      const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
+      return DEFAULT_BRAND_KITS.filter(k => !hiddenDefaults.includes(k.id));
+    } catch {
+      return DEFAULT_BRAND_KITS;
+    }
+  });
   const [brandKitsLoading, setBrandKitsLoading] = useState(true);
-  const [activeBrandKitId, setActiveBrandKitId] = useState<string | null>(null);
+  const [useBrandKit, setUseBrandKit] = useState(false);
+  const [activeBrandKitId, setActiveBrandKitId] = useState<string | null>("default-1");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTab, setModalTab] = useState('Color Palette');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+
+  // Edit & Rename states
+  const [editingBrandKit, setEditingBrandKit] = useState<BrandKit | null>(null);
+  const [renamingKitId, setRenamingKitId] = useState<string | null>(null);
+  const [renamingName, setRenamingName] = useState("");
   
   const [aiModel, setAiModel] = useState('Auto');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -93,7 +163,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
   const isBlocked = remaining === 0 && usage.windowStart !== null;
 
   // Derived: the currently selected brand kit object (null = Condition B)
-  const activeBrandKit = activeBrandKitId
+  const activeBrandKit = useBrandKit && activeBrandKitId
     ? brandKits.find((k) => k.id === activeBrandKitId) ?? null
     : null;
 
@@ -103,10 +173,15 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
     async function fetchKits() {
       setBrandKitsLoading(true);
       try {
+        const hiddenDefaults = typeof window !== 'undefined'
+          ? JSON.parse(localStorage.getItem("hidden_default_kits") || "[]")
+          : [];
+        const visibleDefaults = DEFAULT_BRAND_KITS.filter(k => !hiddenDefaults.includes(k.id));
+
         const res = await fetch("/api/brand-kits");
         const json = await res.json();
         if (!cancelled && json.success && Array.isArray(json.data)) {
-          setBrandKits(json.data as BrandKit[]);
+          setBrandKits([...visibleDefaults, ...json.data] as BrandKit[]);
         }
       } catch (err) {
         console.error("Failed to fetch brand kits:", err);
@@ -149,14 +224,13 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
       if (kitId) {
         const kit = brandKits.find((k) => k.id === kitId);
         if (kit) {
-          const suggestion = generateBrandKitSuggestionPrompt(kit, category);
+          const detectedCat = detectCategoryFromPaperSize(paperSize, category);
+          const suggestion = generateBrandKitSuggestionPrompt(kit, detectedCat);
           setPrompt(suggestion);
         }
       }
-      // When deselecting (None), we don't clear the prompt — user may have
-      // typed something custom. They can clear manually.
     },
-    [brandKits, category]
+    [brandKits, category, paperSize]
   );
 
   const recordGeneration = useCallback(() => {
@@ -187,7 +261,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt,
-          category,
+          category: detectCategoryFromPaperSize(paperSize, category),
           paperSize,
           style: "modern",
           // Condition A: pass full brand kit if selected
@@ -216,6 +290,228 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
     } finally {
       setGenerating(false);
     }
+  };
+
+  const openEditModal = (kit: BrandKit) => {
+    setEditingBrandKit(kit);
+    setIsModalOpen(true);
+    setModalTab('Color Palette');
+  };
+
+  const handleAddCustomKitClick = () => {
+    const newKit: BrandKit = {
+      id: "new-kit-" + Date.now(),
+      user_id: "",
+      name: "New Brand Kit",
+      colors: ["#3B82F6", "#1D4ED8", "#1E40AF", "#172554"],
+      typography: { title: "Inter", subtitle: "Inter", body: "Inter" },
+      logos: [],
+      graphics: [],
+      photos: [],
+      elements: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    openEditModal(newKit);
+  };
+
+  const handleRenameStart = (kit: BrandKit) => {
+    setRenamingKitId(kit.id);
+    setRenamingName(kit.name);
+    setActiveMenuId(null);
+  };
+
+  const handleRenameSave = async (kitId: string) => {
+    if (!renamingName.trim()) {
+      setRenamingKitId(null);
+      return;
+    }
+
+    if (kitId.startsWith("default-")) {
+      try {
+        const kitObj = brandKits.find(k => k.id === kitId);
+        if (kitObj) {
+          const res = await fetch("/api/brand-kits", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: renamingName.trim(),
+              colors: kitObj.colors,
+              typography: kitObj.typography,
+            }),
+          });
+          const data = await res.json();
+          if (data.success && data.data) {
+            const savedKit = data.data as BrandKit;
+            setBrandKits(prev => [...prev.filter(k => k.id !== kitId), savedKit]);
+            setActiveBrandKitId(savedKit.id);
+            setUseBrandKit(true);
+
+            const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
+            localStorage.setItem("hidden_default_kits", JSON.stringify([...hiddenDefaults, kitId]));
+          } else {
+            alert(data.error || "Failed to customize default brand kit");
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to customize default brand kit");
+      }
+      setRenamingKitId(null);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/brand-kits/${kitId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: renamingName.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBrandKits(prev =>
+          prev.map(k => (k.id === kitId ? { ...k, name: renamingName.trim() } : k))
+        );
+      } else {
+        alert(data.error || "Failed to rename brand kit");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to rename brand kit");
+    } finally {
+      setRenamingKitId(null);
+    }
+  };
+
+  const handleRemoveKit = async (kitId: string) => {
+    setActiveMenuId(null);
+    const kit = brandKits.find(k => k.id === kitId);
+    if (!kit) return;
+    if (!confirm(`Are you sure you want to remove "${kit.name}"?`)) return;
+
+    if (kitId.startsWith("default-")) {
+      setBrandKits(prev => prev.filter(k => k.id !== kitId));
+      if (activeBrandKitId === kitId) {
+        setActiveBrandKitId(null);
+      }
+      const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
+      localStorage.setItem("hidden_default_kits", JSON.stringify([...hiddenDefaults, kitId]));
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/brand-kits/${kitId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBrandKits(prev => prev.filter(k => k.id !== kitId));
+        if (activeBrandKitId === kitId) {
+          setActiveBrandKitId(null);
+        }
+      } else {
+        alert(data.error || "Failed to delete brand kit");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete brand kit");
+    }
+  };
+
+  const handleSaveModal = async () => {
+    if (!editingBrandKit) return;
+    if (!editingBrandKit.name.trim()) {
+      alert("Brand kit name is required");
+      return;
+    }
+
+    const isNew = editingBrandKit.id.startsWith("new-kit-");
+    const isDefault = editingBrandKit.id.startsWith("default-");
+
+    if (isDefault) {
+      try {
+        const res = await fetch("/api/brand-kits", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: editingBrandKit.name.trim(),
+            colors: editingBrandKit.colors,
+            typography: editingBrandKit.typography,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          const savedKit = data.data as BrandKit;
+          setBrandKits(prev => [...prev.filter(k => k.id !== editingBrandKit.id), savedKit]);
+          setActiveBrandKitId(savedKit.id);
+          setUseBrandKit(true);
+
+          const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
+          localStorage.setItem("hidden_default_kits", JSON.stringify([...hiddenDefaults, editingBrandKit.id]));
+        } else {
+          alert(data.error || "Failed to customize default brand kit");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to customize default brand kit");
+      }
+      setIsModalOpen(false);
+      setEditingBrandKit(null);
+      return;
+    }
+
+    if (isNew) {
+      try {
+        const res = await fetch("/api/brand-kits", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: editingBrandKit.name.trim(),
+            colors: editingBrandKit.colors,
+            typography: editingBrandKit.typography,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          const savedKit = data.data as BrandKit;
+          setBrandKits(prev => [...prev, savedKit]);
+          setActiveBrandKitId(savedKit.id);
+          setUseBrandKit(true);
+        } else {
+          alert(data.error || "Failed to create brand kit");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to create brand kit");
+      }
+    } else {
+      try {
+        const res = await fetch(`/api/brand-kits/${editingBrandKit.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: editingBrandKit.name.trim(),
+            colors: editingBrandKit.colors,
+            typography: editingBrandKit.typography,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          const savedKit = data.data as BrandKit;
+          setBrandKits(prev =>
+            prev.map(k => (k.id === savedKit.id ? savedKit : k))
+          );
+        } else {
+          alert(data.error || "Failed to update brand kit");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to update brand kit");
+      }
+    }
+
+    setIsModalOpen(false);
+    setEditingBrandKit(null);
   };
 
   const handleMenuToggle = (e: React.MouseEvent, id: string) => {
@@ -265,111 +561,150 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
           <>
             {/* SECTION A: Brand Kit UI */}
             <div className="space-y-3">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
-                <LuPalette className="w-3.5 h-3.5 text-gray-400" />
-                Brand Kit Presets
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                {/* "None / Freestyle" card — Condition B */}
-                <div 
-                  onClick={() => handleBrandKitSelect(null)}
-                  className={`group relative flex flex-col items-center justify-center p-2 rounded-2xl border transition-all duration-200 cursor-pointer min-h-[100px] ${
-                    activeBrandKitId === null 
-                      ? 'border-indigo-600 bg-indigo-50/30 ring-2 ring-indigo-600/20 shadow-md' 
-                      : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
-                  }`}
-                >
-                  <div className="flex justify-between items-start w-full mb-2 px-1">
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
-                      activeBrandKitId === null ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'
-                    }`}>
-                      {activeBrandKitId === null && <LuSparkles className="w-2.5 h-2.5 text-white" />}
-                    </div>
-                  </div>
-                  <div className="flex w-full h-8 rounded-lg overflow-hidden mb-2 border border-gray-100">
-                    {['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b'].map((c, i) => (
-                      <div key={i} className="flex-1 h-full opacity-40" style={{ backgroundColor: c }} />
-                    ))}
-                  </div>
-                  <div className="text-center w-full">
-                    <p className="text-[11px] font-medium text-gray-500">None / Freestyle</p>
-                  </div>
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <LuPalette className="w-3.5 h-3.5 text-gray-400" />
+                  Brand Kit Presets
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-semibold text-gray-400">
+                    {useBrandKit ? "Active" : "Disabled"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextVal = !useBrandKit;
+                      setUseBrandKit(nextVal);
+                      if (nextVal) {
+                        if (!activeBrandKitId && brandKits.length > 0) {
+                          handleBrandKitSelect(brandKits[0].id);
+                        } else if (activeBrandKitId) {
+                          handleBrandKitSelect(activeBrandKitId);
+                        }
+                      }
+                    }}
+                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500/20 ${
+                      useBrandKit ? "bg-indigo-600" : "bg-gray-200"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        useBrandKit ? "translate-x-4" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
                 </div>
+              </div>
 
+              <div className="grid grid-cols-2 gap-3">
                 {/* Loading skeleton */}
-                {brandKitsLoading && (
+                {brandKitsLoading && brandKits.length <= 2 && (
                   <div className="flex flex-col items-center justify-center p-2 rounded-2xl border border-gray-200 bg-gray-50/50 min-h-[100px] animate-pulse">
                     <div className="w-full h-8 bg-gray-200 rounded-lg mb-2" />
                     <div className="w-16 h-3 bg-gray-200 rounded" />
                   </div>
                 )}
 
-                {/* Real brand kit cards */}
-                {brandKits.map((kit) => (
-                  <div 
-                    key={kit.id} 
-                    onClick={() => handleBrandKitSelect(kit.id)}
-                    className={`group relative flex flex-col p-2 rounded-2xl border transition-all duration-200 cursor-pointer ${
-                      activeBrandKitId === kit.id 
-                        ? 'border-indigo-600 bg-indigo-50/30 ring-2 ring-indigo-600/20 shadow-md' 
-                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
-                    } ${activeMenuId === kit.id ? 'z-50' : 'z-10'}`}
-                  >
-                    {/* Top Row: Checkbox & Menu */}
-                    <div className="flex justify-between items-start w-full mb-2">
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
-                        activeBrandKitId === kit.id ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'
-                      }`}>
-                        {activeBrandKitId === kit.id && <LuSparkles className="w-2.5 h-2.5 text-white" />}
-                      </div>
-                      <button 
-                        onClick={(e) => handleMenuToggle(e, kit.id)}
-                        className="p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors relative z-[51]"
-                      >
-                        {activeMenuId === kit.id ? (
-                          <LuX className="w-3.5 h-3.5 text-gray-600" />
-                        ) : (
-                          <BsThreeDotsVertical className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                      
-                      {/* Context Menu Popup */}
-                      {activeMenuId === kit.id && (
-                        <div className="absolute top-8 right-1 w-28 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-[100] animate-in zoom-in-95 origin-top-right">
-                          <button className="w-full text-left px-3 py-2.5 text-[11px] text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors">
-                            <LuPen className="w-3 h-3" /> Rename
-                          </button>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); setIsModalOpen(true); setActiveMenuId(null); }}
-                            className="w-full text-left px-3 py-2.5 text-[11px] text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
-                          >
-                            <LuPaintbrush className="w-3 h-3" /> Edit
-                          </button>
-                          <button className="w-full text-left px-3 py-2.5 text-[11px] text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors">
-                            <LuTrash2 className="w-3 h-3" /> Remove
-                          </button>
+                {/* Brand kit cards */}
+                {brandKits.map((kit) => {
+                  const isActive = useBrandKit && activeBrandKitId === kit.id;
+                  const isDefault = kit.id.startsWith("default-");
+                  return (
+                    <div 
+                      key={kit.id} 
+                      onClick={() => {
+                        if (!useBrandKit) {
+                          setUseBrandKit(true);
+                        }
+                        handleBrandKitSelect(kit.id);
+                      }}
+                      className={`group relative flex flex-col p-2 rounded-2xl border transition-all duration-200 cursor-pointer ${
+                        isActive 
+                          ? 'border-indigo-600 bg-indigo-50/30 ring-2 ring-indigo-600/20 shadow-md' 
+                          : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                      } ${!useBrandKit ? 'opacity-60 hover:opacity-100 grayscale-[20%]' : ''} ${activeMenuId === kit.id ? 'z-50' : 'z-10'}`}
+                    >
+                      {/* Top Row: Checkbox & Menu */}
+                      <div className="flex justify-between items-start w-full mb-2">
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                          isActive ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'
+                        }`}>
+                          {isActive && <LuSparkles className="w-2.5 h-2.5 text-white" />}
                         </div>
-                      )}
+                        
+                        <button 
+                          onClick={(e) => handleMenuToggle(e, kit.id)}
+                          className="p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors relative z-[51]"
+                        >
+                          {activeMenuId === kit.id ? (
+                            <LuX className="w-3.5 h-3.5 text-gray-600" />
+                          ) : (
+                            <BsThreeDotsVertical className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                        
+                        {/* Context Menu Popup */}
+                        {activeMenuId === kit.id && (
+                          <div className="absolute top-8 right-1 w-28 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-[100] animate-in zoom-in-95 origin-top-right">
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleRenameStart(kit); }}
+                              className="w-full text-left px-3 py-2.5 text-[11px] text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                            >
+                              <LuPen className="w-3 h-3" /> Rename
+                            </button>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); openEditModal(kit); setActiveMenuId(null); }}
+                              className="w-full text-left px-3 py-2.5 text-[11px] text-gray-600 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                            >
+                              <LuPaintbrush className="w-3 h-3" /> Edit
+                            </button>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleRemoveKit(kit.id); }}
+                              className="w-full text-left px-3 py-2.5 text-[11px] text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                            >
+                              <LuTrash2 className="w-3 h-3" /> Remove
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Center: Color Strip Preview */}
+                      <div className="flex w-full h-8 rounded-lg overflow-hidden mb-2 border border-gray-100">
+                        {(kit.colors.length > 0 ? kit.colors : ['#cccccc']).map((c, i) => (
+                          <div key={i} className="flex-1 h-full" style={{ backgroundColor: c }} />
+                        ))}
+                      </div>
+                      
+                      {/* Bottom: Title with font or renaming input */}
+                      <div className="text-center w-full px-1" onClick={(e) => { if (renamingKitId === kit.id) e.stopPropagation(); }}>
+                        {renamingKitId === kit.id ? (
+                          <input
+                            type="text"
+                            value={renamingName}
+                            onChange={(e) => setRenamingName(e.target.value)}
+                            onBlur={() => handleRenameSave(kit.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleRenameSave(kit.id);
+                              if (e.key === 'Escape') setRenamingKitId(null);
+                            }}
+                            autoFocus
+                            className="w-full text-[11px] font-medium text-gray-700 bg-gray-50 border border-indigo-500 rounded px-1 text-center outline-none"
+                          />
+                        ) : (
+                          <p className="text-[11px] font-medium text-gray-700 truncate" style={{ fontFamily: kit.typography?.title ?? 'inherit' }}>{kit.name}</p>
+                        )}
+                      </div>
                     </div>
-                    
-                    {/* Center: Color Strip Preview */}
-                    <div className="flex w-full h-8 rounded-lg overflow-hidden mb-2 border border-gray-100">
-                      {(kit.colors.length > 0 ? kit.colors : ['#cccccc']).map((c, i) => (
-                        <div key={i} className="flex-1 h-full" style={{ backgroundColor: c }} />
-                      ))}
-                    </div>
-                    
-                    {/* Bottom: Title with font */}
-                    <div className="text-center w-full">
-                      <p className="text-[11px] font-medium text-gray-700 truncate" style={{ fontFamily: kit.typography?.title ?? 'inherit' }}>{kit.name}</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
 
                 {/* Add Custom Brand Kit Card */}
                 <div 
-                  onClick={() => setIsModalOpen(true)}
-                  className="flex flex-col items-center justify-center p-2 rounded-2xl border border-dashed border-gray-300 bg-gray-50/50 hover:bg-gray-100/50 hover:border-gray-400 transition-all duration-200 cursor-pointer min-h-[100px]"
+                  onClick={handleAddCustomKitClick}
+                  className={`flex flex-col items-center justify-center p-2 rounded-2xl border border-dashed border-gray-300 bg-gray-50/50 hover:bg-gray-100/50 hover:border-gray-400 transition-all duration-200 cursor-pointer min-h-[100px] ${
+                    !useBrandKit ? 'opacity-60 hover:opacity-100' : ''
+                  }`}
                 >
                   <div className="w-8 h-8 rounded-full bg-white shadow-sm border border-gray-200 flex items-center justify-center mb-2">
                     <LuPlus className="w-4 h-4 text-gray-500" />
@@ -516,7 +851,19 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                     {aiPanelOptions.map((o) => (
                       <button
                         key={o.value}
-                        onClick={() => { setPaperSize(o.value); setIsDimensionDropdownOpen(false); }}
+                        onClick={() => { 
+                          setPaperSize(o.value); 
+                          setIsDimensionDropdownOpen(false); 
+                          // Auto-paste brand kit prompt matching the new category if active
+                          if (useBrandKit && activeBrandKitId) {
+                            const kit = brandKits.find((k) => k.id === activeBrandKitId);
+                            if (kit) {
+                              const detectedCat = detectCategoryFromPaperSize(o.value, category);
+                              const suggestion = generateBrandKitSuggestionPrompt(kit, detectedCat);
+                              setPrompt(suggestion);
+                            }
+                          }
+                        }}
                         className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-gray-50 ${paperSize === o.value ? "bg-indigo-50/50" : ""}`}
                       >
                         <span className={`flex items-center justify-center w-5 ${paperSize === o.value ? "text-indigo-600" : "text-gray-400"}`}>
@@ -566,16 +913,27 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
       </div>
 
       {/* Brand Kit Configuration Modal */}
+      {/* Brand Kit Configuration Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-5xl h-[80vh] min-h-[600px] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/80">
-              <div>
-                <h2 className="text-xl font-bold text-gray-800">Brand Kit Configuration</h2>
-                <p className="text-sm text-gray-500 mt-1">Customize your AI generation presets</p>
+              <div className="flex-1 mr-4">
+                <input
+                  type="text"
+                  value={editingBrandKit?.name ?? ""}
+                  onChange={(e) => {
+                    if (editingBrandKit) {
+                      setEditingBrandKit({ ...editingBrandKit, name: e.target.value });
+                    }
+                  }}
+                  placeholder="Brand Kit Name"
+                  className="text-xl font-bold text-gray-800 border-b border-transparent hover:border-gray-300 focus:border-indigo-500 focus:outline-none px-1 rounded transition-colors bg-transparent w-full max-w-md"
+                />
+                <p className="text-xs text-gray-500 mt-1">Customize your brand colors, fonts, and assets</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-full hover:bg-gray-200 text-gray-500 transition-colors">
+              <button onClick={() => { setIsModalOpen(false); setEditingBrandKit(null); }} className="p-2 rounded-full hover:bg-gray-200 text-gray-500 transition-colors">
                 <LuX className="w-6 h-6" />
               </button>
             </div>
@@ -611,23 +969,62 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
               <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-white">
                 {modalTab === 'Color Palette' && (
                   <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                    <h3 className="text-lg font-bold text-gray-800 border-b pb-2">Color Palettes</h3>
-                    <div className="grid grid-cols-2 gap-6">
-                      {brandKits.map((kit) => (
-                        <div key={kit.id} className="p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-indigo-300 transition-colors">
-                          <p className="text-base font-medium text-gray-700 mb-3">{kit.name} Colors</p>
-                          <div className="flex gap-3">
-                            {(kit.colors.length > 0 ? kit.colors : ['#cccccc']).map((c, i) => (
-                              <div key={i} className="w-16 h-16 rounded-xl shadow-inner border border-black/5" style={{ backgroundColor: c }} />
-                            ))}
-                          </div>
+                    <div className="flex justify-between items-center border-b pb-2">
+                      <h3 className="text-lg font-bold text-gray-800">Color Palette</h3>
+                      <button
+                        onClick={() => {
+                          if (editingBrandKit) {
+                            setEditingBrandKit({
+                              ...editingBrandKit,
+                              colors: [...editingBrandKit.colors, "#6366F1"]
+                            });
+                          }
+                        }}
+                        className="px-3 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+                      >
+                        <LuPlus className="w-3.5 h-3.5" /> Add Color
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      {editingBrandKit?.colors.map((color, index) => (
+                        <div key={index} className="flex items-center gap-3 p-3 rounded-xl border border-gray-150 bg-gray-50/50">
+                          <input 
+                            type="color" 
+                            value={color.startsWith("#") ? color : "#ffffff"} 
+                            onChange={(e) => {
+                              if (editingBrandKit) {
+                                const newColors = [...editingBrandKit.colors];
+                                newColors[index] = e.target.value;
+                                setEditingBrandKit({ ...editingBrandKit, colors: newColors });
+                              }
+                            }}
+                            className="w-10 h-10 rounded border border-gray-200 cursor-pointer p-0 bg-transparent"
+                          />
+                          <input 
+                            type="text" 
+                            value={color} 
+                            onChange={(e) => {
+                              if (editingBrandKit) {
+                                const newColors = [...editingBrandKit.colors];
+                                newColors[index] = e.target.value;
+                                setEditingBrandKit({ ...editingBrandKit, colors: newColors });
+                              }
+                            }}
+                            className="flex-1 text-xs font-mono border border-gray-200 rounded px-2 py-1 outline-none uppercase"
+                          />
+                          <button
+                            onClick={() => {
+                              if (editingBrandKit) {
+                                const newColors = editingBrandKit.colors.filter((_, i) => i !== index);
+                                setEditingBrandKit({ ...editingBrandKit, colors: newColors });
+                              }
+                            }}
+                            className="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors"
+                          >
+                            <LuTrash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       ))}
-                      {/* Add new palette card */}
-                      <div className="p-5 rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer min-h-[140px]">
-                        <LuPlus className="w-8 h-8 mb-2" />
-                        <span className="text-sm font-semibold">Add New Palette</span>
-                      </div>
                     </div>
                   </div>
                 )}
@@ -651,18 +1048,40 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                 )}
 
                 {modalTab === 'Typography' && (
-                  <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
+                  <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                     <h3 className="text-lg font-bold text-gray-800 border-b pb-2">Typography Hierarchy</h3>
-                    <div className="space-y-8 max-w-2xl">
-                      {['Title', 'Subtitle', 'Regular Text'].map((level) => (
-                        <div key={level} className="flex flex-col gap-3">
-                          <label className="text-sm font-bold text-gray-500 uppercase">{level} Font</label>
-                          <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50 hover:border-indigo-300 transition-colors cursor-pointer">
-                            <span className="text-base font-medium text-gray-800">Select Font Family...</span>
-                            <LuChevronDown className="w-5 h-5 text-gray-400" />
+                    <div className="space-y-6 max-w-2xl">
+                      {[
+                        { label: "Title Font (Headings)", key: "title" },
+                        { label: "Subtitle Font", key: "subtitle" },
+                        { label: "Body Font (Paragraphs)", key: "body" }
+                      ].map((item) => {
+                        const fontVal = editingBrandKit?.typography?.[item.key as keyof typeof editingBrandKit.typography] || "Inter";
+                        return (
+                          <div key={item.key} className="flex flex-col gap-2">
+                            <label className="text-xs font-bold text-gray-500 uppercase">{item.label}</label>
+                            <select
+                              value={fontVal}
+                              onChange={(e) => {
+                                if (editingBrandKit) {
+                                  setEditingBrandKit({
+                                    ...editingBrandKit,
+                                    typography: {
+                                      ...editingBrandKit.typography,
+                                      [item.key]: e.target.value
+                                    }
+                                  });
+                                }
+                              }}
+                              className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                            >
+                              {["Inter", "Playfair Display", "Roboto", "Lora", "Montserrat", "Oswald", "Poppins", "Merriweather", "Outfit", "Dancing Script", "Cinzel"].map((font) => (
+                                <option key={font} value={font}>{font}</option>
+                              ))}
+                            </select>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -706,10 +1125,10 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
             
             {/* Modal Footer */}
             <div className="px-8 py-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-4">
-              <button onClick={() => setIsModalOpen(false)} className="px-6 py-3 rounded-xl text-base font-semibold text-gray-600 hover:bg-gray-200 transition-colors">
+              <button onClick={() => { setIsModalOpen(false); setEditingBrandKit(null); }} className="px-6 py-3 rounded-xl text-base font-semibold text-gray-600 hover:bg-gray-200 transition-colors">
                 Cancel
               </button>
-              <button onClick={() => setIsModalOpen(false)} className="px-6 py-3 rounded-xl text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition-colors">
+              <button onClick={handleSaveModal} className="px-6 py-3 rounded-xl text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition-colors">
                 Save Changes
               </button>
             </div>

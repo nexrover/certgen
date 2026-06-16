@@ -126,9 +126,10 @@ export async function POST(req: Request) {
           width,
           height,
           paperSize,
+          category,
           style
         )
-      : buildDefaultSystemPrompt(width, height, paperSize, style);
+      : buildDefaultSystemPrompt(width, height, paperSize, category, style);
 
     const conditionLabel = hasBrandKit ? "A (Brand Kit)" : "B (Default)";
     console.log(`[AI Generate] Prompt condition: ${conditionLabel}`);
