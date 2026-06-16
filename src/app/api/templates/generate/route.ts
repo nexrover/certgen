@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { PAPER_DIMENSIONS, type PaperSize } from "@/lib/types";
 
 /* ── Helper: center-align horizontally ─────────────────── */
 function cx(canvasW: number, objW: number) {
@@ -56,7 +57,7 @@ const TYPE_MAP: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
-    const { prompt, category = "certificate", orientation = "landscape", style = "modern" } = await req.json();
+    const { prompt, category = "certificate", orientation = "landscape", paperSize: reqPaperSize, style = "modern" } = await req.json();
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 400 });
@@ -76,27 +77,34 @@ export async function POST(req: Request) {
     let height = 595;
     let paperSize = "A4_LANDSCAPE";
 
-    if (orientation === "square") {
-      width = 1080; height = 1080; paperSize = "CUSTOM";
-    } else if (category === "youtube") {
-      if (orientation === "portrait") {
-        width = 720; height = 1280; paperSize = "CUSTOM";
-      } else {
-        width = 1280; height = 720; paperSize = "YOUTUBE_THUMBNAIL";
-      }
-    } else if (category === "certificate") {
-      if (orientation === "portrait") {
-        width = 595; height = 842; paperSize = "A4";
-      } else {
-        width = 842; height = 595; paperSize = "A4_LANDSCAPE";
-      }
-    } else if (["invoice", "resume", "receipt"].includes(category)) {
-      width = 1020; height = 1320; paperSize = "INVOICE";
+    if (reqPaperSize && PAPER_DIMENSIONS[reqPaperSize as PaperSize]) {
+      const dims = PAPER_DIMENSIONS[reqPaperSize as PaperSize];
+      width = dims.width;
+      height = dims.height;
+      paperSize = reqPaperSize;
     } else {
-      if (orientation === "portrait") {
-        width = 595; height = 842; paperSize = "A4";
+      if (orientation === "square") {
+        width = 1080; height = 1080; paperSize = "CUSTOM";
+      } else if (category === "youtube") {
+        if (orientation === "portrait") {
+          width = 720; height = 1280; paperSize = "CUSTOM";
+        } else {
+          width = 1280; height = 720; paperSize = "YOUTUBE_THUMBNAIL";
+        }
+      } else if (category === "certificate") {
+        if (orientation === "portrait") {
+          width = 595; height = 842; paperSize = "A4";
+        } else {
+          width = 842; height = 595; paperSize = "A4_LANDSCAPE";
+        }
+      } else if (["invoice", "resume", "receipt"].includes(category)) {
+        width = 1020; height = 1320; paperSize = "INVOICE";
       } else {
-        width = 842; height = 595; paperSize = "A4_LANDSCAPE";
+        if (orientation === "portrait") {
+          width = 595; height = 842; paperSize = "A4";
+        } else {
+          width = 842; height = 595; paperSize = "A4_LANDSCAPE";
+        }
       }
     }
 

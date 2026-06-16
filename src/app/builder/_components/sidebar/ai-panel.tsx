@@ -8,6 +8,8 @@ import {
   LuSticker, LuImage, LuChevronDown, LuBot, LuChevronUp
 } from "react-icons/lu";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import type { PaperSize } from "@/lib/types";
+import { ALL_PAPER_OPTIONS } from "../toolbar";
 
 interface AIPanelProps {
   onLoadTemplate: (payload: {
@@ -19,7 +21,6 @@ interface AIPanelProps {
   category?: string;
 }
 
-type Orientation = "landscape" | "portrait" | "square";
 type StyleTheme = "classic" | "modern" | "minimal" | "bold";
 
 const MAX_FREE_GENERATIONS = 5;
@@ -69,7 +70,9 @@ const MOCK_BRAND_KITS = [
 
 export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelProps) {
   const [prompt, setPrompt] = useState("");
-  const [orientation, setOrientation] = useState<Orientation>("landscape");
+  const [paperSize, setPaperSize] = useState<PaperSize>("A4_LANDSCAPE");
+  const aiPanelOptions = ALL_PAPER_OPTIONS.filter(o => o.value !== "CUSTOM");
+  const selectedOption = aiPanelOptions.find((o) => o.value === paperSize) || aiPanelOptions[0];
   const [generating, setGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -137,7 +140,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
       const response = await fetch("/api/templates/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, category, orientation, style: "modern" }),
+        body: JSON.stringify({ prompt, category, paperSize, style: "modern" }),
       });
 
       const data = await response.json();
@@ -369,16 +372,17 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
               <div className="relative mt-2">
                 <button 
                   onClick={() => setIsDimensionDropdownOpen(!isDimensionDropdownOpen)}
-                  className="w-full flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-all shadow-sm"
+                  className="w-full flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 >
-                  <div className="flex items-center gap-2">
-                    <LuLayoutTemplate className="w-4 h-4 text-gray-400" />
+                  <div className="flex items-center gap-3">
+                    <div className="text-gray-400">
+                      {selectedOption.icon}
+                    </div>
                     <div className="flex flex-col items-start">
                       <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Canvas Size</span>
-                      <span className="text-xs font-semibold text-gray-700 capitalize">
-                        {orientation === "landscape" && "A4 (Landscape)"}
-                        {orientation === "portrait" && "Letter (Portrait)"}
-                        {orientation === "square" && "Social Post (Square)"}
+                      <span className="text-xs font-semibold text-gray-700 capitalize flex items-center gap-1.5">
+                        {selectedOption.label} 
+                        <span className="text-[10px] text-gray-400 font-medium font-mono">({selectedOption.displayDims})</span>
                       </span>
                     </div>
                   </div>
@@ -386,25 +390,21 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                 </button>
                 
                 {isDimensionDropdownOpen && (
-                  <div className="absolute bottom-full left-0 mb-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[100] animate-in slide-in-from-bottom-2">
-                    {(["landscape", "portrait", "square"] as const).map((o) => (
+                  <div className="absolute bottom-full left-0 mb-2 w-full max-h-[300px] overflow-y-auto bg-white rounded-xl shadow-2xl border border-gray-100 z-[100] animate-in slide-in-from-bottom-2 custom-scrollbar py-2">
+                    {aiPanelOptions.map((o) => (
                       <button
-                        key={o}
-                        onClick={() => { setOrientation(o); setIsDimensionDropdownOpen(false); }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-indigo-50/50 transition-colors border-b border-gray-50 last:border-0"
+                        key={o.value}
+                        onClick={() => { setPaperSize(o.value); setIsDimensionDropdownOpen(false); }}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-gray-50 ${paperSize === o.value ? "bg-indigo-50/50" : ""}`}
                       >
-                        <div className={`border border-gray-300 rounded transition-all duration-300 ${
-                          o === "landscape" ? "w-6 h-4" : o === "portrait" ? "w-4 h-6" : "w-5 h-5"
-                        } ${orientation === o ? "bg-indigo-600 border-indigo-600" : "bg-gray-100"}`} />
-                        <span className={`text-xs font-medium capitalize flex-1 ${orientation === o ? 'text-indigo-700' : 'text-gray-600'}`}>
-                          {o === "landscape" && "A4 (Landscape)"}
-                          {o === "portrait" && "Letter (Portrait)"}
-                          {o === "square" && "Social Post (Square)"}
+                        <span className={`flex items-center justify-center w-5 ${paperSize === o.value ? "text-indigo-600" : "text-gray-400"}`}>
+                          {o.icon}
                         </span>
-                        <span className="text-[10px] text-gray-400">
-                          {o === "landscape" && "297x210 mm"}
-                          {o === "portrait" && "8.5x11 in"}
-                          {o === "square" && "1080x1080 px"}
+                        <span className={`text-xs flex-1 ${paperSize === o.value ? 'font-semibold text-indigo-700' : 'font-medium text-gray-600'}`}>
+                          {o.label}
+                        </span>
+                        <span className="text-[10px] text-gray-400 font-mono">
+                          {o.displayDims}
                         </span>
                       </button>
                     ))}

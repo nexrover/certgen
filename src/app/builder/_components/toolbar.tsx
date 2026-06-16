@@ -22,7 +22,7 @@ interface ToolbarProps {
   category?: string;
 }
 
-const RAW_PAPER_OPTIONS: { value: PaperSize; label: string; displayDims: string; icon: React.ReactNode; dpi?: string; categories: string[] }[] = [
+export const RAW_PAPER_OPTIONS: { value: PaperSize; label: string; displayDims: string; icon: React.ReactNode; dpi?: string; categories: string[] }[] = [
   { value: "INSTAGRAM_STORY", label: "Instagram Story", displayDims: "1080×1920", icon: <FaInstagram className="w-3.5 h-3.5" />, categories: ["social-media"] },
   { value: "LANDSCAPE_POST", label: "Landscape Post", displayDims: "1080×608", icon: <FaInstagram className="w-3.5 h-3.5" />, categories: ["social-media"] },
   { value: "TWITTER_POST", label: "Twitter Post", displayDims: "1600×900", icon: <FaTwitter className="w-3.5 h-3.5" />, categories: ["social-media"] },
@@ -55,7 +55,7 @@ const RAW_PAPER_OPTIONS: { value: PaperSize; label: string; displayDims: string;
   { value: "CUSTOM", label: "Custom Size", displayDims: "Custom", icon: <LuCrop className="w-3.5 h-3.5" />, categories: [] },
 ];
 
-const ALL_PAPER_OPTIONS = [
+export const ALL_PAPER_OPTIONS = [
   RAW_PAPER_OPTIONS.find((o) => o.value === "CUSTOM")!,
   ...RAW_PAPER_OPTIONS.filter((o) => o.value !== "CUSTOM").sort((a, b) => a.label.localeCompare(b.label)),
 ];
