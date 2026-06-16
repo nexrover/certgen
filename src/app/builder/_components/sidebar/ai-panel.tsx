@@ -29,22 +29,22 @@ const STORAGE_KEY = "ai_gen_usage";
 
 interface UsageData {
   count: number;
-  blockedUntil: number | null; // timestamp
+  windowStart: number | null; // epoch timestamp
 }
 
 function loadUsage(): UsageData {
   try {
     const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-    if (!raw) return { count: 0, blockedUntil: null };
+    if (!raw) return { count: 0, windowStart: null };
     const data = JSON.parse(raw) as UsageData;
-    if (data.blockedUntil && Date.now() >= data.blockedUntil) {
-      const reset: UsageData = { count: 0, blockedUntil: null };
+    if (data.windowStart && Date.now() >= data.windowStart + COOLDOWN_MS) {
+      const reset: UsageData = { count: 0, windowStart: null };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(reset));
       return reset;
     }
     return data;
   } catch {
-    return { count: 0, blockedUntil: null };
+    return { count: 0, windowStart: null };
   }
 }
 
@@ -55,11 +55,12 @@ function saveUsage(data: UsageData) {
 }
 
 function formatTimeLeft(ms: number): string {
-  if (ms <= 0) return "0m";
+  if (ms <= 0) return "00:00:00";
   const hours = Math.floor(ms / (1000 * 60 * 60));
   const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
+  const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 }
 
 // Mock Data for Brand Kits
@@ -88,22 +89,23 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
   const [isDimensionDropdownOpen, setIsDimensionDropdownOpen] = useState(false);
 
   // Usage tracking
-  const [usage, setUsage] = useState<UsageData>({ count: 0, blockedUntil: null });
+  const [usage, setUsage] = useState<UsageData>({ count: 0, windowStart: null });
   const [timeLeft, setTimeLeft] = useState("");
 
-  const remaining = MAX_FREE_GENERATIONS - usage.count;
-  const isBlocked = usage.blockedUntil !== null && Date.now() < usage.blockedUntil;
+  const remaining = Math.max(0, MAX_FREE_GENERATIONS - usage.count);
+  const isBlocked = remaining === 0 && usage.windowStart !== null;
 
   useEffect(() => {
     setUsage(loadUsage());
   }, []);
 
   useEffect(() => {
-    if (!isBlocked || !usage.blockedUntil) return;
+    if (!usage.windowStart) return;
     const tick = () => {
-      const left = (usage.blockedUntil ?? 0) - Date.now();
+      const expiresAt = usage.windowStart! + COOLDOWN_MS;
+      const left = expiresAt - Date.now();
       if (left <= 0) {
-        const reset: UsageData = { count: 0, blockedUntil: null };
+        const reset: UsageData = { count: 0, windowStart: null };
         saveUsage(reset);
         setUsage(reset);
         setTimeLeft("");
@@ -112,19 +114,21 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
       }
     };
     tick();
-    const interval = setInterval(tick, 30_000);
+    const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, [isBlocked, usage.blockedUntil]);
+  }, [usage.windowStart]);
 
   const recordGeneration = useCallback(() => {
-    const newCount = usage.count + 1;
-    const newUsage: UsageData = {
-      count: newCount,
-      blockedUntil: newCount >= MAX_FREE_GENERATIONS ? Date.now() + COOLDOWN_MS : null,
-    };
-    saveUsage(newUsage);
-    setUsage(newUsage);
-  }, [usage.count]);
+    setUsage(prev => {
+      const newCount = prev.count + 1;
+      const newUsage: UsageData = {
+        count: newCount,
+        windowStart: prev.windowStart || Date.now(),
+      };
+      saveUsage(newUsage);
+      return newUsage;
+    });
+  }, []);
 
   const handleGenerate = async () => {
     if (!prompt.trim() || isBlocked) return;
@@ -313,14 +317,21 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                 prompt.trim() ? "border-indigo-300 ring-4 ring-indigo-50" : "border-gray-200"
               }`}>
                 {/* Top area: Textarea + Thumbnails */}
-                <div className="p-3 pb-0">
+                <div className="p-3 pb-0 relative">
                   <textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     placeholder="e.g., A minimalist tech conference certificate with a dark theme and glowing neon accents..."
                     disabled={isBlocked}
-                    className="w-full h-32 text-xs outline-none resize-none placeholder:text-gray-300 bg-transparent custom-scrollbar"
+                    className="w-full h-32 text-xs outline-none resize-none placeholder:text-gray-300 bg-transparent custom-scrollbar relative z-10"
                   />
+                  {isBlocked && (
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/90 backdrop-blur-[2px] rounded-t-2xl">
+                      <LuClock className="w-6 h-6 text-red-500 mb-2 animate-pulse" />
+                      <span className="text-xs font-bold text-gray-800">Quota Exceeded</span>
+                      <span className="text-[10px] text-gray-500 mt-1">Unlock in: <span className="font-mono font-bold text-red-600">{timeLeft}</span></span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Bottom Inner Utility Row */}
