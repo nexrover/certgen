@@ -5,11 +5,12 @@ import {
   LuSparkles, LuCompass, LuRefreshCw, LuLayoutTemplate, LuPaintbrush, 
   LuMessageSquareCode, LuClock, LuPen, LuTrash2, 
   LuPlus, LuX, LuUpload, LuPalette, LuType, LuShapes, LuImagePlus, 
-  LuSticker, LuImage, LuChevronDown, LuBot, LuChevronUp
+  LuSticker, LuImage, LuChevronDown, LuBot, LuChevronUp, LuZap
 } from "react-icons/lu";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import type { PaperSize } from "@/lib/types";
+import type { BrandKit, PaperSize } from "@/lib/types";
 import { ALL_PAPER_OPTIONS } from "../toolbar";
+import { generateBrandKitSuggestionPrompt } from "@/lib/services/prompt-orchestrator";
 
 interface AIPanelProps {
   onLoadTemplate: (payload: {
@@ -63,12 +64,6 @@ function formatTimeLeft(ms: number): string {
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 }
 
-// Mock Data for Brand Kits
-const MOCK_BRAND_KITS = [
-  { id: '1', name: 'Tech Startup', colors: ['#3B82F6', '#1D4ED8', '#1E40AF', '#172554'], font: 'Inter' },
-  { id: '2', name: 'Elegant Studio', colors: ['#D97706', '#92400E', '#78350F', '#451A03'], font: 'Playfair Display' },
-];
-
 export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelProps) {
   const [prompt, setPrompt] = useState("");
   const [paperSize, setPaperSize] = useState<PaperSize>("A4_LANDSCAPE");
@@ -78,8 +73,10 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
   const [currentStep, setCurrentStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  // New states for Step 1 Specs
-  const [activeBrandKit, setActiveBrandKit] = useState('1');
+  // ── Brand Kit State ────────────────────────────────────
+  const [brandKits, setBrandKits] = useState<BrandKit[]>([]);
+  const [brandKitsLoading, setBrandKitsLoading] = useState(true);
+  const [activeBrandKitId, setActiveBrandKitId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTab, setModalTab] = useState('Color Palette');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
@@ -94,6 +91,32 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
 
   const remaining = Math.max(0, MAX_FREE_GENERATIONS - usage.count);
   const isBlocked = remaining === 0 && usage.windowStart !== null;
+
+  // Derived: the currently selected brand kit object (null = Condition B)
+  const activeBrandKit = activeBrandKitId
+    ? brandKits.find((k) => k.id === activeBrandKitId) ?? null
+    : null;
+
+  // ── Fetch brand kits from API on mount ─────────────────
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchKits() {
+      setBrandKitsLoading(true);
+      try {
+        const res = await fetch("/api/brand-kits");
+        const json = await res.json();
+        if (!cancelled && json.success && Array.isArray(json.data)) {
+          setBrandKits(json.data as BrandKit[]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch brand kits:", err);
+      } finally {
+        if (!cancelled) setBrandKitsLoading(false);
+      }
+    }
+    fetchKits();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     setUsage(loadUsage());
@@ -117,6 +140,24 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, [usage.windowStart]);
+
+  // ── Auto-paste prompt when brand kit is selected ───────
+  const handleBrandKitSelect = useCallback(
+    (kitId: string | null) => {
+      setActiveBrandKitId(kitId);
+
+      if (kitId) {
+        const kit = brandKits.find((k) => k.id === kitId);
+        if (kit) {
+          const suggestion = generateBrandKitSuggestionPrompt(kit, category);
+          setPrompt(suggestion);
+        }
+      }
+      // When deselecting (None), we don't clear the prompt — user may have
+      // typed something custom. They can clear manually.
+    },
+    [brandKits, category]
+  );
 
   const recordGeneration = useCallback(() => {
     setUsage(prev => {
@@ -144,7 +185,14 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
       const response = await fetch("/api/templates/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, category, paperSize, style: "modern" }),
+        body: JSON.stringify({
+          prompt,
+          category,
+          paperSize,
+          style: "modern",
+          // Condition A: pass full brand kit if selected
+          ...(activeBrandKit ? { brandKit: activeBrandKit } : {}),
+        }),
       });
 
       const data = await response.json();
@@ -200,7 +248,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
               <h4 className="text-xs font-bold text-gray-700">Designing Template</h4>
               <p className="text-[11px] text-indigo-600 font-medium h-4">
                 {currentStep === 0 && "Analyzing prompt requirements..."}
-                {currentStep === 1 && "Selecting cohesive color palette..."}
+                {currentStep === 1 && (activeBrandKit ? "Applying brand kit constraints..." : "Selecting cohesive color palette...")}
                 {currentStep === 2 && "Arranging elements & coordinates..."}
                 {currentStep === 3 && "Polishing typography hierarchy..."}
                 {currentStep === 4 && "Finalizing canvas template JSON..."}
@@ -222,12 +270,47 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                 Brand Kit Presets
               </label>
               <div className="grid grid-cols-2 gap-3">
-                {MOCK_BRAND_KITS.map((kit) => (
+                {/* "None / Freestyle" card — Condition B */}
+                <div 
+                  onClick={() => handleBrandKitSelect(null)}
+                  className={`group relative flex flex-col items-center justify-center p-2 rounded-2xl border transition-all duration-200 cursor-pointer min-h-[100px] ${
+                    activeBrandKitId === null 
+                      ? 'border-indigo-600 bg-indigo-50/30 ring-2 ring-indigo-600/20 shadow-md' 
+                      : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                  }`}
+                >
+                  <div className="flex justify-between items-start w-full mb-2 px-1">
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                      activeBrandKitId === null ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'
+                    }`}>
+                      {activeBrandKitId === null && <LuSparkles className="w-2.5 h-2.5 text-white" />}
+                    </div>
+                  </div>
+                  <div className="flex w-full h-8 rounded-lg overflow-hidden mb-2 border border-gray-100">
+                    {['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b'].map((c, i) => (
+                      <div key={i} className="flex-1 h-full opacity-40" style={{ backgroundColor: c }} />
+                    ))}
+                  </div>
+                  <div className="text-center w-full">
+                    <p className="text-[11px] font-medium text-gray-500">None / Freestyle</p>
+                  </div>
+                </div>
+
+                {/* Loading skeleton */}
+                {brandKitsLoading && (
+                  <div className="flex flex-col items-center justify-center p-2 rounded-2xl border border-gray-200 bg-gray-50/50 min-h-[100px] animate-pulse">
+                    <div className="w-full h-8 bg-gray-200 rounded-lg mb-2" />
+                    <div className="w-16 h-3 bg-gray-200 rounded" />
+                  </div>
+                )}
+
+                {/* Real brand kit cards */}
+                {brandKits.map((kit) => (
                   <div 
                     key={kit.id} 
-                    onClick={() => setActiveBrandKit(kit.id)}
+                    onClick={() => handleBrandKitSelect(kit.id)}
                     className={`group relative flex flex-col p-2 rounded-2xl border transition-all duration-200 cursor-pointer ${
-                      activeBrandKit === kit.id 
+                      activeBrandKitId === kit.id 
                         ? 'border-indigo-600 bg-indigo-50/30 ring-2 ring-indigo-600/20 shadow-md' 
                         : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                     } ${activeMenuId === kit.id ? 'z-50' : 'z-10'}`}
@@ -235,9 +318,9 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                     {/* Top Row: Checkbox & Menu */}
                     <div className="flex justify-between items-start w-full mb-2">
                       <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
-                        activeBrandKit === kit.id ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'
+                        activeBrandKitId === kit.id ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300 bg-white'
                       }`}>
-                        {activeBrandKit === kit.id && <LuSparkles className="w-2.5 h-2.5 text-white" />}
+                        {activeBrandKitId === kit.id && <LuSparkles className="w-2.5 h-2.5 text-white" />}
                       </div>
                       <button 
                         onClick={(e) => handleMenuToggle(e, kit.id)}
@@ -271,14 +354,14 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                     
                     {/* Center: Color Strip Preview */}
                     <div className="flex w-full h-8 rounded-lg overflow-hidden mb-2 border border-gray-100">
-                      {kit.colors.map((c, i) => (
+                      {(kit.colors.length > 0 ? kit.colors : ['#cccccc']).map((c, i) => (
                         <div key={i} className="flex-1 h-full" style={{ backgroundColor: c }} />
                       ))}
                     </div>
                     
                     {/* Bottom: Title with font */}
                     <div className="text-center w-full">
-                      <p className="text-[11px] font-medium text-gray-700 truncate" style={{ fontFamily: kit.font }}>{kit.name}</p>
+                      <p className="text-[11px] font-medium text-gray-700 truncate" style={{ fontFamily: kit.typography?.title ?? 'inherit' }}>{kit.name}</p>
                     </div>
                   </div>
                 ))}
@@ -316,12 +399,37 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
               <div className={`relative flex flex-col rounded-2xl border bg-white shadow-sm transition-all ${
                 prompt.trim() ? "border-indigo-300 ring-4 ring-indigo-50" : "border-gray-200"
               }`}>
+                {/* Brand Kit Active Indicator (inside prompt box top) */}
+                {activeBrandKit && (
+                  <div className="flex items-center gap-2 px-3 pt-2.5 pb-0">
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-100">
+                      <LuZap className="w-3 h-3 text-indigo-600" />
+                      <span className="text-[10px] font-bold text-indigo-700 truncate max-w-[120px]">{activeBrandKit.name}</span>
+                      <div className="flex items-center gap-0.5 ml-1">
+                        {activeBrandKit.colors.slice(0, 4).map((c, i) => (
+                          <div key={i} className="w-2.5 h-2.5 rounded-full border border-white shadow-sm" style={{ backgroundColor: c }} />
+                        ))}
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => handleBrandKitSelect(null)}
+                      className="p-0.5 rounded text-gray-400 hover:text-red-500 transition-colors"
+                      title="Remove brand kit constraint"
+                    >
+                      <LuX className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+
                 {/* Top area: Textarea + Thumbnails */}
                 <div className="p-3 pb-0 relative">
                   <textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="e.g., A minimalist tech conference certificate with a dark theme and glowing neon accents..."
+                    placeholder={activeBrandKit 
+                      ? `Describe your ${category} template using ${activeBrandKit.name} brand...`
+                      : "e.g., A minimalist tech conference certificate with a dark theme and glowing neon accents..."
+                    }
                     disabled={isBlocked}
                     className="w-full h-32 text-xs outline-none resize-none placeholder:text-gray-300 bg-transparent custom-scrollbar relative z-10"
                   />
@@ -432,15 +540,28 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
 
       {/* Execution Button (Fixed to Bottom inside Panel) */}
       <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-transparent pt-8 z-10 pointer-events-none">
+        {/* Brand Kit Active Badge */}
+        {activeBrandKit && !generating && (
+          <div className="flex items-center justify-center mb-2 pointer-events-auto">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-[9px] font-bold text-indigo-600 uppercase tracking-wider">
+              <LuZap className="w-3 h-3" />
+              Brand Kit Mode
+            </div>
+          </div>
+        )}
         <button
           onClick={handleGenerate}
           disabled={generating || isBlocked}
-          className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 uppercase tracking-wider pointer-events-auto ${
+          className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-xs text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 uppercase tracking-wider pointer-events-auto ${
+            activeBrandKit 
+              ? "bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600" 
+              : "bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600"
+          } ${
             !prompt.trim() ? "opacity-70 grayscale-[20%]" : "opacity-100"
           } ${isBlocked ? "opacity-50 pointer-events-none" : ""}`}
         >
           <LuSparkles className="w-4 h-4" />
-          Generate with AI
+          {activeBrandKit ? "Generate with Brand Kit" : "Generate with AI"}
         </button>
       </div>
 
@@ -492,11 +613,11 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                   <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                     <h3 className="text-lg font-bold text-gray-800 border-b pb-2">Color Palettes</h3>
                     <div className="grid grid-cols-2 gap-6">
-                      {MOCK_BRAND_KITS.map((kit) => (
+                      {brandKits.map((kit) => (
                         <div key={kit.id} className="p-5 rounded-2xl border border-gray-200 shadow-sm hover:border-indigo-300 transition-colors">
                           <p className="text-base font-medium text-gray-700 mb-3">{kit.name} Colors</p>
                           <div className="flex gap-3">
-                            {kit.colors.map((c, i) => (
+                            {(kit.colors.length > 0 ? kit.colors : ['#cccccc']).map((c, i) => (
                               <div key={i} className="w-16 h-16 rounded-xl shadow-inner border border-black/5" style={{ backgroundColor: c }} />
                             ))}
                           </div>
