@@ -5,12 +5,26 @@ import {
   LuSparkles, LuCompass, LuRefreshCw, LuLayoutTemplate, LuPaintbrush, 
   LuMessageSquareCode, LuClock, LuPen, LuTrash2, 
   LuPlus, LuX, LuUpload, LuPalette, LuType, LuShapes, LuImagePlus, 
-  LuSticker, LuImage, LuChevronDown, LuBot, LuChevronUp, LuZap
+  LuSticker, LuImage, LuChevronDown, LuBot, LuChevronUp, LuZap,
+  LuSearch, LuCheck
 } from "react-icons/lu";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import type { BrandKit, PaperSize } from "@/lib/types";
 import { ALL_PAPER_OPTIONS } from "../toolbar";
 import { generateBrandKitSuggestionPrompt } from "@/lib/services/prompt-orchestrator";
+import { 
+  DEFAULT_PALETTES,
+  hexToRgb,
+  rgbToHex,
+  rgbToOklch,
+  oklchToRgb,
+  hexToOklch,
+  oklchToHex,
+  parseHex,
+  parseRgb,
+  parseOklch,
+  ColorPalette
+} from "@/lib/color-converter";
 
 function detectCategoryFromPaperSize(paperSize: PaperSize, defaultCategory: string): string {
   switch (paperSize) {
@@ -146,10 +160,129 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
   const [modalTab, setModalTab] = useState('Color Palette');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-  // Edit & Rename states
+    // Edit & Rename states
   const [editingBrandKit, setEditingBrandKit] = useState<BrandKit | null>(null);
   const [renamingKitId, setRenamingKitId] = useState<string | null>(null);
   const [renamingName, setRenamingName] = useState("");
+
+  // ── Upgraded Color Palette UI State ────────────────────
+  const [searchQuery, setSearchQuery] = useState("");
+  const [customPalettes, setCustomPalettes] = useState<ColorPalette[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem("custom_color_palettes");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [isColorPopupOpen, setIsColorPopupOpen] = useState(false);
+  const [popupPaletteName, setPopupPaletteName] = useState("");
+  const [popupColors, setPopupColors] = useState<string[]>([]);
+  const [selectedPopupColorIndex, setSelectedPopupColorIndex] = useState(0);
+
+  const [hexInput, setHexInput] = useState("");
+  const [rgbInput, setRgbInput] = useState("");
+  const [oklchInput, setOklchInput] = useState("");
+
+  const syncColorInputs = (colorHex: string) => {
+    setHexInput(colorHex);
+    const rgb = hexToRgb(colorHex);
+    if (rgb) {
+      setRgbInput(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+      const oklch = rgbToOklch(rgb);
+      setOklchInput(`oklch(${oklch.l} ${oklch.c} ${oklch.h})`);
+    } else {
+      setRgbInput("");
+      setOklchInput("");
+    }
+  };
+
+  const handleHexInputChange = (val: string) => {
+    setHexInput(val);
+    const parsed = parseHex(val);
+    if (parsed) {
+      const updatedColors = [...popupColors];
+      updatedColors[selectedPopupColorIndex] = parsed;
+      setPopupColors(updatedColors);
+      
+      const rgb = hexToRgb(parsed);
+      if (rgb) {
+        setRgbInput(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+        const oklch = rgbToOklch(rgb);
+        setOklchInput(`oklch(${oklch.l} ${oklch.c} ${oklch.h})`);
+      }
+    }
+  };
+
+  const handleRgbInputChange = (val: string) => {
+    setRgbInput(val);
+    const parsedRgb = parseRgb(val);
+    if (parsedRgb) {
+      const hex = rgbToHex(parsedRgb);
+      const updatedColors = [...popupColors];
+      updatedColors[selectedPopupColorIndex] = hex;
+      setPopupColors(updatedColors);
+      
+      setHexInput(hex);
+      const oklch = rgbToOklch(parsedRgb);
+      setOklchInput(`oklch(${oklch.l} ${oklch.c} ${oklch.h})`);
+    }
+  };
+
+  const handleOklchInputChange = (val: string) => {
+    setOklchInput(val);
+    const parsedOklch = parseOklch(val);
+    if (parsedOklch) {
+      const rgb = oklchToRgb(parsedOklch);
+      const hex = rgbToHex(rgb);
+      const updatedColors = [...popupColors];
+      updatedColors[selectedPopupColorIndex] = hex;
+      setPopupColors(updatedColors);
+      
+      setHexInput(hex);
+      setRgbInput(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+    }
+  };
+
+  const handleNativeColorChange = (hex: string) => {
+    const updatedColors = [...popupColors];
+    updatedColors[selectedPopupColorIndex] = hex.toUpperCase();
+    setPopupColors(updatedColors);
+    syncColorInputs(hex.toUpperCase());
+  };
+
+  const handleSaveCustomPalette = () => {
+    if (!popupPaletteName.trim()) {
+      alert("Palette name is required");
+      return;
+    }
+    const newPalette: ColorPalette = {
+      id: "custom-palette-" + Date.now(),
+      name: popupPaletteName.trim(),
+      colors: popupColors,
+    };
+    const updated = [newPalette, ...customPalettes];
+    setCustomPalettes(updated);
+    localStorage.setItem("custom_color_palettes", JSON.stringify(updated));
+
+    if (editingBrandKit) {
+      setEditingBrandKit({
+        ...editingBrandKit,
+        colors: newPalette.colors,
+      });
+    }
+    setIsColorPopupOpen(false);
+  };
+
+  const handleDeleteCustomPalette = (e: React.MouseEvent, paletteId: string) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this custom color palette?")) return;
+    const updated = customPalettes.filter(p => p.id !== paletteId);
+    setCustomPalettes(updated);
+    localStorage.setItem("custom_color_palettes", JSON.stringify(updated));
+  };
   
   const [aiModel, setAiModel] = useState('Auto');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -967,67 +1100,161 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
 
               {/* Right Panel: Dynamic Details View */}
               <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-white">
-                {modalTab === 'Color Palette' && (
-                  <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                    <div className="flex justify-between items-center border-b pb-2">
-                      <h3 className="text-lg font-bold text-gray-800">Color Palette</h3>
-                      <button
+                {modalTab === 'Color Palette' && (() => {
+                  const query = searchQuery.toLowerCase().trim();
+                  
+                  const filteredDefault = DEFAULT_PALETTES.filter(p => {
+                    if (!query) return true;
+                    return p.name.toLowerCase().includes(query) || p.colors.some(c => c.toLowerCase().includes(query));
+                  });
+
+                  const filteredCustom = customPalettes.filter(p => {
+                    if (!query) return true;
+                    return p.name.toLowerCase().includes(query) || p.colors.some(c => c.toLowerCase().includes(query));
+                  });
+
+                  const renderPaletteCard = (palette: ColorPalette, isCustom: boolean) => {
+                    const isSelected = editingBrandKit && 
+                      editingBrandKit.colors.length === palette.colors.length &&
+                      editingBrandKit.colors.every((c, idx) => c.toLowerCase() === palette.colors[idx].toLowerCase());
+
+                    return (
+                      <div
+                        key={palette.id}
                         onClick={() => {
                           if (editingBrandKit) {
                             setEditingBrandKit({
                               ...editingBrandKit,
-                              colors: [...editingBrandKit.colors, "#6366F1"]
+                              colors: palette.colors,
                             });
                           }
                         }}
-                        className="px-3 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+                        className={`group relative flex flex-col p-3 rounded-2xl border transition-all duration-200 cursor-pointer ${
+                          isSelected
+                            ? "border-indigo-600 bg-indigo-50/20 ring-2 ring-indigo-600/20 shadow-md"
+                            : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+                        }`}
                       >
-                        <LuPlus className="w-3.5 h-3.5" /> Add Color
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      {editingBrandKit?.colors.map((color, index) => (
-                        <div key={index} className="flex items-center gap-3 p-3 rounded-xl border border-gray-150 bg-gray-50/50">
-                          <input 
-                            type="color" 
-                            value={color.startsWith("#") ? color : "#ffffff"} 
-                            onChange={(e) => {
-                              if (editingBrandKit) {
-                                const newColors = [...editingBrandKit.colors];
-                                newColors[index] = e.target.value;
-                                setEditingBrandKit({ ...editingBrandKit, colors: newColors });
-                              }
-                            }}
-                            className="w-10 h-10 rounded border border-gray-200 cursor-pointer p-0 bg-transparent"
-                          />
-                          <input 
-                            type="text" 
-                            value={color} 
-                            onChange={(e) => {
-                              if (editingBrandKit) {
-                                const newColors = [...editingBrandKit.colors];
-                                newColors[index] = e.target.value;
-                                setEditingBrandKit({ ...editingBrandKit, colors: newColors });
-                              }
-                            }}
-                            className="flex-1 text-xs font-mono border border-gray-200 rounded px-2 py-1 outline-none uppercase"
-                          />
-                          <button
-                            onClick={() => {
-                              if (editingBrandKit) {
-                                const newColors = editingBrandKit.colors.filter((_, i) => i !== index);
-                                setEditingBrandKit({ ...editingBrandKit, colors: newColors });
-                              }
-                            }}
-                            className="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors"
-                          >
-                            <LuTrash2 className="w-4 h-4" />
-                          </button>
+                        {/* Selection & Delete icons */}
+                        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors pointer-events-auto ${
+                            isSelected ? "bg-indigo-600 border-indigo-600" : "border-gray-300 bg-white"
+                          }`}>
+                            {isSelected && <LuCheck className="w-2.5 h-2.5 text-white" />}
+                          </div>
+                          {isCustom && (
+                            <button
+                              type="button"
+                              onClick={(e) => handleDeleteCustomPalette(e, palette.id)}
+                              className="p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 pointer-events-auto"
+                              title="Delete Custom Palette"
+                            >
+                              <LuTrash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
-                      ))}
+
+                        {/* Color Blocks */}
+                        <div className="flex w-full h-8 rounded-lg overflow-hidden mt-6 mb-2.5 border border-gray-100 shadow-inner">
+                          {palette.colors.map((color, idx) => (
+                            <div
+                              key={idx}
+                              className="flex-1 h-full hover:scale-110 transition-transform duration-150"
+                              style={{ backgroundColor: color }}
+                              title={color}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Title */}
+                        <p className="text-[11px] font-semibold text-gray-700 text-center truncate px-1">
+                          {palette.name}
+                        </p>
+                      </div>
+                    );
+                  };
+
+                  return (
+                    <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                      {/* Search Header Row */}
+                      <div className="flex justify-between items-center border-b pb-3 gap-4">
+                        <h3 className="text-lg font-bold text-gray-800">Color Palette</h3>
+                        <div className="relative flex-1 max-w-xs">
+                          <input
+                            type="text"
+                            placeholder="Search palettes or colors..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full text-xs bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 pl-8 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium text-gray-600"
+                          />
+                          <LuSearch className="w-4 h-4 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                          {searchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setSearchQuery("")}
+                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                              <LuX className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* 2-Column Grid Layout */}
+                      <div className="max-h-[50vh] overflow-y-auto pr-1 space-y-6 custom-scrollbar">
+                        {/* My color palette */}
+                        <div>
+                          <h4 className="text-xs font-bold text-gray-450 uppercase tracking-wider mb-3">
+                            My color palette
+                          </h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            {/* Create Palette Plus Card */}
+                            <div
+                              onClick={() => {
+                                setPopupPaletteName("My Custom Palette");
+                                setPopupColors(["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#6366F1"]);
+                                setSelectedPopupColorIndex(0);
+                                syncColorInputs("#3B82F6");
+                                setIsColorPopupOpen(true);
+                              }}
+                              className="flex flex-col items-center justify-center p-3 rounded-2xl border border-dashed border-gray-300 bg-gray-50/50 hover:bg-indigo-50/20 hover:border-indigo-400 transition-all duration-200 cursor-pointer min-h-[105px]"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-white shadow-sm border border-gray-200 flex items-center justify-center mb-2">
+                                <LuPlus className="w-4 h-4 text-gray-500" />
+                              </div>
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                Add title
+                              </p>
+                            </div>
+
+                            {/* Custom Palettes */}
+                            {filteredCustom.map(palette => renderPaletteCard(palette, true))}
+                          </div>
+                          {query && filteredCustom.length === 0 && (
+                            <p className="text-[11px] text-gray-450 mt-2 italic pl-1">
+                              No custom palettes match "{searchQuery}"
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Default Section */}
+                        <div className="border-t border-gray-150 pt-5">
+                          <h4 className="text-xs font-bold text-gray-450 uppercase tracking-wider mb-3">
+                            Default
+                          </h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            {filteredDefault.map(palette => renderPaletteCard(palette, false))}
+                          </div>
+                          {filteredDefault.length === 0 && (
+                            <p className="text-xs text-gray-400 py-4 text-center italic">
+                              No default palettes match "{searchQuery}"
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {modalTab === 'Logo' && (
                   <div className="space-y-6 animate-in slide-in-from-right-4 duration-300 h-full flex flex-col">
@@ -1130,6 +1357,201 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
               </button>
               <button onClick={handleSaveModal} className="px-6 py-3 rounded-xl text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition-colors">
                 Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modern Color Chooser Popup */}
+      {isColorPopupOpen && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-gray-950/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50 bg-gray-50/50">
+              <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                <LuPalette className="w-4 h-4 text-indigo-600" />
+                Create Custom Palette
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsColorPopupOpen(false)}
+                className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-655 transition-colors"
+              >
+                <LuX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-5 space-y-4">
+              {/* Palette Title Input */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  Palette Name
+                </label>
+                <input
+                  type="text"
+                  value={popupPaletteName}
+                  onChange={(e) => setPopupPaletteName(e.target.value)}
+                  placeholder="e.g. Electric Teal"
+                  className="w-full text-xs bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium text-gray-700"
+                />
+              </div>
+
+              {/* Swatch Strip Builder */}
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex justify-between items-center">
+                  <span>Palette Colors ({popupColors.length}/10)</span>
+                  <span className="text-[9px] text-gray-450 font-normal normal-case">
+                    Click swatch to edit
+                  </span>
+                </label>
+                <div className="flex flex-wrap gap-2 items-center p-3 bg-gray-50/50 border border-gray-100 rounded-xl">
+                  {popupColors.map((color, idx) => {
+                    const isEditing = idx === selectedPopupColorIndex;
+                    return (
+                      <div key={idx} className="relative group">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedPopupColorIndex(idx);
+                            syncColorInputs(color);
+                          }}
+                          className={`w-9 h-9 rounded-lg border-2 shadow-sm transition-all ${
+                            isEditing
+                              ? "border-indigo-600 ring-2 ring-indigo-600/20 scale-105"
+                              : "border-white hover:scale-105 hover:border-gray-300"
+                          }`}
+                          style={{ backgroundColor: color }}
+                          title={color}
+                        />
+                        {popupColors.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newColors = popupColors.filter((_, i) => i !== idx);
+                              setPopupColors(newColors);
+                              const newIdx = selectedPopupColorIndex >= newColors.length
+                                ? Math.max(0, newColors.length - 1)
+                                : selectedPopupColorIndex;
+                              setSelectedPopupColorIndex(newIdx);
+                              syncColorInputs(newColors[newIdx]);
+                            }}
+                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-650"
+                            title="Delete color"
+                          >
+                            <LuX className="w-2.5 h-2.5" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Add Color Swatch Button */}
+                  {popupColors.length < 10 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newColor = "#6366F1";
+                        const updated = [...popupColors, newColor];
+                        setPopupColors(updated);
+                        setSelectedPopupColorIndex(updated.length - 1);
+                        syncColorInputs(newColor);
+                      }}
+                      className="w-9 h-9 rounded-lg border border-dashed border-gray-300 hover:border-indigo-500 hover:bg-indigo-50/30 flex items-center justify-center transition-all group"
+                      title="Add color swatch"
+                    >
+                      <LuPlus className="w-4 h-4 text-gray-400 group-hover:text-indigo-600" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Color Details Editor Panel (for active swatch) */}
+              <div className="p-4 bg-gray-50 border border-gray-150 rounded-xl space-y-3">
+                <div className="flex items-center gap-3">
+                  {/* Styled native color picker */}
+                  <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-sm border border-gray-200 flex-shrink-0 cursor-pointer">
+                    <input
+                      type="color"
+                      value={popupColors[selectedPopupColorIndex]}
+                      onChange={(e) => handleNativeColorChange(e.target.value)}
+                      className="absolute inset-[-4px] w-[calc(100%+8px)] h-[calc(100%+8px)] cursor-pointer border-none p-0 bg-transparent"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-gray-700">
+                      Color #{selectedPopupColorIndex + 1}
+                    </p>
+                    <p className="text-[10px] text-gray-450 truncate uppercase font-mono">
+                      {popupColors[selectedPopupColorIndex]}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Color Code Fields */}
+                <div className="space-y-2.5 pt-1.5 border-t border-gray-200/60 font-medium">
+                  {/* HEX Input */}
+                  <div className="grid grid-cols-4 items-center gap-2">
+                    <label className="text-[9px] font-bold text-gray-400 uppercase font-mono">
+                      HEX
+                    </label>
+                    <input
+                      type="text"
+                      value={hexInput}
+                      onChange={(e) => handleHexInputChange(e.target.value)}
+                      placeholder="#3B82F6"
+                      className="col-span-3 text-[11px] font-mono bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-indigo-500 transition-all uppercase"
+                    />
+                  </div>
+
+                  {/* RGB Input */}
+                  <div className="grid grid-cols-4 items-center gap-2">
+                    <label className="text-[9px] font-bold text-gray-400 uppercase font-mono">
+                      RGB
+                    </label>
+                    <input
+                      type="text"
+                      value={rgbInput}
+                      onChange={(e) => handleRgbInputChange(e.target.value)}
+                      placeholder="rgb(59, 130, 246)"
+                      className="col-span-3 text-[11px] font-mono bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-indigo-500 transition-all"
+                    />
+                  </div>
+
+                  {/* OKLCH Input */}
+                  <div className="grid grid-cols-4 items-center gap-2">
+                    <label className="text-[9px] font-bold text-gray-400 uppercase font-mono">
+                      OKLCH
+                    </label>
+                    <input
+                      type="text"
+                      value={oklchInput}
+                      onChange={(e) => handleOklchInputChange(e.target.value)}
+                      placeholder="oklch(0.62 0.19 261)"
+                      className="col-span-3 text-[11px] font-mono bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-indigo-500 transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-4 border-t border-gray-50 bg-gray-50/50 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsColorPopupOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveCustomPalette}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm"
+              >
+                Save Palette
               </button>
             </div>
           </div>
