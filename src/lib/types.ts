@@ -96,6 +96,18 @@ export interface BrandKitTypography {
   body?: string;
 }
 
+export interface BrandKitLayout {
+  id: string;
+  name: string;
+  description: string;
+  headingPosition: string;
+  subtitlePosition: string;
+  logoPosition: string;
+  imagePosition: string;
+  iconPosition: string;
+  isCustom?: boolean;
+}
+
 export interface BrandKit {
   id: string;
   user_id: string;
@@ -106,6 +118,7 @@ export interface BrandKit {
   graphics: string[];
   photos: string[];
   elements: string[];
+  layout?: BrandKitLayout;
   created_at: string;
   updated_at: string;
 }

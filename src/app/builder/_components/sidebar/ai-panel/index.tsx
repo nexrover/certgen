@@ -337,6 +337,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
             name: editingBrandKit.name.trim(),
             colors: editingBrandKit.colors,
             typography: editingBrandKit.typography,
+            layout: editingBrandKit.layout,
           }),
         });
         const data = await res.json();
@@ -369,6 +370,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
             name: editingBrandKit.name.trim(),
             colors: editingBrandKit.colors,
             typography: editingBrandKit.typography,
+            layout: editingBrandKit.layout,
           }),
         });
         const data = await res.json();
@@ -393,6 +395,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
             name: editingBrandKit.name.trim(),
             colors: editingBrandKit.colors,
             typography: editingBrandKit.typography,
+            layout: editingBrandKit.layout,
           }),
         });
         const data = await res.json();

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { LuX, LuPalette, LuImage, LuType, LuShapes, LuImagePlus, LuSticker } from "react-icons/lu";
+import { LuX, LuPalette, LuImage, LuType, LuShapes, LuImagePlus, LuSticker, LuLayoutGrid } from "react-icons/lu";
 import type { BrandKit } from "@/lib/types";
 import type { ColorPalette } from "@/lib/color-converter";
+import { LayoutTab } from "./layout-tab";
 import { ColorPaletteTab } from "./color-palette-tab";
 import { LogoTab } from "./logo-tab";
 import { TypographyTab } from "./typography-tab";
@@ -23,6 +24,7 @@ interface BrandKitModalProps {
 }
 
 const TABS = [
+  { name: "Layout", icon: LuLayoutGrid },
   { name: "Color Palette", icon: LuPalette },
   { name: "Logo", icon: LuImage },
   { name: "Typography", icon: LuType },
@@ -41,7 +43,7 @@ export function BrandKitModal({
   onDeleteCustomPalette,
   onSave,
 }: BrandKitModalProps) {
-  const [modalTab, setModalTab] = useState("Color Palette");
+  const [modalTab, setModalTab] = useState("Layout");
 
   if (!isOpen) return null;
 
@@ -94,6 +96,12 @@ export function BrandKitModal({
 
           {/* Right Panel: Dynamic Details View */}
           <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-white">
+            {modalTab === "Layout" && (
+              <LayoutTab
+                editingBrandKit={editingBrandKit}
+                onChange={onUpdateEditingBrandKit}
+              />
+            )}
             {modalTab === "Color Palette" && (
               <ColorPaletteTab
                 editingBrandKit={editingBrandKit}

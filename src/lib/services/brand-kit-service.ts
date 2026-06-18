@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { BrandKit, BrandKitTypography } from "@/lib/types";
+import type { BrandKit, BrandKitTypography, BrandKitLayout } from "@/lib/types";
 
 const TABLE = "brand_kits";
 
@@ -11,6 +11,7 @@ export interface CreateBrandKitInput {
   graphics?: string[];
   photos?: string[];
   elements?: string[];
+  layout?: BrandKitLayout;
 }
 
 export interface UpdateBrandKitInput {
@@ -21,6 +22,7 @@ export interface UpdateBrandKitInput {
   graphics?: string[];
   photos?: string[];
   elements?: string[];
+  layout?: BrandKitLayout;
 }
 
 /**
@@ -80,6 +82,7 @@ export async function createBrandKit(
       graphics: input.graphics ?? [],
       photos: input.photos ?? [],
       elements: input.elements ?? [],
+      layout: input.layout ?? {},
     })
     .select()
     .single();
@@ -107,6 +110,7 @@ export async function updateBrandKit(
   if (input.graphics !== undefined) updatePayload.graphics = input.graphics;
   if (input.photos !== undefined) updatePayload.photos = input.photos;
   if (input.elements !== undefined) updatePayload.elements = input.elements;
+  if (input.layout !== undefined) updatePayload.layout = input.layout;
 
   const { data, error } = await supabase
     .from(TABLE)

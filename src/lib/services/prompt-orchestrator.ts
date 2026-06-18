@@ -235,7 +235,7 @@ export function buildBrandKitSystemPrompt(
   category: string,
   style: string
 ): string {
-  const { colors, typography, name: brandName } = brandKit;
+  const { colors, typography, name: brandName, layout } = brandKit;
 
   // ── Colour constraint block ──────────────────────────────
   const colorList = colors.length > 0 ? colors.join(", ") : "#1e3a5f, #c9a84c, #333333, #777777";
@@ -257,6 +257,54 @@ export function buildBrandKitSystemPrompt(
   const bodyFont = resolveFont(typography?.body) ?? "Helvetica";
 
   const { exampleTemplate, instructions } = getCategoryDetails(category, width, height, paperSize);
+
+  // ── Layout constraint block ──────────────────────────────
+  let layoutBlock = "";
+  if (layout && layout.id && layout.name) {
+    layoutBlock = `
+═══════════════════════════════════════════════════════
+ LAYOUT POSITIONING CONSTRAINT (ACTIVE)
+ Layout: "${layout.name}"
+ ═══════════════════════════════════════════════════════
+
+You MUST follow these element placement rules precisely.
+Canvas dimensions: ${width}×${height}px.
+
+ELEMENT POSITIONS:
+  • Heading / Title Textbox      → Place at: ${layout.headingPosition}
+  • Subtitle Textbox             → Place at: ${layout.subtitlePosition}
+  • Logo placeholder (Rect/Image)→ Place at: ${layout.logoPosition}
+  • Image / Graphic area         → Place at: ${layout.imagePosition}
+  • Icons / Footer elements      → Place at: ${layout.iconPosition}
+
+POSITION MAPPING (use these to calculate left/top coordinates):
+  • "top-left"         → left: 30-60,  top: 20-50
+  • "top-center"       → left: centered, top: 20-60
+  • "top-center-large" → left: centered, top: 20-40, width: 70-80% of canvas
+  • "top-right"        → left: ${width - 250}-${width - 50}, top: 20-50
+  • "center-left"      → left: 30-60,  top: ${Math.round(height * 0.35)}-${Math.round(height * 0.5)}
+  • "center"           → left: centered, top: ${Math.round(height * 0.35)}-${Math.round(height * 0.5)}
+  • "center-right"     → left: ${width - 280}-${width - 50}, top: ${Math.round(height * 0.35)}-${Math.round(height * 0.5)}
+  • "bottom-left"      → left: 30-60,  top: ${Math.round(height * 0.75)}-${height - 40}
+  • "bottom-center"    → left: centered, top: ${Math.round(height * 0.75)}-${height - 40}
+  • "bottom-right"     → left: ${width - 250}-${width - 50}, top: ${Math.round(height * 0.75)}-${height - 40}
+  • "left-top"         → Inside a left sidebar panel (x: 0-${Math.round(width * 0.3)}), near top
+  • "left-center"      → Inside a left sidebar panel, vertically centered
+  • "left-bottom"      → Inside a left sidebar panel, near bottom
+  • "right-top"        → Inside a right content area (x: ${Math.round(width * 0.3)}-${width}), near top
+  • "right-center"     → Inside a right content area, vertically centered
+  • "right-bottom"     → Inside a right content area, near bottom
+  • "full-background"  → Full canvas background (Rect at 0,0 with full width/height)
+  • "top-banner-*"     → Inside a colored banner strip at top of canvas (height ~80-120px)
+  • "grid-cells"       → Arrange in evenly-spaced grid columns
+
+STRICT LAYOUT OVERRIDES:
+- You MUST position elements according to the layout mapping above.
+- The layout structure takes priority over default element placement.
+- If the layout specifies a sidebar, create a background Rect for it.
+- Maintain the overall layout spatial relationships described in "${layout.name}".
+`;
+  }
 
   return `You are a world-class graphic designer specialising in Fabric.js v7 canvas templates.
 You MUST return ONLY valid JSON. No markdown, no code fences, no explanation.
@@ -296,7 +344,7 @@ STRICT OVERRIDES:
 - Do NOT randomly generate colours or fonts. Strictly follow the brand constraints above.
 - Do NOT use any colour hex value that is not listed in ALLOWED_COLORS.
 - The overall design should feel cohesive with the "${brandName}" brand identity.
-
+${layoutBlock}
 ${coreSchemaRules(width, height)}
 
 ${instructions}
@@ -304,7 +352,7 @@ ${instructions}
 HERE IS AN EXCELLENT EXAMPLE of the exact JSON structure you must follow:
 ${JSON.stringify(exampleTemplate, null, 2)}
 
-Now generate a DIFFERENT, unique, beautiful template that STRICTLY uses the "${brandName}" brand kit colours and typography defined above. Be creative with the layout while adhering to every constraint.`;
+Now generate a DIFFERENT, unique, beautiful template that STRICTLY uses the "${brandName}" brand kit colours and typography defined above.${layout?.id ? ` Follow the "${layout.name}" layout positioning rules precisely.` : ""} Be creative with the layout while adhering to every constraint.`;
 }
 
 export function buildDefaultSystemPrompt(
