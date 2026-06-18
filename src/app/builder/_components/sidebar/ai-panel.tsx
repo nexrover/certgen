@@ -8,6 +8,7 @@ import {
   LuSticker, LuImage, LuChevronDown, LuBot, LuChevronUp, LuZap,
   LuSearch, LuCheck
 } from "react-icons/lu";
+import ModernColorPicker from "@/components/ui/modern-color-picker";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import type { BrandKit, PaperSize } from "@/lib/types";
 import { ALL_PAPER_OPTIONS } from "../toolbar";
@@ -1383,9 +1384,9 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
             </div>
 
             {/* Content */}
-            <div className="p-5 space-y-4">
+            <div className="px-5 py-3 space-y-2.5">
               {/* Palette Title Input */}
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                   Palette Name
                 </label>
@@ -1399,14 +1400,14 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
               </div>
 
               {/* Swatch Strip Builder */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex justify-between items-center">
                   <span>Palette Colors ({popupColors.length}/10)</span>
                   <span className="text-[9px] text-gray-450 font-normal normal-case">
                     Click swatch to edit
                   </span>
                 </label>
-                <div className="flex flex-wrap gap-2 items-center p-3 bg-gray-50/50 border border-gray-100 rounded-xl">
+                <div className="flex flex-wrap gap-2 items-center p-2.5 bg-gray-50/50 border border-gray-100 rounded-xl">
                   {popupColors.map((color, idx) => {
                     const isEditing = idx === selectedPopupColorIndex;
                     return (
@@ -1417,7 +1418,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                             setSelectedPopupColorIndex(idx);
                             syncColorInputs(color);
                           }}
-                          className={`w-9 h-9 rounded-lg border-2 shadow-sm transition-all ${
+                          className={`w-8 h-8 rounded-lg border-2 shadow-sm transition-all ${
                             isEditing
                               ? "border-indigo-600 ring-2 ring-indigo-600/20 scale-105"
                               : "border-white hover:scale-105 hover:border-gray-300"
@@ -1459,7 +1460,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                         setSelectedPopupColorIndex(updated.length - 1);
                         syncColorInputs(newColor);
                       }}
-                      className="w-9 h-9 rounded-lg border border-dashed border-gray-300 hover:border-indigo-500 hover:bg-indigo-50/30 flex items-center justify-center transition-all group"
+                      className="w-8 h-8 rounded-lg border border-dashed border-gray-300 hover:border-indigo-500 hover:bg-indigo-50/30 flex items-center justify-center transition-all group"
                       title="Add color swatch"
                     >
                       <LuPlus className="w-4 h-4 text-gray-400 group-hover:text-indigo-600" />
@@ -1468,90 +1469,34 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
                 </div>
               </div>
 
-              {/* Color Details Editor Panel (for active swatch) */}
-              <div className="p-4 bg-gray-50 border border-gray-150 rounded-xl space-y-3">
-                <div className="flex items-center gap-3">
-                  {/* Styled native color picker */}
-                  <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-sm border border-gray-200 flex-shrink-0 cursor-pointer">
-                    <input
-                      type="color"
-                      value={popupColors[selectedPopupColorIndex]}
-                      onChange={(e) => handleNativeColorChange(e.target.value)}
-                      className="absolute inset-[-4px] w-[calc(100%+8px)] h-[calc(100%+8px)] cursor-pointer border-none p-0 bg-transparent"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-gray-700">
-                      Color #{selectedPopupColorIndex + 1}
-                    </p>
-                    <p className="text-[10px] text-gray-450 truncate uppercase font-mono">
-                      {popupColors[selectedPopupColorIndex]}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Color Code Fields */}
-                <div className="space-y-2.5 pt-1.5 border-t border-gray-200/60 font-medium">
-                  {/* HEX Input */}
-                  <div className="grid grid-cols-4 items-center gap-2">
-                    <label className="text-[9px] font-bold text-gray-400 uppercase font-mono">
-                      HEX
-                    </label>
-                    <input
-                      type="text"
-                      value={hexInput}
-                      onChange={(e) => handleHexInputChange(e.target.value)}
-                      placeholder="#3B82F6"
-                      className="col-span-3 text-[11px] font-mono bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-indigo-500 transition-all uppercase"
-                    />
-                  </div>
-
-                  {/* RGB Input */}
-                  <div className="grid grid-cols-4 items-center gap-2">
-                    <label className="text-[9px] font-bold text-gray-400 uppercase font-mono">
-                      RGB
-                    </label>
-                    <input
-                      type="text"
-                      value={rgbInput}
-                      onChange={(e) => handleRgbInputChange(e.target.value)}
-                      placeholder="rgb(59, 130, 246)"
-                      className="col-span-3 text-[11px] font-mono bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-indigo-500 transition-all"
-                    />
-                  </div>
-
-                  {/* OKLCH Input */}
-                  <div className="grid grid-cols-4 items-center gap-2">
-                    <label className="text-[9px] font-bold text-gray-400 uppercase font-mono">
-                      OKLCH
-                    </label>
-                    <input
-                      type="text"
-                      value={oklchInput}
-                      onChange={(e) => handleOklchInputChange(e.target.value)}
-                      placeholder="oklch(0.62 0.19 261)"
-                      className="col-span-3 text-[11px] font-mono bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-indigo-500 transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
+              {/* Modern Color Picker */}
+              <ModernColorPicker
+                key={selectedPopupColorIndex}
+                initialColor={popupColors[selectedPopupColorIndex]}
+                onChange={(hex) => {
+                  const updated = [...popupColors];
+                  updated[selectedPopupColorIndex] = hex;
+                  setPopupColors(updated);
+                  syncColorInputs(hex);
+                }}
+              />
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-4 border-t border-gray-50 bg-gray-50/50 flex justify-end gap-3">
+            <div className="px-5 py-3 border-t border-gray-50 bg-gray-50/50 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setIsColorPopupOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-200 transition-colors"
+                className="px-5 py-2.5 rounded-xl text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSaveCustomPalette}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm"
+                className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 transition-colors shadow-sm"
               >
-                Save Palette
+                OK
               </button>
             </div>
           </div>
