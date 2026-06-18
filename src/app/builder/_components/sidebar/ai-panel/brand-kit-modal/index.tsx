@@ -95,7 +95,7 @@ export function BrandKitModal({
           </div>
 
           {/* Right Panel: Dynamic Details View */}
-          <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-white">
+          <div className="flex-1 px-8 py-4 overflow-y-auto custom-scrollbar bg-white">
             {modalTab === "Layout" && (
               <LayoutTab
                 editingBrandKit={editingBrandKit}

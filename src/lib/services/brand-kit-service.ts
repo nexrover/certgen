@@ -12,6 +12,7 @@ export interface CreateBrandKitInput {
   photos?: string[];
   elements?: string[];
   layout?: BrandKitLayout;
+  customLayouts?: BrandKitLayout[];
 }
 
 export interface UpdateBrandKitInput {
@@ -23,6 +24,7 @@ export interface UpdateBrandKitInput {
   photos?: string[];
   elements?: string[];
   layout?: BrandKitLayout;
+  customLayouts?: BrandKitLayout[];
 }
 
 /**
@@ -83,6 +85,7 @@ export async function createBrandKit(
       photos: input.photos ?? [],
       elements: input.elements ?? [],
       layout: input.layout ?? {},
+      custom_layouts: input.customLayouts ?? [],
     })
     .select()
     .single();
@@ -111,6 +114,7 @@ export async function updateBrandKit(
   if (input.photos !== undefined) updatePayload.photos = input.photos;
   if (input.elements !== undefined) updatePayload.elements = input.elements;
   if (input.layout !== undefined) updatePayload.layout = input.layout;
+  if (input.customLayouts !== undefined) updatePayload.custom_layouts = input.customLayouts;
 
   const { data, error } = await supabase
     .from(TABLE)

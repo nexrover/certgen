@@ -338,6 +338,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
             colors: editingBrandKit.colors,
             typography: editingBrandKit.typography,
             layout: editingBrandKit.layout,
+            customLayouts: editingBrandKit.custom_layouts,
           }),
         });
         const data = await res.json();
@@ -371,6 +372,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
             colors: editingBrandKit.colors,
             typography: editingBrandKit.typography,
             layout: editingBrandKit.layout,
+            customLayouts: editingBrandKit.custom_layouts,
           }),
         });
         const data = await res.json();
@@ -396,6 +398,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
             colors: editingBrandKit.colors,
             typography: editingBrandKit.typography,
             layout: editingBrandKit.layout,
+            customLayouts: editingBrandKit.custom_layouts,
           }),
         });
         const data = await res.json();

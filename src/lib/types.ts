@@ -99,6 +99,7 @@ export interface BrandKitTypography {
 export interface BrandKitLayout {
   id: string;
   name: string;
+  title?: string;
   description: string;
   headingPosition: string;
   subtitlePosition: string;
@@ -119,6 +120,7 @@ export interface BrandKit {
   photos: string[];
   elements: string[];
   layout?: BrandKitLayout;
+  custom_layouts?: BrandKitLayout[];
   created_at: string;
   updated_at: string;
 }
