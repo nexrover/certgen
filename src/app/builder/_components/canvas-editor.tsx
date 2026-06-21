@@ -778,8 +778,9 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
               transform: `scale(${scale})`,
               transformOrigin: "top left",
               position: "relative",
+              overflow: "hidden",
             }}
-            className="shadow-xl"
+            className="shadow-xl bg-white"
           >
             <canvas ref={canvasElRef} />
 

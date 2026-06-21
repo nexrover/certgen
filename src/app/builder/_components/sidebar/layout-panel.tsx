@@ -13,10 +13,13 @@ import {
 } from "react-icons/lu";
 import type { BrandKit, BrandKitLayout } from "@/lib/types";
 import { DEFAULT_LAYOUTS, POSITION_OPTIONS } from "./ai-panel/brand-kit-modal/layouts-data";
+import { buildLayoutSkeleton } from "@/lib/builder/fabric-utils";
+import type { Canvas } from "fabric";
 
 interface LayoutPanelProps {
-  editingBrandKit: BrandKit | null;
-  onChange: (updated: BrandKit) => void;
+  activeBrandKit: BrandKit | null;
+  onUpdateBrandKit: (updated: BrandKit) => void;
+  canvas?: Canvas | null;
 }
 
 /* Tiny visual canvas that illustrates a layout */
@@ -125,7 +128,7 @@ const ELEMENT_FIELDS: {
 type LayoutTabView = "my-layouts" | "default-layouts";
 type EditorMode = "closed" | "creating" | "editing";
 
-export function LayoutPanel({ editingBrandKit, onChange }: LayoutPanelProps) {
+export function LayoutPanel({ activeBrandKit, onUpdateBrandKit, canvas }: LayoutPanelProps) {
   const [activeTab, setActiveTab] = useState<LayoutTabView>("my-layouts");
   const [editorMode, setEditorMode] = useState<EditorMode>("closed");
   const [editingCustomId, setEditingCustomId] = useState<string | null>(null);
@@ -139,7 +142,7 @@ export function LayoutPanel({ editingBrandKit, onChange }: LayoutPanelProps) {
     iconPosition: "bottom-center",
   });
 
-  const kit = editingBrandKit || {
+  const kit = activeBrandKit || {
     id: "temp-brand-kit",
     user_id: "",
     name: "Temporary Brand Kit",
@@ -161,13 +164,19 @@ export function LayoutPanel({ editingBrandKit, onChange }: LayoutPanelProps) {
   const selectDefaultLayout = (layout: BrandKitLayout) => {
     setEditorMode("closed");
     setEditingCustomId(null);
-    onChange({ ...kit, layout: { ...layout } });
+    onUpdateBrandKit({ ...kit, layout: { ...layout } });
+    if (canvas) {
+      buildLayoutSkeleton(canvas, layout);
+    }
   };
 
   const selectCustomLayout = (layout: BrandKitLayout) => {
     setEditorMode("closed");
     setEditingCustomId(null);
-    onChange({ ...kit, layout: { ...layout } });
+    onUpdateBrandKit({ ...kit, layout: { ...layout } });
+    if (canvas) {
+      buildLayoutSkeleton(canvas, layout);
+    }
   };
 
   const startCreating = () => {
@@ -194,7 +203,7 @@ export function LayoutPanel({ editingBrandKit, onChange }: LayoutPanelProps) {
       imagePosition: layout.imagePosition,
       iconPosition: layout.iconPosition,
     });
-    onChange({ ...kit, layout: { ...layout } });
+    onUpdateBrandKit({ ...kit, layout: { ...layout } });
   };
 
   const cancelEditor = () => {
@@ -228,7 +237,7 @@ export function LayoutPanel({ editingBrandKit, onChange }: LayoutPanelProps) {
       updatedCustomLayouts = [newLayout, ...customLayouts];
     }
 
-    onChange({
+    onUpdateBrandKit({
       ...kit,
       layout: { ...newLayout },
       custom_layouts: updatedCustomLayouts,
@@ -256,7 +265,7 @@ export function LayoutPanel({ editingBrandKit, onChange }: LayoutPanelProps) {
       setEditingCustomId(null);
     }
 
-    onChange({ ...kit, ...updates });
+    onUpdateBrandKit({ ...kit, ...updates });
   };
 
   const duplicateCustomLayout = (layout: BrandKitLayout) => {
@@ -266,7 +275,7 @@ export function LayoutPanel({ editingBrandKit, onChange }: LayoutPanelProps) {
       name: `${layout.title ?? layout.name} (Copy)`,
       title: `${layout.title ?? layout.name} (Copy)`,
     };
-    onChange({
+    onUpdateBrandKit({
       ...kit,
       custom_layouts: [newLayout, ...customLayouts],
     });
@@ -275,7 +284,7 @@ export function LayoutPanel({ editingBrandKit, onChange }: LayoutPanelProps) {
   const clearActiveLayout = () => {
     setEditorMode("closed");
     setEditingCustomId(null);
-    onChange({ ...kit, layout: undefined });
+    onUpdateBrandKit({ ...kit, layout: undefined });
   };
 
   return (

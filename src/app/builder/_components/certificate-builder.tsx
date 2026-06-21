@@ -671,6 +671,9 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
           onAddCustomKit={handleAddCustomKitClick}
           onRenameKit={handleRenameKit}
           onRemoveKit={handleRemoveKit}
+          onUpdateBrandKitInList={(updated) => {
+            setBrandKits((prev) => prev.map((k) => (k.id === updated.id ? updated : k)));
+          }}
         />
 
         <div className="flex flex-1 flex-col overflow-hidden">

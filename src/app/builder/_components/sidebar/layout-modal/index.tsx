@@ -14,12 +14,15 @@ import {
 } from "react-icons/lu";
 import type { BrandKit, BrandKitLayout } from "@/lib/types";
 import { DEFAULT_LAYOUTS, POSITION_OPTIONS } from "../ai-panel/brand-kit-modal/layouts-data";
+import { buildLayoutSkeleton } from "@/lib/builder/fabric-utils";
+import type { Canvas } from "fabric";
 
 interface LayoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   editingBrandKit: BrandKit | null;
   onChange: (updated: BrandKit) => void;
+  canvas?: Canvas | null;
 }
 
 /* ── Tiny visual canvas that illustrates a layout ───────── */
@@ -128,7 +131,7 @@ const ELEMENT_FIELDS: {
 type LayoutTabView = "my-layouts" | "default-layouts";
 type EditorMode = "closed" | "creating" | "editing";
 
-export function LayoutModal({ isOpen, onClose, editingBrandKit, onChange }: LayoutModalProps) {
+export function LayoutModal({ isOpen, onClose, editingBrandKit, onChange, canvas }: LayoutModalProps) {
   const [activeTab, setActiveTab] = useState<LayoutTabView>("my-layouts");
   const [editorMode, setEditorMode] = useState<EditorMode>("closed");
   const [editingCustomId, setEditingCustomId] = useState<string | null>(null);
@@ -165,12 +168,18 @@ export function LayoutModal({ isOpen, onClose, editingBrandKit, onChange }: Layo
     setEditorMode("closed");
     setEditingCustomId(null);
     onChange({ ...kit, layout: { ...layout } });
+    if (canvas) {
+      buildLayoutSkeleton(canvas, layout);
+    }
   };
 
   const selectCustomLayout = (layout: BrandKitLayout) => {
     setEditorMode("closed");
     setEditingCustomId(null);
     onChange({ ...kit, layout: { ...layout } });
+    if (canvas) {
+      buildLayoutSkeleton(canvas, layout);
+    }
   };
 
   const startCreating = () => {

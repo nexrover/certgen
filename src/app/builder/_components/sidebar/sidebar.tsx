@@ -110,6 +110,7 @@ interface SidebarProps {
   onAddCustomKit: () => void;
   onRenameKit: (kitId: string, name: string) => Promise<void>;
   onRemoveKit: (kitId: string) => Promise<void>;
+  onUpdateBrandKitInList: (updated: BrandKit) => void;
 }
 
 export function Sidebar({
@@ -137,6 +138,7 @@ export function Sidebar({
   onAddCustomKit,
   onRenameKit,
   onRemoveKit,
+  onUpdateBrandKitInList,
 }: SidebarProps) {
   const [activeTab, setActiveTab] = useState<TabId>("templates");
 
@@ -212,10 +214,13 @@ export function Sidebar({
             )}
             {activeTab === "layout" && (
               <LayoutPanel
-                editingBrandKit={editingBrandKit}
-                onChange={(updated) => {
-                  onUpdateEditingBrandKit(updated);
-                }}
+                activeBrandKit={
+                  useBrandKit && activeBrandKitId
+                    ? brandKits.find((k) => k.id === activeBrandKitId) ?? null
+                    : null
+                }
+                onUpdateBrandKit={onUpdateBrandKitInList}
+                canvas={canvas}
               />
             )}
             {activeTab === "elements" && (
