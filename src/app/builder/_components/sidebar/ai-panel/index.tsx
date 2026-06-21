@@ -5,10 +5,10 @@ import { LuSparkles, LuRefreshCw, LuZap, LuX } from "react-icons/lu";
 import type { BrandKit, PaperSize } from "@/lib/types";
 import { generateBrandKitSuggestionPrompt } from "@/lib/services/prompt-orchestrator";
 import type { ColorPalette } from "@/lib/color-converter";
+import type { PromptGeneratorSelections, ModalId } from "../_shared/types";
 import {
   MAX_FREE_GENERATIONS,
   COOLDOWN_MS,
-  DEFAULT_BRAND_KITS,
   detectCategoryFromPaperSize,
   loadUsage,
   saveUsage,
@@ -16,8 +16,8 @@ import {
   type UsageData,
 } from "./types-and-helpers";
 import { PromptSection } from "./prompt-section";
-import { BrandKitSection } from "./brand-kit-section";
-import { BrandKitModal } from "./brand-kit-modal";
+import { PromptGeneratorModal } from "../prompt-generator-modal";
+import { ALL_PAPER_OPTIONS } from "../../toolbar";
 
 interface AIPanelProps {
   onLoadTemplate: (payload: {
@@ -27,45 +27,49 @@ interface AIPanelProps {
     height?: number;
   }) => void;
   category?: string;
+  onOpenModal?: (id: ModalId) => void;
+  
+  paperSize: PaperSize;
+  onPaperSizeChange: (size: PaperSize) => void;
+  brandKits: BrandKit[];
+  brandKitsLoading: boolean;
+  useBrandKit: boolean;
+  onToggleUseBrandKit: (val: boolean) => void;
+  activeBrandKitId: string | null;
+  onBrandKitSelect: (id: string | null) => void;
+  customPalettes: ColorPalette[];
 }
 
-export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelProps) {
+export function AIPanel({
+  onLoadTemplate,
+  category = "certificate",
+  onOpenModal,
+  paperSize,
+  onPaperSizeChange,
+  brandKits,
+  brandKitsLoading,
+  useBrandKit,
+  onToggleUseBrandKit,
+  activeBrandKitId,
+  onBrandKitSelect,
+  customPalettes,
+}: AIPanelProps) {
   const [prompt, setPrompt] = useState("");
-  const [paperSize, setPaperSize] = useState<PaperSize>("A4_LANDSCAPE");
   const [generating, setGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Brand Kit State ────────────────────────────────────
-  const [brandKits, setBrandKits] = useState<BrandKit[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_BRAND_KITS;
-    try {
-      const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
-      return DEFAULT_BRAND_KITS.filter((k) => !hiddenDefaults.includes(k.id));
-    } catch {
-      return DEFAULT_BRAND_KITS;
-    }
-  });
-  const [brandKitsLoading, setBrandKitsLoading] = useState(true);
-  const [useBrandKit, setUseBrandKit] = useState(false);
-  const [activeBrandKitId, setActiveBrandKitId] = useState<string | null>("default-1");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Edit states
-  const [editingBrandKit, setEditingBrandKit] = useState<BrandKit | null>(null);
-
-  // ── Upgraded Color Palette UI State ────────────────────
-  const [customPalettes, setCustomPalettes] = useState<ColorPalette[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const saved = localStorage.getItem("custom_color_palettes");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
+  // ── Prompt Generator State ─────────────────────────────
+  const [promptGeneratorSelections, setPromptGeneratorSelections] = useState<PromptGeneratorSelections>({
+    brandKit: null,
+    layout: null,
+    elements: [],
+    images: [],
+    canvasSize: paperSize,
+    templateSkillSet: category,
   });
 
-  const [aiModel, setAiModel] = useState("Auto");
+  const [aiModel, setAiModel] = useState("Gemini 1.5 Flash");
 
   // Usage tracking
   const [usage, setUsage] = useState<UsageData>({ count: 0, windowStart: null });
@@ -74,40 +78,10 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
   const remaining = Math.max(0, MAX_FREE_GENERATIONS - usage.count);
   const isBlocked = remaining === 0 && usage.windowStart !== null;
 
-  // Derived: the currently selected brand kit object (null = Condition B)
   const activeBrandKit =
     useBrandKit && activeBrandKitId
       ? brandKits.find((k) => k.id === activeBrandKitId) ?? null
       : null;
-
-  // ── Fetch brand kits from API on mount ─────────────────
-  useEffect(() => {
-    let cancelled = false;
-    async function fetchKits() {
-      setBrandKitsLoading(true);
-      try {
-        const hiddenDefaults =
-          typeof window !== "undefined"
-            ? JSON.parse(localStorage.getItem("hidden_default_kits") || "[]")
-            : [];
-        const visibleDefaults = DEFAULT_BRAND_KITS.filter((k) => !hiddenDefaults.includes(k.id));
-
-        const res = await fetch("/api/brand-kits");
-        const json = await res.json();
-        if (!cancelled && json.success && Array.isArray(json.data)) {
-          setBrandKits([...visibleDefaults, ...json.data] as BrandKit[]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch brand kits:", err);
-      } finally {
-        if (!cancelled) setBrandKitsLoading(false);
-      }
-    }
-    fetchKits();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     setUsage(loadUsage());
@@ -132,11 +106,9 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
     return () => clearInterval(interval);
   }, [usage.windowStart]);
 
-  // ── Auto-paste prompt when brand kit is selected ───────
-  const handleBrandKitSelect = useCallback(
+  const handleBrandKitSelectLocal = useCallback(
     (kitId: string | null) => {
-      setActiveBrandKitId(kitId);
-
+      onBrandKitSelect(kitId);
       if (kitId) {
         const kit = brandKits.find((k) => k.id === kitId);
         if (kit) {
@@ -146,7 +118,7 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
         }
       }
     },
-    [brandKits, category, paperSize]
+    [brandKits, category, paperSize, onBrandKitSelect]
   );
 
   const recordGeneration = useCallback(() => {
@@ -180,7 +152,6 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
           category: detectCategoryFromPaperSize(paperSize, category),
           paperSize,
           style: "modern",
-          // Condition A: pass full brand kit if selected
           ...(activeBrandKit ? { brandKit: activeBrandKit } : {}),
         }),
       });
@@ -208,235 +179,54 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
     }
   };
 
-  const openEditModal = (kit: BrandKit) => {
-    setEditingBrandKit(kit);
-    setIsModalOpen(true);
+  // ── Prompt Generator Handlers ──────────────────────────
+  const handleOpenPromptGenerator = () => {
+    // Initialize selections with current state
+    setPromptGeneratorSelections((prev) => ({
+      ...prev,
+      brandKit: activeBrandKit,
+      canvasSize: paperSize,
+      templateSkillSet: category,
+    }));
+    setIsPromptGeneratorOpen(true);
   };
 
-  const handleAddCustomKitClick = () => {
-    const newKit: BrandKit = {
-      id: "new-kit-" + Date.now(),
-      user_id: "",
-      name: "New Brand Kit",
-      colors: ["#3B82F6", "#1D4ED8", "#1E40AF", "#172554"],
-      typography: { title: "Inter", subtitle: "Inter", body: "Inter" },
-      logos: [],
-      graphics: [],
-      photos: [],
-      elements: [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    openEditModal(newKit);
-  };
+  const [isPromptGeneratorOpen, setIsPromptGeneratorOpen] = useState(false);
 
-  const handleRenameKit = async (kitId: string, newName: string) => {
-    if (kitId.startsWith("default-")) {
-      try {
-        const kitObj = brandKits.find((k) => k.id === kitId);
-        if (kitObj) {
-          const res = await fetch("/api/brand-kits", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: newName,
-              colors: kitObj.colors,
-              typography: kitObj.typography,
-            }),
-          });
-          const data = await res.json();
-          if (data.success && data.data) {
-            const savedKit = data.data as BrandKit;
-            setBrandKits((prev) => [...prev.filter((k) => k.id !== kitId), savedKit]);
-            setActiveBrandKitId(savedKit.id);
-            setUseBrandKit(true);
+  const handlePromptGeneratorProcess = (notePrompt: string) => {
+    // Compose the final prompt from selections
+    const parts: string[] = [];
 
-            const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
-            localStorage.setItem("hidden_default_kits", JSON.stringify([...hiddenDefaults, kitId]));
-          } else {
-            alert(data.error || "Failed to customize default brand kit");
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Failed to customize default brand kit");
-      }
-      return;
+    if (promptGeneratorSelections.brandKit) {
+      parts.push(`Brand kit: ${promptGeneratorSelections.brandKit.name} with colors ${promptGeneratorSelections.brandKit.colors.join(", ")}`);
+    }
+    if (promptGeneratorSelections.layout) {
+      parts.push(`Layout: ${promptGeneratorSelections.layout.title ?? promptGeneratorSelections.layout.name}`);
+    }
+    if (promptGeneratorSelections.elements.length > 0) {
+      parts.push(`Elements: ${promptGeneratorSelections.elements.map((e) => e.label).join(", ")}`);
+    }
+    if (promptGeneratorSelections.images.length > 0) {
+      parts.push(`Images: ${promptGeneratorSelections.images.map((i) => i.name).join(", ")}`);
+    }
+    if (notePrompt.trim()) {
+      parts.push(`Additional notes: ${notePrompt.trim()}`);
     }
 
-    try {
-      const res = await fetch(`/api/brand-kits/${kitId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setBrandKits((prev) =>
-          prev.map((k) => (k.id === kitId ? { ...k, name: newName } : k))
-        );
-      } else {
-        alert(data.error || "Failed to rename brand kit");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Failed to rename brand kit");
-    }
-  };
-
-  const handleRemoveKit = async (kitId: string) => {
-    const kit = brandKits.find((k) => k.id === kitId);
-    if (!kit) return;
-    if (!confirm(`Are you sure you want to remove "${kit.name}"?`)) return;
-
-    if (kitId.startsWith("default-")) {
-      setBrandKits((prev) => prev.filter((k) => k.id !== kitId));
-      if (activeBrandKitId === kitId) {
-        setActiveBrandKitId(null);
-      }
-      const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
-      localStorage.setItem("hidden_default_kits", JSON.stringify([...hiddenDefaults, kitId]));
-      return;
+    if (parts.length > 0) {
+      setPrompt(parts.join(". ") + ".");
     }
 
-    try {
-      const res = await fetch(`/api/brand-kits/${kitId}`, {
-        method: "DELETE",
-      });
-      const data = await res.json();
-      if (data.success) {
-        setBrandKits((prev) => prev.filter((k) => k.id !== kitId));
-        if (activeBrandKitId === kitId) {
-          setActiveBrandKitId(null);
-        }
-      } else {
-        alert(data.error || "Failed to delete brand kit");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete brand kit");
-    }
-  };
-
-  const handleSaveModal = async () => {
-    if (!editingBrandKit) return;
-    if (!editingBrandKit.name.trim()) {
-      alert("Brand kit name is required");
-      return;
+    // Apply canvas size
+    if (promptGeneratorSelections.canvasSize !== paperSize) {
+      onPaperSizeChange(promptGeneratorSelections.canvasSize);
     }
 
-    const isNew = editingBrandKit.id.startsWith("new-kit-");
-    const isDefault = editingBrandKit.id.startsWith("default-");
-
-    if (isDefault) {
-      try {
-        const res = await fetch("/api/brand-kits", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: editingBrandKit.name.trim(),
-            colors: editingBrandKit.colors,
-            typography: editingBrandKit.typography,
-            layout: editingBrandKit.layout,
-            customLayouts: editingBrandKit.custom_layouts,
-          }),
-        });
-        const data = await res.json();
-        if (data.success && data.data) {
-          const savedKit = data.data as BrandKit;
-          setBrandKits((prev) => [...prev.filter((k) => k.id !== editingBrandKit.id), savedKit]);
-          setActiveBrandKitId(savedKit.id);
-          setUseBrandKit(true);
-
-          const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
-          localStorage.setItem("hidden_default_kits", JSON.stringify([...hiddenDefaults, editingBrandKit.id]));
-        } else {
-          alert(data.error || "Failed to customize default brand kit");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Failed to customize default brand kit");
-      }
-      setIsModalOpen(false);
-      setEditingBrandKit(null);
-      return;
+    // Apply brand kit
+    if (promptGeneratorSelections.brandKit) {
+      onToggleUseBrandKit(true);
+      onBrandKitSelect(promptGeneratorSelections.brandKit.id);
     }
-
-    if (isNew) {
-      try {
-        const res = await fetch("/api/brand-kits", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: editingBrandKit.name.trim(),
-            colors: editingBrandKit.colors,
-            typography: editingBrandKit.typography,
-            layout: editingBrandKit.layout,
-            customLayouts: editingBrandKit.custom_layouts,
-          }),
-        });
-        const data = await res.json();
-        if (data.success && data.data) {
-          const savedKit = data.data as BrandKit;
-          setBrandKits((prev) => [...prev, savedKit]);
-          setActiveBrandKitId(savedKit.id);
-          setUseBrandKit(true);
-        } else {
-          alert(data.error || "Failed to create brand kit");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Failed to create brand kit");
-      }
-    } else {
-      try {
-        const res = await fetch(`/api/brand-kits/${editingBrandKit.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: editingBrandKit.name.trim(),
-            colors: editingBrandKit.colors,
-            typography: editingBrandKit.typography,
-            layout: editingBrandKit.layout,
-            customLayouts: editingBrandKit.custom_layouts,
-          }),
-        });
-        const data = await res.json();
-        if (data.success && data.data) {
-          const savedKit = data.data as BrandKit;
-          setBrandKits((prev) =>
-            prev.map((k) => (k.id === savedKit.id ? savedKit : k))
-          );
-        } else {
-          alert(data.error || "Failed to update brand kit");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Failed to update brand kit");
-      }
-    }
-
-    setIsModalOpen(false);
-    setEditingBrandKit(null);
-  };
-
-  const handleAddCustomPalette = (newPalette: ColorPalette) => {
-    const updated = [newPalette, ...customPalettes];
-    setCustomPalettes(updated);
-    localStorage.setItem("custom_color_palettes", JSON.stringify(updated));
-
-    if (editingBrandKit) {
-      setEditingBrandKit({
-        ...editingBrandKit,
-        colors: newPalette.colors,
-      });
-    }
-  };
-
-  const handleDeleteCustomPalette = (paletteId: string) => {
-    const updated = customPalettes.filter((p) => p.id !== paletteId);
-    setCustomPalettes(updated);
-    localStorage.setItem("custom_color_palettes", JSON.stringify(updated));
   };
 
   return (
@@ -491,55 +281,21 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
               </div>
             )}
 
-            {/* SECTION A: Brand Kit UI */}
-            <BrandKitSection
-              brandKits={brandKits}
-              brandKitsLoading={brandKitsLoading}
-              useBrandKit={useBrandKit}
-              onToggleUseBrandKit={(nextVal) => {
-                setUseBrandKit(nextVal);
-                if (nextVal) {
-                  if (!activeBrandKitId && brandKits.length > 0) {
-                    handleBrandKitSelect(brandKits[0].id);
-                  } else if (activeBrandKitId) {
-                    handleBrandKitSelect(activeBrandKitId);
-                  }
-                }
-              }}
-              activeBrandKitId={activeBrandKitId}
-              onBrandKitSelect={handleBrandKitSelect}
-              onEditKit={openEditModal}
-              onRenameKit={handleRenameKit}
-              onRemoveKit={handleRemoveKit}
-              onAddCustomKit={handleAddCustomKitClick}
-            />
-
-            {/* SECTION B: Upgraded Prompt Box UI */}
+            {/* Upgraded Prompt Box UI */}
             <PromptSection
               prompt={prompt}
               onChangePrompt={setPrompt}
               category={category}
-              paperSize={paperSize}
-              onPaperSizeChange={(size) => {
-                setPaperSize(size);
-                // Auto-paste brand kit prompt matching the new category if active
-                if (useBrandKit && activeBrandKitId) {
-                  const kit = brandKits.find((k) => k.id === activeBrandKitId);
-                  if (kit) {
-                    const detectedCat = detectCategoryFromPaperSize(size, category);
-                    const suggestion = generateBrandKitSuggestionPrompt(kit, detectedCat);
-                    setPrompt(suggestion);
-                  }
-                }
-              }}
               isBlocked={isBlocked}
               timeLeft={timeLeft}
               remaining={remaining}
               maxFreeGenerations={MAX_FREE_GENERATIONS}
               activeBrandKit={activeBrandKit}
-              onRemoveBrandKitConstraint={() => handleBrandKitSelect(null)}
+              onRemoveBrandKitConstraint={() => handleBrandKitSelectLocal(null)}
               aiModel={aiModel}
               onChangeAiModel={setAiModel}
+              activeSelections={promptGeneratorSelections}
+              onOpenPromptGenerator={handleOpenPromptGenerator}
             />
           </>
         )}
@@ -547,11 +303,10 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
 
       {/* Execution Button (Fixed to Bottom inside Panel) */}
       <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-transparent pt-8 z-10 pointer-events-none">
-        {/* Brand Kit Active Badge */}
         {activeBrandKit && !generating && (
           <div className="flex items-center justify-center mb-2 pointer-events-auto">
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-[9px] font-bold text-indigo-600 uppercase tracking-wider">
-              <LuZap className="w-3 h-3" />
+              <LuZap className="w-3.5 h-3.5" />
               Brand Kit Mode
             </div>
           </div>
@@ -572,19 +327,17 @@ export function AIPanel({ onLoadTemplate, category = "certificate" }: AIPanelPro
         </button>
       </div>
 
-      {/* Brand Kit Configuration Modal */}
-      <BrandKitModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingBrandKit(null);
-        }}
-        editingBrandKit={editingBrandKit}
-        onUpdateEditingBrandKit={setEditingBrandKit}
-        customPalettes={customPalettes}
-        onAddCustomPalette={handleAddCustomPalette}
-        onDeleteCustomPalette={handleDeleteCustomPalette}
-        onSave={handleSaveModal}
+      {/* Prompt Generator Workspace Modal */}
+      <PromptGeneratorModal
+        isOpen={isPromptGeneratorOpen}
+        onClose={() => setIsPromptGeneratorOpen(false)}
+        selections={promptGeneratorSelections}
+        onUpdateSelections={(updates) =>
+          setPromptGeneratorSelections((prev) => ({ ...prev, ...updates }))
+        }
+        brandKits={brandKits}
+        customLayouts={activeBrandKit?.custom_layouts ?? []}
+        onProcess={handlePromptGeneratorProcess}
       />
     </div>
   );

@@ -7,7 +7,12 @@ import { FormatToolbar } from "./format-toolbar";
 import { CanvasEditor, type CanvasEditorHandle } from "./canvas-editor";
 import { Sidebar } from "./sidebar/sidebar";
 import { PreviewModal } from "./preview-modal";
+import { BrandKitModal } from "./sidebar/ai-panel/brand-kit-modal";
+import { DEFAULT_BRAND_KITS } from "./sidebar/ai-panel/types-and-helpers";
+import type { BrandKit } from "@/lib/types";
+import type { ColorPalette } from "@/lib/color-converter";
 import type { CertificateTemplate, PaperSize } from "@/lib/types";
+import type { ModalId } from "./sidebar/_shared/types";
 import { PAPER_DIMENSIONS, CATEGORY_DEFAULT_PAPER_SIZE } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { getCategoryBySlug } from "@/lib/template-categories";
@@ -38,7 +43,269 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
   const [showPreview, setShowPreview] = useState(false);
 
   const [canvasReady, setCanvasReady] = useState(false);
+  const [activeModal, setActiveModal] = useState<ModalId>(null);
   const [bgSelected, setBgSelected] = useState(false);
+
+  // ── Brand Kit State ────────────────────────────────────
+  const [brandKits, setBrandKits] = useState<BrandKit[]>(() => {
+    if (typeof window === "undefined") return DEFAULT_BRAND_KITS;
+    try {
+      const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
+      return DEFAULT_BRAND_KITS.filter((k) => !hiddenDefaults.includes(k.id));
+    } catch {
+      return DEFAULT_BRAND_KITS;
+    }
+  });
+  const [brandKitsLoading, setBrandKitsLoading] = useState(true);
+  const [useBrandKit, setUseBrandKit] = useState(false);
+  const [activeBrandKitId, setActiveBrandKitId] = useState<string | null>("default-1");
+
+  const [editingBrandKit, setEditingBrandKit] = useState<BrandKit | null>(null);
+
+  // ── Upgraded Color Palette UI State ────────────────────
+  const [customPalettes, setCustomPalettes] = useState<ColorPalette[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem("custom_color_palettes");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Fetch brand kits from API on mount
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchKits() {
+      setBrandKitsLoading(true);
+      try {
+        const hiddenDefaults =
+          typeof window !== "undefined"
+            ? JSON.parse(localStorage.getItem("hidden_default_kits") || "[]")
+            : [];
+        const visibleDefaults = DEFAULT_BRAND_KITS.filter((k) => !hiddenDefaults.includes(k.id));
+
+        const res = await fetch("/api/brand-kits");
+        const json = await res.json();
+        if (!cancelled && json.success && Array.isArray(json.data)) {
+          setBrandKits([...visibleDefaults, ...json.data] as BrandKit[]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch brand kits:", err);
+      } finally {
+        if (!cancelled) setBrandKitsLoading(false);
+      }
+    }
+    fetchKits();
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleAddCustomKitClick = () => {
+    const newKit: BrandKit = {
+      id: "new-kit-" + Date.now(),
+      user_id: "",
+      name: "New Brand Kit",
+      colors: ["#3B82F6", "#1D4ED8", "#1E40AF", "#172554"],
+      typography: { title: "Inter", subtitle: "Inter", body: "Inter" },
+      logos: [],
+      graphics: [],
+      photos: [],
+      elements: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setEditingBrandKit(newKit);
+  };
+
+  const handleRenameKit = async (kitId: string, newName: string) => {
+    if (kitId.startsWith("default-")) {
+      try {
+        const kitObj = brandKits.find((k) => k.id === kitId);
+        if (kitObj) {
+          const res = await fetch("/api/brand-kits", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: newName,
+              colors: kitObj.colors,
+              typography: kitObj.typography,
+            }),
+          });
+          const data = await res.json();
+          if (data.success && data.data) {
+            const savedKit = data.data as BrandKit;
+            setBrandKits((prev) => [...prev.filter((k) => k.id !== kitId), savedKit]);
+            setActiveBrandKitId(savedKit.id);
+            setUseBrandKit(true);
+            const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
+            localStorage.setItem("hidden_default_kits", JSON.stringify([...hiddenDefaults, kitId]));
+          } else {
+            alert(data.error || "Failed to customize default brand kit");
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to customize default brand kit");
+      }
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/brand-kits/${kitId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBrandKits((prev) =>
+          prev.map((k) => (k.id === kitId ? { ...k, name: newName } : k))
+        );
+      } else {
+        alert(data.error || "Failed to rename brand kit");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to rename brand kit");
+    }
+  };
+
+  const handleRemoveKit = async (kitId: string) => {
+    const kit = brandKits.find((k) => k.id === kitId);
+    if (!kit) return;
+    if (!confirm(`Are you sure you want to remove "${kit.name}"?`)) return;
+
+    if (kitId.startsWith("default-")) {
+      setBrandKits((prev) => prev.filter((k) => k.id !== kitId));
+      if (activeBrandKitId === kitId) setActiveBrandKitId(null);
+      const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
+      localStorage.setItem("hidden_default_kits", JSON.stringify([...hiddenDefaults, kitId]));
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/brand-kits/${kitId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setBrandKits((prev) => prev.filter((k) => k.id !== kitId));
+        if (activeBrandKitId === kitId) setActiveBrandKitId(null);
+      } else {
+        alert(data.error || "Failed to delete brand kit");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete brand kit");
+    }
+  };
+
+  const handleSaveBrandKitModal = async () => {
+    if (!editingBrandKit) return;
+    if (!editingBrandKit.name.trim()) {
+      alert("Brand kit name is required");
+      return;
+    }
+
+    const isNew = editingBrandKit.id.startsWith("new-kit-");
+    const isDefault = editingBrandKit.id.startsWith("default-");
+
+    if (isDefault) {
+      try {
+        const res = await fetch("/api/brand-kits", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: editingBrandKit.name.trim(),
+            colors: editingBrandKit.colors,
+            typography: editingBrandKit.typography,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          const savedKit = data.data as BrandKit;
+          setBrandKits((prev) => [...prev.filter((k) => k.id !== editingBrandKit.id), savedKit]);
+          setActiveBrandKitId(savedKit.id);
+          setUseBrandKit(true);
+          const hiddenDefaults = JSON.parse(localStorage.getItem("hidden_default_kits") || "[]");
+          localStorage.setItem("hidden_default_kits", JSON.stringify([...hiddenDefaults, editingBrandKit.id]));
+        } else {
+          alert(data.error || "Failed to customize default brand kit");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to customize default brand kit");
+      }
+      setEditingBrandKit(null);
+      return;
+    }
+
+    if (isNew) {
+      try {
+        const res = await fetch("/api/brand-kits", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: editingBrandKit.name.trim(),
+            colors: editingBrandKit.colors,
+            typography: editingBrandKit.typography,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          const savedKit = data.data as BrandKit;
+          setBrandKits((prev) => [...prev, savedKit]);
+          setActiveBrandKitId(savedKit.id);
+          setUseBrandKit(true);
+        } else {
+          alert(data.error || "Failed to create brand kit");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to create brand kit");
+      }
+    } else {
+      try {
+        const res = await fetch(`/api/brand-kits/${editingBrandKit.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: editingBrandKit.name.trim(),
+            colors: editingBrandKit.colors,
+            typography: editingBrandKit.typography,
+            logos: editingBrandKit.logos,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          const savedKit = data.data as BrandKit;
+          setBrandKits((prev) =>
+            prev.map((k) => (k.id === savedKit.id ? savedKit : k))
+          );
+        } else {
+          alert(data.error || "Failed to update brand kit");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to update brand kit");
+      }
+    }
+
+    setEditingBrandKit(null);
+  };
+
+  const handleAddCustomPalette = (newPalette: ColorPalette) => {
+    const updated = [newPalette, ...customPalettes];
+    setCustomPalettes(updated);
+    localStorage.setItem("custom_color_palettes", JSON.stringify(updated));
+    if (editingBrandKit) {
+      setEditingBrandKit({ ...editingBrandKit, colors: newPalette.colors });
+    }
+  };
+
+  const handleDeleteCustomPalette = (paletteId: string) => {
+    const updated = customPalettes.filter((p) => p.id !== paletteId);
+    setCustomPalettes(updated);
+    localStorage.setItem("custom_color_palettes", JSON.stringify(updated));
+  };
   const [bgColor, setBgColor] = useState("#ffffff");
   const bgFileRef = useRef<HTMLInputElement>(null);
   const [customWidth, setCustomWidth] = useState(1080);
@@ -386,9 +653,26 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
           customTemplates={customTemplates}
           onDeleteCustomTemplate={handleDeleteCustomTemplate}
           category={category}
+          activeModal={activeModal}
+          onOpenModal={setActiveModal}
+          onCloseModal={() => setActiveModal(null)}
+          paperSize={paperSize}
+          onPaperSizeChange={handlePaperSizeChange}
+          brandKits={brandKits}
+          brandKitsLoading={brandKitsLoading}
+          useBrandKit={useBrandKit}
+          onToggleUseBrandKit={setUseBrandKit}
+          activeBrandKitId={activeBrandKitId}
+          onBrandKitSelect={setActiveBrandKitId}
+          customPalettes={customPalettes}
+          editingBrandKit={editingBrandKit}
+          onUpdateEditingBrandKit={setEditingBrandKit}
+          onEditKit={(kit) => setEditingBrandKit(kit)}
+          onAddCustomKit={handleAddCustomKitClick}
+          onRenameKit={handleRenameKit}
+          onRemoveKit={handleRemoveKit}
         />
 
-        {/* Right column: format toolbar + canvas */}
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* Format toolbar — positioned above canvas only */}
           <FormatToolbar
@@ -431,6 +715,30 @@ export function CertificateBuilder({ initialTemplate, category = "certificate" }
           height={dims.height}
         />
       )}
+
+      {/* Brand Kit Modal (opened for editing/creating custom kits) */}
+      <BrandKitModal
+        isOpen={editingBrandKit !== null}
+        onClose={() => {
+          setEditingBrandKit(null);
+        }}
+        brandKits={brandKits}
+        brandKitsLoading={brandKitsLoading}
+        useBrandKit={useBrandKit}
+        onToggleUseBrandKit={setUseBrandKit}
+        activeBrandKitId={activeBrandKitId}
+        onBrandKitSelect={setActiveBrandKitId}
+        editingBrandKit={editingBrandKit}
+        onUpdateEditingBrandKit={setEditingBrandKit}
+        onEditKit={(kit) => setEditingBrandKit(kit)}
+        onAddCustomKit={handleAddCustomKitClick}
+        onRenameKit={handleRenameKit}
+        onRemoveKit={handleRemoveKit}
+        customPalettes={customPalettes}
+        onAddCustomPalette={handleAddCustomPalette}
+        onDeleteCustomPalette={handleDeleteCustomPalette}
+        onSave={handleSaveBrandKitModal}
+      />
 
       {canvasReady && null}
     </div>
