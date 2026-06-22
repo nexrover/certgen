@@ -79,7 +79,6 @@ export function PromptSection({
               : "bg-indigo-50 text-indigo-600"
           }`}
         >
-          {isBlocked && <span>Resets in: {timeLeft} | </span>}
           {isBlocked ? "0" : remaining}/{maxFreeGenerations}
         </div>
       </div>
