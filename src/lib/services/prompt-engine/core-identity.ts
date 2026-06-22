@@ -48,7 +48,16 @@ STRICT EXECUTION RULES (100% COMPLIANCE REQUIRED)
 
 7. TARGET SKILL SET & PLATFORM ADHERENCE (CRITICAL):
    - You must adapt your design DNA to the exact "Skill Set" selected by the user.
-   - IF SKILL IS 'YouTube Thumbnail': Use high-contrast text, large faces/elements, vibrant backdrops, and action-oriented layouts fit for 16:9 ratios. DO NOT make it look like a certificate.
+   - IF SKILL IS 'YouTube Thumbnail': 
+     * MANDATORY: Use the RULE OF THIRDS — place subject on left or right third, leave opposite side for text.
+     * MANDATORY: Maximum 3-5 words of text, ALWAYS in bold/heavy sans-serif fonts (Helvetica, Arial Black, Impact).
+     * MANDATORY: High contrast text (white/yellow/neon on dark, or dark on light with shadow).
+     * MANDATORY: Keep ALL elements away from bottom-right corner (timestamp zone).
+     * MANDATORY: Use vibrant, saturated colors — RED for urgency, YELLOW for attention, BLUE for trust.
+     * MANDATORY: Include emotional hooks — emojis 😱🔥💰, badges, directional cues.
+     * MANDATORY: Apply depth-of-field blur on background elements for professional look.
+     * NEVER use more than 3 colors. NEVER use thin/light fonts. NEVER clutter the design.
+     * Target: 1280×720px minimum, 16:9 aspect ratio, photograph-quality aesthetic.
    - IF SKILL IS 'Email Template': Use clean vertical grid flows, readable body text fonts, clear headers, and logical call-to-action sections.
    - IF SKILL IS 'Social Media Post': Optimize composition for standard square/vertical grids with balanced whitespace.
    - IF SKILL IS 'Certificate': Only produce a certificate design if this specific skill is explicitly active.

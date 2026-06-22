@@ -80,14 +80,121 @@ register({
 register({
   id: "youtube",
   label: "YouTube Thumbnail",
-  mergeTags: ["{{title}}", "{{subtitle}}", "{{author}}"],
-  designInstructions: `DESIGN EXCELLENCE REQUIREMENTS:
-- High contrast, dark/vibrant background to grab attention on YouTube
-- Bold, thick text overlays using Helvetica or Arial (avoid serif fonts like Georgia for thumbnails)
-- Colored accent shapes (Rect or Circle) with opacity behind text to ensure legibility
-- A colored callout banner/rect for a key high-impact word (like "AMAZING", "NEW", "TUTORIAL")
-- Use placeholder merge tags: {{title}}, {{subtitle}}, {{author}}
-- Keep elements away from the bottom-right corner to avoid being covered by the video duration overlay`,
+  mergeTags: ["{{title}}", "{{subtitle}}", "{{author}}", "{{emoji}}", "{{badge}}", "{{counter}}"],
+  designInstructions: `═══════════════════════════════════════════════════════
+ YOUTUBE THUMBNAIL MASTER SKILL SET — HIGH CTR DESIGN ENGINE
+═══════════════════════════════════════════════════════
+
+═══ 1. CORE DESIGN PRINCIPLES (MANDATORY FOR EVERY THUMBNAIL) ═══
+
+A. RULE OF THIRDS (Focus Composition)
+- Position the primary subject (person, object, animal) on either the LEFT or RIGHT THIRD of the frame.
+- Ensure ONE SIDE has clean NEGATIVE SPACE for clear, large text (3-5 powerful words max).
+- The thumbnail title explains, the thumbnail hooks — never duplicate the title.
+
+B. HIGH CONTRAST & VIBRANT COLOR SEPARATION
+- Subject-Background Contrast: Main subject MUST contrast sharply with background. Use outer glow, heavy drop shadow, or light edge blur to make subjects "pop".
+- Text Contrast: ALWAYS use bright text (white #FFFFFF, yellow #FFD700, neon #00FF88) against dark backgrounds OR dark text (#1a1a1a) with strong dark drop shadow.
+- Vibrance: Saturate and enhance key colors. Vibrant thumbnails grab more attention.
+- Minimum contrast ratio: 4.5:1 for all text against background.
+
+C. READABILITY ON MOBILE (Critical — 70%+ of views are mobile)
+- TEXT LIMIT: Maximum 3-5 powerful, high-impact words. NEVER exceed 5 words.
+- FONT CHOICE: Use ONLY extremely bold, heavy, thick sans-serif fonts: Arial Black, Helvetica Bold, Montserrat ExtraBold. NEVER use serif, script, handwritten, or thin fonts.
+- SAFE ZONES: NEVER place essential elements (text, logos, facial expressions) in the BOTTOM-RIGHT corner (reserved for video timestamp overlay 00:00).
+- Minimum font size: 48px for headlines, 24px for subtitles.
+
+D. EMOTIONAL HOOK & FACIAL FOCUS
+- Facial Expressiveness: If a person is in the thumbnail, their expression MUST be HIGH-EMOTION (shocked, laughing, serious, curious, amazed).
+- Direct Eye Contact: The subject should make eye contact with the viewer OR point/gesture towards the main object/text hook.
+- Human faces increase CTR by 30-50% — always include when relevant.
+
+═══ 2. COMPOSITION STRATEGIES BY NICHE (Auto-Select Based on Topic) ═══
+
+Based on the user's video topic, automatically select ONE composition strategy:
+
+CATEGORY A: Travel, Outdoor & Lifestyle Vlogs
+- Composition: Medium shot or medium-long shot of the vlogger
+- Focus: Blend scenic wide-angle background with prominent, happy/adventurous vlogger. Use dramatic lighting (golden hour).
+- Color Palette: Warm, sun-kissed, natural, vivid blues (#00B4D8) and greens (#2ECC71).
+- Emotional Tone: Adventure, excitement, wanderlust.
+
+CATEGORY B: Technology, Reviews & Gadgets
+- Composition: Close-up of the product (the hero) in ONE-THIRD, and the host in the OTHER third.
+- Focus: Crisp, detailed shots with professional studio lighting. Focus on texture. Use depth of field (blurry background effect).
+- Color Palette: Clean, futuristic, high-contrast. Dark mode (#0D1117) with neon accents (#00D4FF, #7C3AED).
+- Emotional Tone: Innovation, premium quality, cutting-edge.
+
+CATEGORY C: Education, Productivity & Tutorials (Problem/Solution Structure)
+- Composition: Direct headshot (or subject) on ONE side, key informational graphic/text on the OTHER.
+- Focus: Simplicity. Highlight the "Before/After" or "The Result" visually. Clear information hierarchy.
+- Color Palette: Professional, clean, energetic. Use subject-specific colors (green #27AE60 for finance, blue #2563EB for trust/tech).
+- Emotional Tone: Knowledge, transformation, results.
+
+CATEGORY D: Gaming, Entertainment & Highlights
+- Composition: Action-oriented close-up or highly dynamic character pose (Rule of Thirds). Text in empty space.
+- Focus: Drama, movement, explosive visual effects. Use motion blur or energy effects.
+- Color Palette: Intense, aggressive, high-saturation neon (red #FF3B30, purple #AF52DE, orange #FF9500).
+- Emotional Tone: Excitement, intensity, epic moments.
+
+═══ 3. MICRO-ELEMENTS & PSYCHOLOGICAL HOOKS (Engagement Boosters) ═══
+
+Incorporate these subtle elements to increase interest and CTR:
+
+A. EMOTIONAL EMOJIS
+- Insert highly relevant emojis naturally near the text or subject.
+- Examples: 😍 (beauty/lifestyle), 😱 (shocking reveals), 🤔 (mystery/curiosity), 💰 (money/finance), 🔥 (trending/hot), ⚡ (speed/tech), 🎮 (gaming).
+- Use merge tag {{emoji}} or embed directly. Max 1-2 emojis per thumbnail.
+
+B. SUBTLE BADGES & ICONS
+- Small badges or icons for credentials when applicable: verified checkmark ✓, currency symbol ($, €), location pin 📍, fire icon 🔥.
+- Place in corners or near subject to establish authority/credibility.
+
+C. PROGRESS BARS & COUNTERS
+- For "Transformation" or "Goal" videos: "0 to $10,000", "Before/After", "30 Day Challenge".
+- Visual progress bar element using Rect with gradient fill.
+- Use merge tag {{counter}} for dynamic values.
+
+D. DIRECTIONAL CUES
+- Use the subject's arm, finger, or an explicit arrow/circle to direct viewer's eye to the main hook.
+- Create visual flow: Subject → Arrow/Gesture → Text Hook → CTA.
+
+═══ 4. TECHNICAL OUTPUT SPECIFICATIONS ═══
+
+- Aspect Ratio: STRICTLY 16:9 (Landscape) — 1280×720 pixels minimum.
+- Resolution: Always generate at 1280×720 or higher (1920×1080 preferred).
+- Style: DEFAULT to high-quality, professional photograph style unless explicitly requested otherwise.
+- Clarity: Sharp focus on main subject; background can have relevant depth-of-field blur.
+- File Format: Design for PNG/JPG export with clean edges.
+
+═══ 5. TEXT HIERARCHY RULES ═══
+
+- Headline (Primary): 64-80px, Bold/Black weight, ALL CAPS or Title Case, maximum 3-5 words.
+- Subheadline (Secondary): 24-36px, Medium weight, supporting context.
+- Badge/Label: 14-18px, Bold, inside colored pill/rectangle shape.
+- NEVER use more than 2-3 text elements total.
+- Text must have drop shadow or outline for readability over any background.
+
+═══ 6. COLOR THEORY FOR YOUTUBE ═══
+
+- RED (#FF0000, #EF4444): Urgency, excitement, passion — highest CTR color.
+- YELLOW (#FFD700, #FFC107): Optimism, attention, warmth — stands out in feed.
+- BLUE (#3B82F6, #0066FF): Trust, technology, professionalism.
+- GREEN (#10B981, #2ECC71): Growth, money, nature, success.
+- PURPLE (#8B5CF6, #7C3AED): Luxury, creativity, mystery.
+- ORANGE (#F97316, #FF9500): Energy, enthusiasm, fun.
+- Use MAX 2-3 colors per thumbnail for cohesion.
+
+═══ 7. ANTI-PATTERNS (NEVER DO THESE) ═══
+
+- NEVER use more than 5 words of text.
+- NEVER use thin, light, or decorative fonts.
+- NEVER place text in bottom-right corner (timestamp zone).
+- NEVER use low-contrast text (light gray on white, dark on dark).
+- NEVER create cluttered designs with too many elements (max 8-10 objects).
+- NEVER use generic stock photo aesthetics — aim for authentic, dynamic feel.
+- NEVER make text smaller than 24px.
+- NEVER use more than 3 colors per thumbnail.`,
   exampleFactory: (w, h, ps) => ({
     name: "YouTube Thumbnail",
     width: w,
@@ -98,14 +205,18 @@ register({
       background: "#0f172a",
       objects: [
         { type: "Rect", left: 0, top: 0, width: w, height: h, fill: "#0f172a" },
-        { type: "Rect", left: -50, top: -50, width: 300, height: 300, fill: "#3b82f6", opacity: 0.15, angle: 45 },
-        { type: "Circle", left: w - 150, top: h - 150, radius: 150, fill: "#ec4899", opacity: 0.15 },
-        { type: "Rect", left: 50, top: 180, width: 600, height: 110, fill: "#ef4444", rx: 8, ry: 8 },
-        { type: "Textbox", text: "AMAZING", left: 70, top: 195, width: 560, fontSize: 64, fontFamily: "Helvetica", fill: "#ffffff", fontWeight: "bold", textAlign: "left" },
-        { type: "Textbox", text: "{{title}}", left: 50, top: 300, width: 800, fontSize: 50, fontFamily: "Helvetica", fill: "#ffffff", fontWeight: "bold", textAlign: "left" },
-        { type: "Textbox", text: "{{subtitle}}", left: 50, top: 370, width: 800, fontSize: 24, fontFamily: "Helvetica", fill: "#cbd5e1", fontWeight: "normal", textAlign: "left" },
-        { type: "Rect", left: 50, top: 50, width: 140, height: 40, fill: "#10b981", rx: 20, ry: 20 },
-        { type: "Textbox", text: "NEW VIDEO", left: 50, top: 60, width: 140, fontSize: 14, fontFamily: "Helvetica", fill: "#ffffff", fontWeight: "bold", textAlign: "center" },
+        { type: "Rect", left: -50, top: -50, width: 350, height: 350, fill: "#FF0000", opacity: 0.12, angle: 45 },
+        { type: "Circle", left: w - 180, top: h - 180, radius: 200, fill: "#FFD700", opacity: 0.1 },
+        { type: "Rect", left: 60, top: 40, width: 160, height: 45, fill: "#FF0000", rx: 22, ry: 22 },
+        { type: "Textbox", text: "🔥 NEW", left: 60, top: 50, width: 160, fontSize: 18, fontFamily: "Helvetica", fill: "#ffffff", fontWeight: "bold", textAlign: "center" },
+        { type: "Rect", left: 60, top: 160, width: 650, height: 120, fill: "#000000", rx: 10, ry: 10, opacity: 0.7 },
+        { type: "Textbox", text: "AMAZING", left: 80, top: 175, width: 610, fontSize: 72, fontFamily: "Helvetica", fill: "#FFD700", fontWeight: "bold", textAlign: "left" },
+        { type: "Textbox", text: "{{title}}", left: 60, top: 290, width: 800, fontSize: 48, fontFamily: "Helvetica", fill: "#ffffff", fontWeight: "bold", textAlign: "left" },
+        { type: "Textbox", text: "{{subtitle}}", left: 60, top: 350, width: 700, fontSize: 24, fontFamily: "Helvetica", fill: "#94a3b8", fontWeight: "normal", textAlign: "left" },
+        { type: "Rect", left: 60, top: 420, width: 200, height: 40, fill: "#10b981", rx: 20, ry: 20 },
+        { type: "Textbox", text: "WATCH NOW →", left: 60, top: 428, width: 200, fontSize: 14, fontFamily: "Helvetica", fill: "#ffffff", fontWeight: "bold", textAlign: "center" },
+        { type: "Circle", left: w - 200, top: 60, radius: 45, fill: "#FFD700", opacity: 0.9 },
+        { type: "Textbox", text: "😱", left: w - 185, top: 72, width: 30, fontSize: 28, fontFamily: "Helvetica", fill: "#000000", textAlign: "center" },
       ],
     },
   }),

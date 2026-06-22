@@ -98,7 +98,7 @@ export function generateBrandKitSuggestionPrompt(
 
   const categoryFlavour: Record<string, string> = {
     certificate: "a polished, professional certificate",
-    youtube: "a vibrant, eye-catching YouTube thumbnail",
+    youtube: "a high-CTR, psychologically-optimized YouTube thumbnail with rule-of-thirds composition, vibrant high-contrast colors, bold 3-5 word text hooks, emotional facial expressions, and mobile-first readability — designed to maximize click-through rate",
     invoice: "a clean, structured invoice",
     resume: "a modern, elegant resume layout",
     receipt: "a compact, well-organized receipt",

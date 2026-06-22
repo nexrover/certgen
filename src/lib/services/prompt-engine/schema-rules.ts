@@ -5,7 +5,7 @@
  * Ensures the LLM only returns valid Fabric.js canvas JSON.
  * ────────────────────────────────────────────────────────── */
 
-const SAFE_FONTS = ["Georgia", "Helvetica", "Arial", "Courier New"];
+const SAFE_FONTS = ["Georgia", "Helvetica", "Arial", "Courier New", "Arial Black", "Impact", "Verdana", "Trebuchet MS"];
 
 export function resolveFont(raw?: string): string | null {
   if (!raw) return null;
