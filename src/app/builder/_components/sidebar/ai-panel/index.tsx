@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { LuSparkles, LuRefreshCw, LuZap, LuX } from "react-icons/lu";
-import type { BrandKit, PaperSize } from "@/lib/types";
+import type { BrandKit, BrandKitLayout, PaperSize } from "@/lib/types";
 import { generateBrandKitSuggestionPrompt } from "@/lib/services/prompt-orchestrator";
 import type { ColorPalette } from "@/lib/color-converter";
 import type { PromptGeneratorSelections, ModalId } from "../_shared/types";
@@ -133,6 +133,10 @@ export function AIPanel({
     });
   }, []);
 
+  // Track layout and assets from prompt generator for API calls
+  const [activeLayout, setActiveLayout] = useState<BrandKitLayout | null>(null);
+  const [activeAssets, setActiveAssets] = useState<{ kind: string; url: string; label: string }[]>([]);
+
   const handleGenerate = async () => {
     if (!prompt.trim() || isBlocked) return;
     setGenerating(true);
@@ -153,6 +157,8 @@ export function AIPanel({
           paperSize,
           style: "modern",
           ...(activeBrandKit ? { brandKit: activeBrandKit } : {}),
+          ...(activeLayout ? { layout: activeLayout } : {}),
+          ...(activeAssets.length > 0 ? { assets: activeAssets } : {}),
         }),
       });
 
@@ -227,6 +233,14 @@ export function AIPanel({
       onToggleUseBrandKit(true);
       onBrandKitSelect(promptGeneratorSelections.brandKit.id);
     }
+
+    // Store layout and assets for the compilation pipeline
+    setActiveLayout(promptGeneratorSelections.layout ?? null);
+    const compiledAssets: { kind: string; url: string; label: string }[] = [
+      ...promptGeneratorSelections.elements.map((e) => ({ kind: "element" as const, url: e.url, label: e.label })),
+      ...promptGeneratorSelections.images.map((i) => ({ kind: "image" as const, url: i.url, label: i.name })),
+    ];
+    setActiveAssets(compiledAssets);
   };
 
   return (
@@ -296,6 +310,12 @@ export function AIPanel({
               onChangeAiModel={setAiModel}
               activeSelections={promptGeneratorSelections}
               onOpenPromptGenerator={handleOpenPromptGenerator}
+              onRemoveMedia={(kind, index) => {
+                if (kind === "image") {
+                  const updated = promptGeneratorSelections.images.filter((_, i) => i !== index);
+                  setPromptGeneratorSelections((prev) => ({ ...prev, images: updated }));
+                }
+              }}
             />
           </>
         )}

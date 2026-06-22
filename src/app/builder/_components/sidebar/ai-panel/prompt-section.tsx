@@ -8,6 +8,7 @@ import {
   LuX,
   LuChevronDown,
   LuPlus,
+  LuTrash2,
 } from "react-icons/lu";
 import type { BrandKit } from "@/lib/types";
 import type { PromptGeneratorSelections } from "../_shared/types";
@@ -27,6 +28,7 @@ interface PromptSectionProps {
   onChangeAiModel: (model: string) => void;
   activeSelections?: PromptGeneratorSelections;
   onOpenPromptGenerator?: () => void;
+  onRemoveMedia?: (kind: "logo" | "image", index: number) => void;
 }
 
 export function PromptSection({
@@ -43,19 +45,20 @@ export function PromptSection({
   onChangeAiModel,
   activeSelections,
   onOpenPromptGenerator,
+  onRemoveMedia,
 }: PromptSectionProps) {
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
 
   // Collect active media for inline thumbnails
-  const activeMedia: { url: string; label: string; type: "logo" | "image" }[] = [];
+  const activeMedia: { url: string; label: string; type: "logo" | "image"; index: number }[] = [];
   if (activeBrandKit?.logos) {
     activeBrandKit.logos.forEach((url, i) => {
-      activeMedia.push({ url, label: `Logo ${i + 1}`, type: "logo" });
+      activeMedia.push({ url, label: `Logo ${i + 1}`, type: "logo", index: i });
     });
   }
   if (activeSelections?.images) {
-    activeSelections.images.forEach((img) => {
-      activeMedia.push({ url: img.url, label: img.name, type: "image" });
+    activeSelections.images.forEach((img, i) => {
+      activeMedia.push({ url: img.url, label: img.name, type: "image", index: i });
     });
   }
 
@@ -115,12 +118,12 @@ export function PromptSection({
           </div>
         )}
 
-        {/* Inline Media Thumbnails (ChatGPT/Gemini style) */}
+        {/* Inline Media Thumbnails with Remove Buttons */}
         {activeMedia.length > 0 && (
           <div className="flex gap-2 px-3 pt-2.5 pb-0 overflow-x-auto no-scrollbar" style={{ scrollbarWidth: "none" }}>
             {activeMedia.map((media, i) => (
               <div
-                key={i}
+                key={`${media.type}-${media.index}-${i}`}
                 className="shrink-0 relative w-12 h-12 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden group"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -129,6 +132,13 @@ export function PromptSection({
                   alt={media.label}
                   className="w-full h-full object-cover"
                 />
+                <button
+                  onClick={() => onRemoveMedia?.(media.type, media.index)}
+                  className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-red-500/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                  title={`Remove ${media.label}`}
+                >
+                  <LuX className="w-2.5 h-2.5 text-white" />
+                </button>
                 <span className="absolute inset-x-0 bottom-0 bg-black/50 text-[7px] text-white text-center py-0.5 truncate px-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   {media.label}
                 </span>
@@ -137,7 +147,7 @@ export function PromptSection({
           </div>
         )}
 
-        {/* Top area: Textarea + Quota Block overlay */}
+        {/* Textarea + Clear button at bottom-right above border */}
         <div className="p-3 pb-0 relative">
           <textarea
             value={prompt}
@@ -150,6 +160,15 @@ export function PromptSection({
             disabled={isBlocked}
             className="w-full h-32 text-xs outline-none resize-none placeholder:text-gray-300 bg-transparent custom-scrollbar relative z-10"
           />
+          {prompt.trim() && (
+            <button
+              onClick={() => onChangePrompt("")}
+              className="absolute bottom-1 right-2 z-20 p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+              title="Clear prompt"
+            >
+              <LuTrash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
           {isBlocked && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/90 backdrop-blur-[2px] rounded-t-2xl">
               <LuClock className="w-6 h-6 text-red-500 mb-2 animate-pulse" />
@@ -176,7 +195,7 @@ export function PromptSection({
             </button>
           )}
 
-          {/* Right: AI Model Selector + Clear */}
+          {/* Right: AI Model Selector */}
           <div className="flex items-center gap-3">
             <div className="relative">
               <button
@@ -204,18 +223,6 @@ export function PromptSection({
                 </div>
               )}
             </div>
-
-            {prompt && (
-              <button
-                onClick={() => onChangePrompt("")}
-                className="group relative p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors flex items-center justify-center"
-              >
-                <LuX className="w-3 h-3" />
-                <span className="absolute bottom-full right-0 mb-2 hidden group-hover:block whitespace-nowrap bg-gray-800 text-white text-[10px] px-2 py-1 rounded shadow-lg z-50">
-                  Clear
-                </span>
-              </button>
-            )}
           </div>
         </div>
       </div>

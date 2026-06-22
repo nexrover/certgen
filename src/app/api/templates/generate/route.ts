@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { PAPER_DIMENSIONS, type PaperSize, type BrandKit } from "@/lib/types";
-import {
-  buildBrandKitSystemPrompt,
-  buildDefaultSystemPrompt,
-} from "@/lib/services/prompt-orchestrator";
+import { PAPER_DIMENSIONS, type PaperSize, type BrandKit, type BrandKitLayout } from "@/lib/types";
+import { compilePrompt, type PromptCompilationInput, type InjectedAsset } from "@/lib/services/prompt-engine";
+import { injectAssetsIntoCanvas } from "@/lib/services/prompt-engine/asset-post-processor";
 
 /* ── Allowed properties per Fabric.js type ─────────────── */
 const TEXTBOX_KEYS = new Set([
@@ -29,12 +27,19 @@ const CIRCLE_KEYS = new Set([
   "selectable", "originX", "originY", "opacity", "angle",
 ]);
 
+const IMAGE_KEYS = new Set([
+  "type", "src", "crossOrigin", "left", "top", "width", "height",
+  "scaleX", "scaleY", "fill", "opacity", "angle", "name",
+  "selectable", "originX", "originY", "flipX", "flipY", "skewX", "skewY",
+]);
+
 function getAllowedKeys(type: string): Set<string> | null {
   switch (type) {
     case "Textbox": return TEXTBOX_KEYS;
     case "Rect": return RECT_KEYS;
     case "Line": return LINE_KEYS;
     case "Circle": return CIRCLE_KEYS;
+    case "image": return IMAGE_KEYS;
     default: return null;
   }
 }
@@ -56,6 +61,7 @@ const TYPE_MAP: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
+    const body = await req.json();
     const {
       prompt,
       category = "certificate",
@@ -63,7 +69,9 @@ export async function POST(req: Request) {
       paperSize: reqPaperSize,
       style = "modern",
       brandKit: brandKitPayload,
-    } = await req.json();
+      layout: layoutPayload,
+      assets: assetsPayload,
+    } = body;
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 400 });
@@ -114,25 +122,51 @@ export async function POST(req: Request) {
       }
     }
 
-    // ── Condition A / B — Build the system prompt ────────
+    // ── Parse brand kit ──────────────────────────────────
     const hasBrandKit =
       brandKitPayload &&
       typeof brandKitPayload === "object" &&
       typeof brandKitPayload.name === "string";
+    const brandKit = hasBrandKit ? (brandKitPayload as BrandKit) : null;
 
-    const systemPrompt = hasBrandKit
-      ? buildBrandKitSystemPrompt(
-          brandKitPayload as BrandKit,
-          width,
-          height,
-          paperSize,
-          category,
-          style
-        )
-      : buildDefaultSystemPrompt(width, height, paperSize, category, style);
+    // ── Parse layout ─────────────────────────────────────
+    const hasLayout =
+      layoutPayload &&
+      typeof layoutPayload === "object" &&
+      typeof layoutPayload.id === "string" &&
+      typeof layoutPayload.name === "string";
+    const layout = hasLayout ? (layoutPayload as BrandKitLayout) : null;
 
-    const conditionLabel = hasBrandKit ? "A (Brand Kit)" : "B (Default)";
-    console.log(`[AI Generate] Prompt condition: ${conditionLabel}`);
+    // ── Parse assets ─────────────────────────────────────
+    let assets: InjectedAsset[] = [];
+    if (Array.isArray(assetsPayload)) {
+      assets = assetsPayload
+        .filter((a: unknown): a is InjectedAsset =>
+          typeof a === "object" &&
+          a !== null &&
+          "kind" in a &&
+          "url" in a &&
+          "label" in a
+        );
+    }
+
+    // ── Compile prompt via the Prompt Engine ─────────────
+    const compilationInput: PromptCompilationInput = {
+      skillSet: category,
+      width,
+      height,
+      paperSize,
+      style,
+      brandKit,
+      layout,
+      assets,
+      userPrompt: prompt,
+    };
+
+    const compiled = compilePrompt(compilationInput);
+
+    const conditionLabel = brandKit ? "A (Brand Kit)" : layout ? "A' (Layout)" : "B (Default)";
+    console.log(`[AI Generate] Prompt condition: ${conditionLabel} | Blocks: ${compiled.meta.blockOrder.join(", ")}`);
 
     const geminiPayload = {
       contents: [
@@ -140,17 +174,17 @@ export async function POST(req: Request) {
           role: "user",
           parts: [
             {
-              text: `Design a stunning ${category} template: "${prompt}". Use ${orientation} orientation (${width}×${height}px) with ${style} style. Return ONLY valid JSON matching the required schema.`,
+              text: compiled.userMessage,
             },
           ],
         },
       ],
       systemInstruction: {
-        parts: [{ text: systemPrompt }],
+        parts: [{ text: compiled.systemInstruction }],
       },
       generationConfig: {
         responseMimeType: "application/json",
-        temperature: hasBrandKit ? 0.6 : 0.8,
+        temperature: compiled.temperature,
       },
     };
 
@@ -226,7 +260,6 @@ export async function POST(req: Request) {
     // ── Parse and sanitize ───────────────────────────────
     let parsedTemplate: Record<string, unknown>;
     try {
-      // Strip markdown code fences if the AI wrapped the JSON
       let cleaned = candidateText.trim();
       if (cleaned.startsWith("```")) {
         cleaned = cleaned.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "");
@@ -240,7 +273,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Ensure canvasJson exists
     const canvasJson = parsedTemplate.canvasJson as Record<string, unknown> | undefined;
     if (!canvasJson || !Array.isArray(canvasJson.objects)) {
       return NextResponse.json(
@@ -249,9 +281,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Sanitize each object: normalize type, strip invalid properties, set defaults
+    // Sanitize each object
     canvasJson.objects = (canvasJson.objects as Record<string, unknown>[]).map((obj) => {
-      // Normalize type
       if (typeof obj.type === "string") {
         const lower = obj.type.toLowerCase();
         if (TYPE_MAP[lower]) {
@@ -263,7 +294,6 @@ export async function POST(req: Request) {
       const allowedKeys = getAllowedKeys(objType);
 
       if (allowedKeys) {
-        // Strip any properties that don't belong to this type
         for (const key of Object.keys(obj)) {
           if (!allowedKeys.has(key)) {
             delete obj[key];
@@ -271,32 +301,27 @@ export async function POST(req: Request) {
         }
       }
 
-      // Set defaults
       obj.selectable = true;
       obj.originX = "left";
       obj.originY = "top";
 
-      // Fix Textbox specifics
       if (objType === "Textbox") {
         if (!obj.text || typeof obj.text !== "string") obj.text = "Text";
         if (!obj.width || (obj.width as number) < 50) obj.width = 200;
         if (!obj.fontSize) obj.fontSize = 16;
         if (!obj.fontFamily) obj.fontFamily = "Georgia";
         if (!obj.fill) obj.fill = "#333333";
-        // Clamp charSpacing
         if (typeof obj.charSpacing === "number" && (obj.charSpacing as number) > 800) {
           obj.charSpacing = 800;
         }
       }
 
-      // Fix Rect specifics
       if (objType === "Rect") {
         if (!obj.width) obj.width = 100;
         if (!obj.height) obj.height = 100;
         if (!obj.fill && !obj.stroke) obj.fill = "#cccccc";
       }
 
-      // Fix Line specifics
       if (objType === "Line") {
         if (obj.x2 === undefined) obj.x2 = 200;
         if (obj.y2 === undefined) obj.y2 = 0;
@@ -306,22 +331,36 @@ export async function POST(req: Request) {
         if (!obj.strokeWidth) obj.strokeWidth = 1;
       }
 
-      // Fix Circle specifics
       if (objType === "Circle") {
         if (!obj.radius) obj.radius = 30;
         if (!obj.fill) obj.fill = "#cccccc";
       }
 
-      // Ensure position defaults
+      if (objType === "image") {
+        if (!obj.src || typeof obj.src !== "string") obj.src = "";
+        if (!obj.crossOrigin) obj.crossOrigin = "anonymous";
+        if (!obj.width) obj.width = 200;
+        if (!obj.height) obj.height = 150;
+        if (typeof obj.scaleX !== "number") obj.scaleX = 1;
+        if (typeof obj.scaleY !== "number") obj.scaleY = 1;
+      }
+
       if (typeof obj.left !== "number") obj.left = 50;
       if (typeof obj.top !== "number") obj.top = 50;
 
       return obj;
     });
 
-    // Ensure version and background
     if (!canvasJson.version) canvasJson.version = "7.0.0";
     if (!canvasJson.background) canvasJson.background = "#ffffff";
+
+    // ── Post-process: inject actual asset images ──────────
+    if (assets.length > 0) {
+      const injected = injectAssetsIntoCanvas(canvasJson, assets);
+      if (injected > 0) {
+        console.log(`[AI Generate] Injected ${injected} asset image(s) into canvas`);
+      }
+    }
 
     return NextResponse.json({
       success: true,
