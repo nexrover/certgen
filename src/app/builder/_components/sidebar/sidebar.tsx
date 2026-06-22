@@ -10,6 +10,7 @@ import { ElementsPanel } from "./elements-panel";
 import { ImagesPanel } from "./images-panel";
 import { LayoutPanel } from "./layout-panel";
 import { BrandKitPanel } from "./brand-kit-panel";
+import { AttributesPanel } from "./attributes-panel";
 import type { Canvas } from "fabric";
 import type { CustomTemplate } from "@/lib/custom-templates-store";
 import type { ModalId } from "./_shared/types";
@@ -25,6 +26,7 @@ import {
   LuLayoutGrid,
   LuImage,
   LuPalette,
+  LuFileText,
 } from "react-icons/lu";
 
 const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
@@ -64,6 +66,11 @@ const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
     icon: <LuType className="w-6 h-6" />,
   },
   {
+    id: "attributes",
+    label: "Attributes",
+    icon: <LuFileText className="w-6 h-6" />,
+  },
+  {
     id: "qrcodes",
     label: "QR Codes",
     icon: <LuQrCode className="w-6 h-6" />,
@@ -75,7 +82,7 @@ const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
   },
 ];
 
-type TabId = "templates" | "layout" | "elements" | "images" | "brand-kit" | "text" | "qrcodes" | "layers" | "ai";
+type TabId = "templates" | "layout" | "elements" | "images" | "brand-kit" | "text" | "attributes" | "qrcodes" | "layers" | "ai";
 
 interface SidebarProps {
   canvas: Canvas | null;
@@ -200,6 +207,11 @@ export function Sidebar({
             {activeTab === "text" && (
               <div className="p-4">
                 <TextPanel canvas={canvas} />
+              </div>
+            )}
+            {activeTab === "attributes" && (
+              <div className="p-4">
+                <AttributesPanel canvas={canvas} />
               </div>
             )}
             {activeTab === "qrcodes" && (

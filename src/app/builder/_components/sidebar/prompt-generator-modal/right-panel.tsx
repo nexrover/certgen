@@ -12,6 +12,16 @@ import {
   LuX,
   LuCheck,
   LuUpload,
+  LuAward,
+  LuPlay,
+  LuMail,
+  LuShoppingBag,
+  LuFileText,
+  LuShare2,
+  LuReceipt,
+  LuCreditCard,
+  LuGift,
+  LuBuilding,
 } from "react-icons/lu";
 import type { BrandKit, BrandKitLayout, PaperSize } from "@/lib/types";
 import type { PromptGeneratorSelections, SelectedElement, SelectedImage } from "../_shared/types";
@@ -65,6 +75,22 @@ function getDisplayDims(sizeValue: string): string {
 
 function getSkillsetLabel(value: string): string {
   return TEMPLATE_SKILL_SETS.find((s) => s.value === value)?.label ?? value;
+}
+
+function getSkillsetIcon(value: string) {
+  const iconMap: Record<string, typeof LuAward> = {
+    certificate: LuAward,
+    youtube: LuPlay,
+    email: LuMail,
+    ecommerce: LuShoppingBag,
+    resume: LuFileText,
+    "social-media": LuShare2,
+    invoice: LuReceipt,
+    receipt: LuCreditCard,
+    "christmas-card": LuGift,
+    "real-estate": LuBuilding,
+  };
+  return iconMap[value] ?? LuLayoutGrid;
 }
 
 export function PromptGeneratorRightPanel({
@@ -121,164 +147,163 @@ export function PromptGeneratorRightPanel({
         <button
           type="button"
           onClick={() => setActiveModal("brandKit")}
-          className={`shrink-0 w-52 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-48 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${
+          className={`shrink-0 w-60 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-52 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${
             selections.brandKit
               ? "border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md"
               : "border-gray-200 bg-white opacity-60 hover:opacity-100"
           }`}
         >
           <div>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white mb-2 shadow-sm">
-              <LuPalette className="w-4 h-4" />
-            </div>
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Brand Kit</p>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Brand Kit</p>
             <p className={`text-xs font-bold truncate ${selections.brandKit ? "text-gray-800" : "text-gray-400"}`}>
               {selections.brandKit?.name ?? "Not selected"}
             </p>
           </div>
-          <div>
-            {selections.brandKit ? (
-              <div className="flex gap-1 border border-gray-100 rounded-lg p-1.5 bg-gray-50/50">
+          {selections.brandKit ? (
+            <div className="space-y-2">
+              <div className="flex gap-1 rounded-lg overflow-hidden h-5">
                 {selections.brandKit.colors.slice(0, 4).map((c, i) => (
-                  <div
-                    key={i}
-                    className="w-4 h-4 rounded-full border border-white shadow-sm shrink-0"
-                    style={{ backgroundColor: c }}
-                  />
+                  <div key={i} className="flex-1 h-full" style={{ backgroundColor: c }} />
                 ))}
               </div>
-            ) : (
-              <p className="text-[10px] text-gray-400">Click to choose a brand kit</p>
-            )}
-          </div>
+              <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+                <p className="text-[10px] font-bold text-gray-700 leading-tight" style={{ fontFamily: selections.brandKit.typography?.title ?? "inherit" }}>
+                  Title Sample
+                </p>
+                <p className="text-[8px] text-gray-400 leading-tight" style={{ fontFamily: selections.brandKit.typography?.subtitle ?? "inherit" }}>
+                  Subtitle & body text
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-[10px] text-gray-400">Click to choose a brand kit</p>
+          )}
         </button>
 
         {/* Card 2: Layout */}
         <button
           type="button"
           onClick={() => setActiveModal("layout")}
-          className={`shrink-0 w-52 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-48 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${
+          className={`shrink-0 w-60 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-52 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${
             selections.layout
               ? "border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md"
               : "border-gray-200 bg-white opacity-60 hover:opacity-100"
           }`}
         >
           <div>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white mb-2 shadow-sm">
-              <LuLayoutGrid className="w-4 h-4" />
-            </div>
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Layout</p>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Layout</p>
             <p className={`text-xs font-bold truncate ${selections.layout ? "text-gray-800" : "text-gray-400"}`}>
               {selections.layout?.title ?? selections.layout?.name ?? "Not selected"}
             </p>
           </div>
-          <div>
-            <p className="text-[10px] text-gray-400 line-clamp-2">
-              {selections.layout?.description ?? "Click to choose layout guidelines"}
-            </p>
-          </div>
+          {selections.layout ? (
+            <div className="bg-gray-50 rounded-lg border border-gray-100 p-1.5 flex items-center justify-center">
+              <div className="w-full max-w-[140px] aspect-[4/3]">
+                <LayoutPreview layout={selections.layout} />
+              </div>
+            </div>
+          ) : (
+            <p className="text-[10px] text-gray-400">Click to choose layout</p>
+          )}
         </button>
 
         {/* Card 3: Elements */}
         <button
           type="button"
           onClick={() => setActiveModal("elements")}
-          className={`shrink-0 w-52 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-48 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${
+          className={`shrink-0 w-60 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-52 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${
             selections.elements.length > 0
               ? "border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md"
               : "border-gray-200 bg-white opacity-60 hover:opacity-100"
           }`}
         >
           <div>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white mb-2 shadow-sm">
-              <LuShapes className="w-4 h-4" />
-            </div>
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Elements</p>
-            <p className={`text-xs font-bold truncate ${selections.elements.length > 0 ? "text-gray-800" : "text-gray-400"}`}>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Elements</p>
+            <p className={`text-xs font-bold ${selections.elements.length > 0 ? "text-gray-800" : "text-gray-400"}`}>
               {selections.elements.length > 0 ? `${selections.elements.length} Selected` : "Not selected"}
             </p>
           </div>
-          <div>
-            {selections.elements.length > 0 ? (
-              <div className="flex gap-1.5 overflow-x-auto no-scrollbar max-w-full">
-                {selections.elements.slice(0, 4).map((el, i) => (
-                  <div key={i} className="w-7 h-7 rounded-lg border border-gray-150 bg-white p-1 flex items-center justify-center shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={el.url} alt={el.label} className="w-full h-full object-contain" />
-                  </div>
-                ))}
-                {selections.elements.length > 4 && (
-                  <div className="w-7 h-7 rounded-lg border border-indigo-200 bg-indigo-50 text-[10px] font-bold text-indigo-700 flex items-center justify-center shrink-0 select-none">
-                    +{selections.elements.length - 4}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="text-[10px] text-gray-400">Click to add design elements</p>
-            )}
-          </div>
+          {selections.elements.length > 0 ? (
+            <div className="grid grid-cols-4 gap-1.5">
+              {selections.elements.slice(0, 8).map((el, i) => (
+                <div key={i} className="w-full aspect-square rounded-lg border border-gray-200 bg-white p-1 flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={el.url} alt={el.label} className="w-full h-full object-contain" />
+                </div>
+              ))}
+              {selections.elements.length > 8 && (
+                <div className="w-full aspect-square rounded-lg border border-indigo-200 bg-indigo-50 text-[10px] font-bold text-indigo-700 flex items-center justify-center">
+                  +{selections.elements.length - 8}
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-[10px] text-gray-400">Click to add elements</p>
+          )}
         </button>
 
         {/* Card 4: Images */}
         <button
           type="button"
           onClick={() => setActiveModal("images")}
-          className={`shrink-0 w-52 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-48 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${
+          className={`shrink-0 w-60 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-52 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${
             selections.images.length > 0
               ? "border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md"
               : "border-gray-200 bg-white opacity-60 hover:opacity-100"
           }`}
         >
           <div>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white mb-2 shadow-sm">
-              <LuImage className="w-4 h-4" />
-            </div>
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Images</p>
-            <p className={`text-xs font-bold truncate ${selections.images.length > 0 ? "text-gray-800" : "text-gray-400"}`}>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Images</p>
+            <p className={`text-xs font-bold ${selections.images.length > 0 ? "text-gray-800" : "text-gray-400"}`}>
               {selections.images.length > 0 ? `${selections.images.length} Selected` : "Not selected"}
             </p>
           </div>
-          <div>
-            {selections.images.length > 0 ? (
-              <div className="flex gap-1.5 overflow-x-auto no-scrollbar max-w-full">
-                {selections.images.slice(0, 3).map((img, i) => (
-                  <div key={i} className="w-9 h-7 rounded-lg border border-gray-150 bg-white overflow-hidden shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.url} alt={img.name} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-                {selections.images.length > 3 && (
-                  <div className="w-7 h-7 rounded-lg border border-indigo-200 bg-indigo-50 text-[10px] font-bold text-indigo-700 flex items-center justify-center shrink-0 select-none">
-                    +{selections.images.length - 3}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="text-[10px] text-gray-400">Click to add asset images</p>
-            )}
-          </div>
+          {selections.images.length > 0 ? (
+            <div className="grid grid-cols-3 gap-1.5">
+              {selections.images.slice(0, 6).map((img, i) => (
+                <div key={i} className="w-full aspect-video rounded-lg border border-gray-200 bg-white overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img.url} alt={img.name} className="w-full h-full object-cover" />
+                </div>
+              ))}
+              {selections.images.length > 6 && (
+                <div className="w-full aspect-video rounded-lg border border-indigo-200 bg-indigo-50 text-[10px] font-bold text-indigo-700 flex items-center justify-center">
+                  +{selections.images.length - 6}
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-[10px] text-gray-400">Click to add images</p>
+          )}
         </button>
 
         {/* Card 5: Canvas Size */}
         <button
           type="button"
           onClick={() => setActiveModal("canvasSize")}
-          className="shrink-0 w-52 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-48 border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md cursor-pointer hover:shadow-lg hover:scale-[1.02]"
+          className="shrink-0 w-60 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-52 border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md cursor-pointer hover:shadow-lg hover:scale-[1.02]"
         >
           <div>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white mb-2 shadow-sm">
-              <LuRuler className="w-4 h-4" />
-            </div>
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Canvas Size</p>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Canvas Size</p>
             <p className="text-xs font-bold text-gray-800 truncate">
               {selections.canvasSize.replace(/_/g, " ")}
             </p>
           </div>
-          <div>
+          <div className="bg-gray-50 rounded-lg border border-gray-100 p-3 flex flex-col items-center justify-center">
             {getDisplayDims(selections.canvasSize) ? (
-              <p className="text-[10px] text-gray-500 font-medium">{getDisplayDims(selections.canvasSize)} px</p>
+              <>
+                <div
+                  className="bg-indigo-100 border border-indigo-200 rounded-md mb-1.5"
+                  style={{
+                    width: "60px",
+                    height: "36px",
+                  }}
+                />
+                <p className="text-[10px] font-semibold text-gray-600">{getDisplayDims(selections.canvasSize)}</p>
+                <p className="text-[8px] text-gray-400">pixels</p>
+              </>
             ) : (
-              <p className="text-[10px] text-gray-400">Click to change size</p>
+              <p className="text-[10px] text-gray-400">Click to change</p>
             )}
           </div>
         </button>
@@ -287,19 +312,26 @@ export function PromptGeneratorRightPanel({
         <button
           type="button"
           onClick={() => setActiveModal("templateSkill")}
-          className="shrink-0 w-52 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-48 cursor-pointer hover:shadow-lg hover:scale-[1.02] border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md"
+          className="shrink-0 w-60 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-52 cursor-pointer hover:shadow-lg hover:scale-[1.02] border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md"
         >
           <div>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white mb-2 shadow-sm">
-              <LuLayoutGrid className="w-4 h-4" />
-            </div>
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Template Type</p>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Template Type</p>
             <p className="text-xs font-bold text-gray-800 truncate">
               {getSkillsetLabel(selections.templateSkillSet)}
             </p>
           </div>
-          <div>
-            <p className="text-[10px] text-gray-500 font-medium">Click to change type</p>
+          <div className="bg-gray-50 rounded-lg border border-gray-100 p-3 flex flex-col items-center justify-center">
+            {(() => {
+              const SkillIcon = getSkillsetIcon(selections.templateSkillSet);
+              return (
+                <>
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-sm mb-1.5">
+                    <SkillIcon className="w-5 h-5" />
+                  </div>
+                  <p className="text-[9px] font-semibold text-gray-500">{getSkillsetLabel(selections.templateSkillSet)}</p>
+                </>
+              );
+            })()}
           </div>
         </button>
       </div>
