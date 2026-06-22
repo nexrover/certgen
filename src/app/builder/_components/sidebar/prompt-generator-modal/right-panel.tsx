@@ -11,6 +11,7 @@ import {
   LuChevronRight,
   LuX,
   LuCheck,
+  LuUpload,
 } from "react-icons/lu";
 import type { BrandKit, BrandKitLayout, PaperSize } from "@/lib/types";
 import type { PromptGeneratorSelections, SelectedElement, SelectedImage } from "../_shared/types";
@@ -19,8 +20,11 @@ import { ALL_PAPER_OPTIONS } from "../../toolbar";
 import {
   BUILDER_ELEMENT_SHAPES,
   BUILDER_ELEMENT_ICONS,
+  BUILDER_ELEMENT_RIBBONS,
+  BUILDER_ELEMENT_BASES,
 } from "@/lib/builder/decorative-assets";
 import { DEFAULT_LAYOUTS } from "../ai-panel/brand-kit-modal/layouts-data";
+import { RAW_PAPER_OPTIONS } from "../../toolbar";
 
 interface PromptGeneratorRightPanelProps {
   selections: PromptGeneratorSelections;
@@ -32,13 +36,36 @@ interface PromptGeneratorRightPanelProps {
 const DEFAULT_ASSET_IMAGES = [
   { name: "Abstract Stripes", url: "/Images/ImageCards/abstract-stripes-qhd.jpg" },
   { name: "Alien Planet", url: "/Images/ImageCards/aien-planet-4k-gj-1366x768.jpg" },
+  { name: "Backtrack Linux", url: "/Images/ImageCards/backtrack-linux-h8.jpg" },
+  { name: "Balance", url: "/Images/ImageCards/balance-110850.jpg" },
   { name: "Blue Wave", url: "/Images/ImageCards/blue-abstract-wave-flow-minimalist-1k-1366x768.jpg" },
   { name: "Boat at Dawn", url: "/Images/ImageCards/boat-and-duck-in-the-calm-of-dawn-us-1366x768.jpg" },
-  { name: "Balance", url: "/Images/ImageCards/balance-110850.jpg" },
+  { name: "Buttermere Lake", url: "/Images/ImageCards/buttermere-7051403_1920.jpg" },
+  { name: "Couple in Love", url: "/Images/ImageCards/couple-in-love-lu_copy.jpg" },
+  { name: "Couple Silhouette", url: "/Images/ImageCards/couple-silhouette-art-5k-8a.jpg" },
+  { name: "Eid Celebration", url: "/Images/ImageCards/eid-8683303_1280.png" },
+  { name: "Emerald Lake", url: "/Images/ImageCards/emerald-lake-landscape-mountains-5k-la-1366x768.jpg" },
+  { name: "Fisherman Mist", url: "/Images/ImageCards/fisherman-on-the-misty-lake-qhd-1366x768.jpg" },
+  { name: "Fog Lake Duck", url: "/Images/ImageCards/fog-lake-duck-evening-4k-pl-1366x768.jpg" },
+  { name: "Geometry Print", url: "/Images/ImageCards/geometry-print-4k-gj-1366x768.jpg" },
+  { name: "Iceland Rocks", url: "/Images/ImageCards/iceland-rocks-dawn-black-sand-zb-1366x768.jpg" },
+  { name: "Island Moon", url: "/Images/ImageCards/island-sky-moon-tree-5q-1366x768.jpg" },
+  { name: "Jupiter Dark", url: "/Images/ImageCards/jupiter-dark-5k-sx-1366x768.jpg" },
   { name: "Lake Louise", url: "/Images/ImageCards/lake-louise-hamlet-in-canada-7g-1366x768.jpg" },
+  { name: "Leather Texture", url: "/Images/ImageCards/leather-texture-blue-4k-si-1366x768.jpg" },
+  { name: "Parrot Security", url: "/Images/ImageCards/parrot-security-linux-debian-img-1920x1080.jpg" },
 ];
 
-type ActiveModal = "brandKit" | "layout" | "elements" | "images" | "canvasSize" | null;
+type ActiveModal = "brandKit" | "layout" | "elements" | "images" | "canvasSize" | "templateSkill" | null;
+
+function getDisplayDims(sizeValue: string): string {
+  const found = RAW_PAPER_OPTIONS.find((o) => o.value === sizeValue);
+  return found?.displayDims ?? "";
+}
+
+function getSkillsetLabel(value: string): string {
+  return TEMPLATE_SKILL_SETS.find((s) => s.value === value)?.label ?? value;
+}
 
 export function PromptGeneratorRightPanel({
   selections,
@@ -248,7 +275,31 @@ export function PromptGeneratorRightPanel({
             </p>
           </div>
           <div>
-            <p className="text-[10px] text-gray-500 font-medium">Click to change size</p>
+            {getDisplayDims(selections.canvasSize) ? (
+              <p className="text-[10px] text-gray-500 font-medium">{getDisplayDims(selections.canvasSize)} px</p>
+            ) : (
+              <p className="text-[10px] text-gray-400">Click to change size</p>
+            )}
+          </div>
+        </button>
+
+        {/* Card 6: Template Skill Set */}
+        <button
+          type="button"
+          onClick={() => setActiveModal("templateSkill")}
+          className="shrink-0 w-52 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-48 cursor-pointer hover:shadow-lg hover:scale-[1.02] border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md"
+        >
+          <div>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white mb-2 shadow-sm">
+              <LuLayoutGrid className="w-4 h-4" />
+            </div>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Template Type</p>
+            <p className="text-xs font-bold text-gray-800 truncate">
+              {getSkillsetLabel(selections.templateSkillSet)}
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] text-gray-500 font-medium">Click to change type</p>
           </div>
         </button>
       </div>
@@ -319,6 +370,17 @@ export function PromptGeneratorRightPanel({
           selectedSize={selections.canvasSize}
           onSelect={(size) => {
             onUpdateSelections({ canvasSize: size });
+            handleCloseModal();
+          }}
+          onClose={handleCloseModal}
+        />
+      )}
+
+      {activeModal === "templateSkill" && (
+        <TemplateSkillSelectionModal
+          selectedValue={selections.templateSkillSet}
+          onSelect={(val) => {
+            onUpdateSelections({ templateSkillSet: val });
             handleCloseModal();
           }}
           onClose={handleCloseModal}
@@ -451,6 +513,96 @@ function BrandKitSelectionModal({
 /* ═══════════════════════════════════════════════════════════════
    Layout Selection Modal
    ═══════════════════════════════════════════════════════════════ */
+
+function LayoutPreview({ layout }: { layout: BrandKitLayout }) {
+  const posMap: Record<string, { x: number; y: number }> = {
+    "top-left": { x: 8, y: 6 },
+    "top-center": { x: 38, y: 6 },
+    "top-center-large": { x: 25, y: 4 },
+    "top-center-spanning": { x: 20, y: 4 },
+    "top-center-above-heading": { x: 38, y: 2 },
+    "top-center-below-heading": { x: 30, y: 18 },
+    "top-right": { x: 68, y: 6 },
+    "top-left-large": { x: 4, y: 4 },
+    "top-left-below-heading": { x: 4, y: 18 },
+    "top-banner-center": { x: 30, y: 4 },
+    "top-banner-left": { x: 4, y: 4 },
+    "top-banner-right": { x: 72, y: 4 },
+    "center-left": { x: 8, y: 36 },
+    center: { x: 30, y: 36 },
+    "center-right": { x: 62, y: 36 },
+    "center-upper": { x: 30, y: 26 },
+    "center-full-width": { x: 10, y: 30 },
+    "upper-center": { x: 30, y: 24 },
+    "middle-center": { x: 30, y: 38 },
+    "left-top": { x: 4, y: 6 },
+    "left-center": { x: 4, y: 36 },
+    "left-bottom": { x: 4, y: 62 },
+    "left-center-heading": { x: 4, y: 32 },
+    "left-below-heading": { x: 4, y: 44 },
+    "right-top": { x: 62, y: 6 },
+    "right-center": { x: 62, y: 36 },
+    "right-bottom": { x: 62, y: 62 },
+    "right-half-diagonal": { x: 55, y: 20 },
+    "right-large": { x: 52, y: 12 },
+    "right-column-full-height": { x: 62, y: 10 },
+    "below-banner-center": { x: 30, y: 18 },
+    "bottom-left": { x: 8, y: 62 },
+    "bottom-center": { x: 38, y: 62 },
+    "bottom-center-above-heading": { x: 30, y: 54 },
+    "bottom-right": { x: 68, y: 62 },
+    "bottom-center-inside-frame": { x: 38, y: 62 },
+    "center-bottom-inside-frame": { x: 38, y: 62 },
+    "center-top-inside-frame": { x: 38, y: 8 },
+    "center-below-subtitle": { x: 30, y: 46 },
+    "full-background": { x: 0, y: 0 },
+    "card-top-center": { x: 28, y: 18 },
+    "card-center": { x: 28, y: 36 },
+    "card-top-left": { x: 18, y: 18 },
+    "card-bottom-center": { x: 28, y: 56 },
+    "grid-cells": { x: 10, y: 30 },
+    "top-half": { x: 10, y: 10 },
+  };
+
+  const getPos = (key: string) => posMap[key] ?? { x: 40, y: 40 };
+
+  const h = getPos(layout.headingPosition);
+  const s = getPos(layout.subtitlePosition);
+  const l = getPos(layout.logoPosition);
+  const img = getPos(layout.imagePosition);
+  const ic = getPos(layout.iconPosition);
+
+  return (
+    <svg viewBox="0 0 90 78" className="w-full h-full" aria-hidden>
+      <rect x="0" y="0" width="90" height="78" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.5" />
+
+      {layout.imagePosition === "full-background" ? (
+        <rect x="2" y="2" width="86" height="74" rx="2" fill="#dbeafe" opacity="0.4" />
+      ) : layout.imagePosition === "right-column-full-height" ? (
+        <rect x={img.x} y={img.y} width="24" height="58" rx="2" fill="#dbeafe" opacity="0.6" />
+      ) : layout.imagePosition === "right-large" ? (
+        <rect x={img.x} y={img.y} width="34" height="50" rx="2" fill="#dbeafe" opacity="0.6" />
+      ) : layout.imagePosition === "top-half" ? (
+        <rect x={img.x} y={img.y} width="70" height="28" rx="2" fill="#dbeafe" opacity="0.6" />
+      ) : layout.imagePosition === "grid-cells" ? (
+        <>
+          <rect x="8" y="30" width="22" height="18" rx="1.5" fill="#dbeafe" opacity="0.6" />
+          <rect x="34" y="30" width="22" height="18" rx="1.5" fill="#dbeafe" opacity="0.6" />
+          <rect x="60" y="30" width="22" height="18" rx="1.5" fill="#dbeafe" opacity="0.6" />
+        </>
+      ) : (
+        <rect x={img.x} y={img.y} width="28" height="18" rx="2" fill="#dbeafe" opacity="0.6" />
+      )}
+
+      <rect x={h.x} y={h.y} width={layout.headingPosition.includes("large") ? 40 : 26} height="4" rx="1" fill="#6366f1" />
+      <rect x={s.x} y={s.y} width={20} height="2.5" rx="0.8" fill="#a5b4fc" />
+      <rect x={l.x} y={l.y} width="8" height="8" rx="2" fill="#f59e0b" opacity="0.7" />
+      <circle cx={ic.x + 2} cy={ic.y + 3} r="2.5" fill="#10b981" opacity="0.6" />
+      <circle cx={ic.x + 9} cy={ic.y + 3} r="2.5" fill="#10b981" opacity="0.6" />
+    </svg>
+  );
+}
+
 function LayoutSelectionModal({
   customLayouts,
   selectedLayoutId,
@@ -464,11 +616,12 @@ function LayoutSelectionModal({
   onClear: () => void;
   onClose: () => void;
 }) {
-  const allLayouts = [...DEFAULT_LAYOUTS, ...customLayouts];
+  const [activeTab, setActiveTab] = useState<"default" | "custom">("default");
+  const displayedLayouts = activeTab === "default" ? DEFAULT_LAYOUTS : customLayouts;
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-2xl max-h-[70vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200">
+      <div className="bg-white w-full max-w-3xl max-h-[75vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/80">
           <div>
             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -482,6 +635,30 @@ function LayoutSelectionModal({
           </button>
         </div>
 
+        {/* Tabs */}
+        <div className="flex border-b border-gray-100 bg-gray-50/50 px-6">
+          <button
+            onClick={() => setActiveTab("default")}
+            className={`px-5 py-3 text-sm font-bold transition-all border-b-2 ${
+              activeTab === "default"
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Default Layouts ({DEFAULT_LAYOUTS.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("custom")}
+            className={`px-5 py-3 text-sm font-bold transition-all border-b-2 ${
+              activeTab === "custom"
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            My Custom Layouts ({customLayouts.length})
+          </button>
+        </div>
+
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
           {selectedLayoutId && (
             <button
@@ -492,33 +669,74 @@ function LayoutSelectionModal({
             </button>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
-            {allLayouts.map((layout) => {
-              const isSelected = selectedLayoutId === layout.id;
-              return (
-                <button
-                  key={layout.id}
-                  onClick={() => onSelect(layout)}
-                  className={`group relative flex flex-col p-3 rounded-2xl border-2 transition-all duration-200 text-left hover:shadow-lg ${
-                    isSelected
-                      ? "border-indigo-500 bg-gradient-to-br from-indigo-50/80 to-purple-50/40 shadow-lg ring-2 ring-indigo-200"
-                      : "border-gray-200 bg-white hover:border-indigo-300 hover:bg-gray-50"
-                  }`}
-                >
-                  {isSelected && (
-                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center shadow-sm z-10">
-                      <LuCheck className="w-3 h-3 text-white" />
-                    </span>
-                  )}
-                  <p className={`text-[11px] font-bold leading-tight ${isSelected ? "text-indigo-700" : "text-gray-700"}`}>
-                    {layout.title ?? layout.name}
-                  </p>
-                  <p className="text-[9px] text-gray-400 leading-snug mt-1 line-clamp-2">
-                    {layout.description}
-                  </p>
-                </button>
-              );
-            })}
+          {displayedLayouts.length === 0 ? (
+            <div className="text-center py-12">
+              <LuLayoutGrid className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm font-semibold text-gray-500">
+                {activeTab === "default" ? "No default layouts" : "No custom layouts yet"}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                {activeTab === "default" ? "Default layouts are not available" : "Create a custom layout to see it here"}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-3">
+              {displayedLayouts.map((layout) => {
+                const isSelected = selectedLayoutId === layout.id;
+                return (
+                  <button
+                    key={layout.id}
+                    onClick={() => onSelect(layout)}
+                    className={`group relative flex flex-col rounded-2xl border-2 p-2.5 transition-all duration-200 text-left hover:shadow-lg ${
+                      isSelected
+                        ? "border-indigo-500 bg-gradient-to-br from-indigo-50/80 to-purple-50/40 shadow-lg ring-2 ring-indigo-200"
+                        : "border-gray-200 bg-white hover:border-indigo-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    {isSelected && (
+                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center shadow-sm z-10">
+                        <LuCheck className="w-3 h-3 text-white" />
+                      </span>
+                    )}
+                    <div className="aspect-[4/3] w-full rounded-xl overflow-hidden bg-gray-50 border border-gray-100 mb-2">
+                      <LayoutPreview layout={layout} />
+                    </div>
+                    <p className={`text-[11px] font-bold leading-tight ${isSelected ? "text-indigo-700" : "text-gray-700"}`}>
+                      {layout.title ?? layout.name}
+                    </p>
+                    <p className="text-[9px] text-gray-400 leading-snug mt-0.5 line-clamp-2">
+                      {layout.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Legend */}
+        <div className="px-6 py-3 border-t border-gray-100 bg-gray-50/50">
+          <div className="flex flex-wrap gap-3">
+            <span className="flex items-center gap-1.5 text-[10px] text-gray-500">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#6366f1" }} />
+              Heading
+            </span>
+            <span className="flex items-center gap-1.5 text-[10px] text-gray-500">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#a5b4fc" }} />
+              Subtitle
+            </span>
+            <span className="flex items-center gap-1.5 text-[10px] text-gray-500">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#f59e0b" }} />
+              Logo
+            </span>
+            <span className="flex items-center gap-1.5 text-[10px] text-gray-500">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#dbeafe" }} />
+              Image
+            </span>
+            <span className="flex items-center gap-1.5 text-[10px] text-gray-500">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#10b981" }} />
+              Icons
+            </span>
           </div>
         </div>
       </div>
@@ -538,15 +756,19 @@ function ElementsSelectionModal({
   onToggle: (el: SelectedElement) => void;
   onClose: () => void;
 }) {
+  const [activeTab, setActiveTab] = useState<"default" | "custom">("default");
   const [category, setCategory] = useState("All");
-  const allElements = [...BUILDER_ELEMENT_SHAPES, ...BUILDER_ELEMENT_ICONS];
 
-  const categories = ["All", "Shapes", "Icons"];
+  const categories = ["All", "Shapes", "Icons", "Ribbons", "Bases"];
 
-  const filteredElements = allElements.filter((el) => {
+  const defaultElements = [...BUILDER_ELEMENT_SHAPES, ...BUILDER_ELEMENT_ICONS, ...BUILDER_ELEMENT_RIBBONS, ...BUILDER_ELEMENT_BASES];
+
+  const filteredElements = defaultElements.filter((el) => {
     if (category === "All") return true;
     if (category === "Shapes") return BUILDER_ELEMENT_SHAPES.some((s) => s.url === el.url);
     if (category === "Icons") return BUILDER_ELEMENT_ICONS.some((s) => s.url === el.url);
+    if (category === "Ribbons") return BUILDER_ELEMENT_RIBBONS.some((s) => s.url === el.url);
+    if (category === "Bases") return BUILDER_ELEMENT_BASES.some((s) => s.url === el.url);
     return true;
   });
 
@@ -568,49 +790,87 @@ function ElementsSelectionModal({
           </button>
         </div>
 
+        {/* Main Tabs: Default / Custom */}
         <div className="flex border-b border-gray-100 bg-gray-50/50 px-6">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              className={`px-4 py-2.5 text-xs font-bold transition-all border-b-2 ${
-                category === cat
-                  ? "border-emerald-600 text-emerald-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+          <button
+            onClick={() => { setActiveTab("default"); setCategory("All"); }}
+            className={`px-5 py-3 text-sm font-bold transition-all border-b-2 ${
+              activeTab === "default"
+                ? "border-emerald-600 text-emerald-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Default Elements ({defaultElements.length})
+          </button>
+          <button
+            onClick={() => { setActiveTab("custom"); setCategory("All"); }}
+            className={`px-5 py-3 text-sm font-bold transition-all border-b-2 ${
+              activeTab === "custom"
+                ? "border-emerald-600 text-emerald-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Uploaded Elements
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-          <div className="grid grid-cols-4 gap-2">
-            {filteredElements.map((el, idx) => {
-              const isSelected = selectedElements.some((e) => e.url === el.url);
-              return (
+        {/* Category Filters (only for default tab) */}
+        {activeTab === "default" && (
+          <div className="px-6 pt-3 pb-1">
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => (
                 <button
-                  key={idx}
-                  onClick={() => onToggle(el)}
-                  className={`relative p-2 rounded-xl border flex flex-col items-center justify-center aspect-square transition-all ${
-                    isSelected
-                      ? "border-emerald-500 bg-emerald-50/50 shadow-sm"
-                      : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  className={`flex items-center rounded-lg border px-3 py-1.5 text-[11px] font-semibold transition-all ${
+                    category === cat
+                      ? "border-emerald-400 bg-emerald-50 text-emerald-600 shadow-sm"
+                      : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                   }`}
-                  title={el.label}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={el.url} alt={el.label} className="w-8 h-8 object-contain" />
-                  {isSelected && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 flex items-center justify-center text-white text-[8px] font-bold shadow-sm">
-                      ✓
-                    </span>
-                  )}
-                  <span className="text-[8px] text-gray-400 mt-1 truncate w-full text-center">{el.label}</span>
+                  {cat}
                 </button>
-              );
-            })}
+              ))}
+            </div>
           </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+          {activeTab === "default" ? (
+            <div className="grid grid-cols-4 gap-2">
+              {filteredElements.map((el, idx) => {
+                const isSelected = selectedElements.some((e) => e.url === el.url);
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => onToggle(el)}
+                    className={`relative p-2 rounded-xl border flex flex-col items-center justify-center aspect-square transition-all ${
+                      isSelected
+                        ? "border-emerald-500 bg-emerald-50/50 shadow-sm"
+                        : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                    title={el.label}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={el.url} alt={el.label} className="w-8 h-8 object-contain" />
+                    {isSelected && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 flex items-center justify-center text-white text-[8px] font-bold shadow-sm">
+                        ✓
+                      </span>
+                    )}
+                    <span className="text-[8px] text-gray-400 mt-1 truncate w-full text-center">{el.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            /* Custom / Uploaded Elements - empty state for now */
+            <div className="text-center py-12">
+              <LuUpload className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm font-semibold text-gray-500">No uploaded elements yet</p>
+              <p className="text-xs text-gray-400 mt-1">Upload custom SVGs or images from the Elements sidebar</p>
+            </div>
+          )}
         </div>
 
         <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end">
@@ -638,9 +898,36 @@ function ImagesSelectionModal({
   onToggle: (img: { name: string; url: string }) => void;
   onClose: () => void;
 }) {
+  const [activeTab, setActiveTab] = useState<"default" | "custom">("default");
+  const [uploadedImages, setUploadedImages] = useState<{ name: string; url: string }[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/uploads", { method: "POST", body: form });
+      const data = await res.json();
+      if (data.success && data.data?.url) {
+        const name = data.data.path?.split("/").pop() || file.name;
+        setUploadedImages((prev) => [{ url: data.data.url, name }, ...prev]);
+      }
+    } catch {
+      // silently ignore
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const displayedImages = activeTab === "default" ? DEFAULT_ASSET_IMAGES : uploadedImages;
+
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-2xl max-h-[70vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200">
+      <div className="bg-white w-full max-w-2xl max-h-[75vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/80">
           <div>
             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -656,37 +943,81 @@ function ImagesSelectionModal({
           </button>
         </div>
 
+        {/* Tabs */}
+        <div className="flex border-b border-gray-100 bg-gray-50/50 px-6">
+          <button
+            onClick={() => setActiveTab("default")}
+            className={`px-5 py-3 text-sm font-bold transition-all border-b-2 ${
+              activeTab === "default"
+                ? "border-amber-600 text-amber-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Default Images ({DEFAULT_ASSET_IMAGES.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("custom")}
+            className={`px-5 py-3 text-sm font-bold transition-all border-b-2 ${
+              activeTab === "custom"
+                ? "border-amber-600 text-amber-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Uploaded Images ({uploadedImages.length})
+          </button>
+        </div>
+
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-          <div className="grid grid-cols-3 gap-2">
-            {DEFAULT_ASSET_IMAGES.map((img, idx) => {
-              const isSelected = selectedImages.some((i) => i.url === img.url);
-              return (
-                <button
-                  key={idx}
-                  onClick={() => onToggle(img)}
-                  className={`relative rounded-xl border overflow-hidden aspect-video transition-all ${
-                    isSelected
-                      ? "border-amber-500 bg-amber-50/50 shadow-sm"
-                      : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-                  }`}
-                  title={img.name}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img.url} alt={img.name} className="w-full h-full object-cover" />
-                  {isSelected && (
-                    <div className="absolute inset-0 bg-amber-500/25 flex items-center justify-center">
-                      <span className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
-                        ✓
-                      </span>
-                    </div>
-                  )}
-                  <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5 text-[9px] font-medium text-white truncate">
-                    {img.name}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          {activeTab === "custom" && (
+            <label className="flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-gray-300 p-4 text-sm text-gray-500 transition-colors hover:border-amber-400 hover:text-amber-600 mb-4">
+              <LuUpload className="w-4 h-4 mr-2" />
+              {uploading ? "Uploading..." : "Click to upload image (PNG, JPG, SVG)"}
+              <input type="file" accept="image/png,image/jpeg,image/svg+xml" className="hidden" onChange={handleUpload} />
+            </label>
+          )}
+
+          {displayedImages.length === 0 ? (
+            <div className="text-center py-12">
+              <LuImage className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm font-semibold text-gray-500">
+                {activeTab === "default" ? "No default images" : "No uploaded images yet"}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                {activeTab === "default" ? "Default images are not available" : "Upload images to see them here"}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {displayedImages.map((img, idx) => {
+                const isSelected = selectedImages.some((i) => i.url === img.url);
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => onToggle(img)}
+                    className={`relative rounded-xl border overflow-hidden aspect-video transition-all ${
+                      isSelected
+                        ? "border-amber-500 bg-amber-50/50 shadow-sm"
+                        : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                    title={img.name}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img.url} alt={img.name} className="w-full h-full object-cover" />
+                    {isSelected && (
+                      <div className="absolute inset-0 bg-amber-500/25 flex items-center justify-center">
+                        <span className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
+                          ✓
+                        </span>
+                      </div>
+                    )}
+                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5 text-[9px] font-medium text-white truncate">
+                      {img.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end">
@@ -746,10 +1077,71 @@ function CanvasSizeSelectionModal({
                       : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
                   }`}
                 >
-                  <span className={`text-sm font-semibold ${isSelected ? "text-rose-700" : "text-gray-700"}`}>
-                    {opt.label}
+                  <div className="flex flex-col items-start">
+                    <span className={`text-sm font-semibold ${isSelected ? "text-rose-700" : "text-gray-700"}`}>
+                      {opt.label}
+                    </span>
+                    <span className="text-[10px] text-gray-400 mt-0.5">
+                      {opt.displayDims} px{opt.dpi ? ` · ${opt.dpi}` : ""}
+                    </span>
+                  </div>
+                  {isSelected && <LuCheck className="w-4 h-4 text-rose-600 shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Template Skill Selection Modal
+   ═══════════════════════════════════════════════════════════════ */
+function TemplateSkillSelectionModal({
+  selectedValue,
+  onSelect,
+  onClose,
+}: {
+  selectedValue: string;
+  onSelect: (value: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-md max-h-[70vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/80">
+          <div>
+            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <LuLayoutGrid className="w-5 h-5 text-cyan-600" />
+              Select Template Type
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">Choose the type of template to generate</p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-200 text-gray-500 transition-colors">
+            <LuX className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+          <div className="space-y-2">
+            {TEMPLATE_SKILL_SETS.map((skill) => {
+              const isSelected = selectedValue === skill.value;
+              return (
+                <button
+                  key={skill.value}
+                  onClick={() => onSelect(skill.value)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
+                    isSelected
+                      ? "border-cyan-500 bg-cyan-50/50 shadow-sm"
+                      : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <span className={`text-sm font-semibold ${isSelected ? "text-cyan-700" : "text-gray-700"}`}>
+                    {skill.label}
                   </span>
-                  {isSelected && <LuCheck className="w-4 h-4 text-rose-600" />}
+                  {isSelected && <LuCheck className="w-4 h-4 text-cyan-600 shrink-0" />}
                 </button>
               );
             })}
