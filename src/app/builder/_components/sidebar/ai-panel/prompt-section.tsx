@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   LuMessageSquareCode,
-  LuClock,
+  // LuClock, // COLDLOCK DISABLED FOR DEV
   LuZap,
   LuX,
   LuChevronDown,
@@ -18,10 +18,10 @@ interface PromptSectionProps {
   prompt: string;
   onChangePrompt: (val: string) => void;
   category: string;
-  isBlocked: boolean;
-  timeLeft: string;
-  remaining: number;
-  maxFreeGenerations: number;
+  isBlocked?: boolean;
+  timeLeft?: string;
+  remaining?: number;
+  maxFreeGenerations?: number;
   activeBrandKit: BrandKit | null;
   onRemoveBrandKitConstraint: () => void;
   aiModel: string;
@@ -35,10 +35,10 @@ export function PromptSection({
   prompt,
   onChangePrompt,
   category,
-  isBlocked,
-  timeLeft,
-  remaining,
-  maxFreeGenerations,
+  isBlocked = false,
+  timeLeft = "",
+  remaining = 0,
+  maxFreeGenerations = 0,
   activeBrandKit,
   onRemoveBrandKitConstraint,
   aiModel,
@@ -70,6 +70,7 @@ export function PromptSection({
           <LuMessageSquareCode className="w-3.5 h-3.5 text-gray-400" />
           Describe Your Template
         </label>
+        {/* COLDLOCK DISABLED FOR DEV — uncomment to re-enable
         <div
           className={`flex items-center gap-2 text-[9px] font-bold px-2 py-0.5 rounded-full ${
             isBlocked
@@ -81,6 +82,7 @@ export function PromptSection({
         >
           {isBlocked ? "0" : remaining}/{maxFreeGenerations}
         </div>
+        */}
       </div>
 
       {/* Main Prompt Box Container */}
@@ -156,7 +158,6 @@ export function PromptSection({
                 ? `Describe your ${category} template using ${activeBrandKit.name} brand...`
                 : "e.g., A minimalist tech conference certificate with a dark theme and glowing neon accents..."
             }
-            disabled={isBlocked}
             className="w-full h-32 text-xs outline-none resize-none placeholder:text-gray-300 bg-transparent custom-scrollbar relative z-10"
           />
           {prompt.trim() && (
@@ -168,6 +169,7 @@ export function PromptSection({
               <LuTrash2 className="w-3.5 h-3.5" />
             </button>
           )}
+          {/* COLDLOCK DISABLED FOR DEV — uncomment to re-enable
           {isBlocked && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/90 backdrop-blur-[2px] rounded-t-2xl">
               <LuClock className="w-6 h-6 text-red-500 mb-2 animate-pulse" />
@@ -178,6 +180,7 @@ export function PromptSection({
               </span>
             </div>
           )}
+          */}
         </div>
 
         {/* Bottom Inner Utility Row */}

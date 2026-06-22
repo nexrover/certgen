@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { LuSparkles, LuRefreshCw, LuZap, LuX } from "react-icons/lu";
 import type { BrandKit, BrandKitLayout, PaperSize } from "@/lib/types";
 import { generateBrandKitSuggestionPrompt } from "@/lib/services/prompt-orchestrator";
 import type { ColorPalette } from "@/lib/color-converter";
 import type { PromptGeneratorSelections, ModalId } from "../_shared/types";
 import {
-  MAX_FREE_GENERATIONS,
-  COOLDOWN_MS,
+  // MAX_FREE_GENERATIONS, // COLDLOCK DISABLED FOR DEV
+  // COOLDOWN_MS, // COLDLOCK DISABLED FOR DEV
   detectCategoryFromPaperSize,
-  loadUsage,
-  saveUsage,
-  formatTimeLeft,
-  type UsageData,
+  // loadUsage, // COLDLOCK DISABLED FOR DEV
+  // saveUsage, // COLDLOCK DISABLED FOR DEV
+  // formatTimeLeft, // COLDLOCK DISABLED FOR DEV
+  // type UsageData, // COLDLOCK DISABLED FOR DEV
 } from "./types-and-helpers";
 import { PromptSection } from "./prompt-section";
 import { PromptGeneratorModal } from "../prompt-generator-modal";
@@ -71,40 +71,41 @@ export function AIPanel({
 
   const [aiModel, setAiModel] = useState("Gemini 1.5 Flash");
 
-  // Usage tracking
-  const [usage, setUsage] = useState<UsageData>({ count: 0, windowStart: null });
-  const [timeLeft, setTimeLeft] = useState("");
-
-  const remaining = Math.max(0, MAX_FREE_GENERATIONS - usage.count);
-  const isBlocked = remaining === 0 && usage.windowStart !== null;
+  // COLDLOCK DISABLED FOR DEV — uncomment to re-enable
+  // const [usage, setUsage] = useState<UsageData>({ count: 0, windowStart: null });
+  // const [timeLeft, setTimeLeft] = useState("");
+  //
+  // const remaining = Math.max(0, MAX_FREE_GENERATIONS - usage.count);
+  // const isBlocked = remaining === 0 && usage.windowStart !== null;
 
   const activeBrandKit =
     useBrandKit && activeBrandKitId
       ? brandKits.find((k) => k.id === activeBrandKitId) ?? null
       : null;
 
-  useEffect(() => {
-    setUsage(loadUsage());
-  }, []);
+  // COLDLOCK DISABLED FOR DEV — uncomment to re-enable
+  // useEffect(() => {
+  //   setUsage(loadUsage());
+  // }, []);
 
-  useEffect(() => {
-    if (!usage.windowStart) return;
-    const tick = () => {
-      const expiresAt = usage.windowStart! + COOLDOWN_MS;
-      const left = expiresAt - Date.now();
-      if (left <= 0) {
-        const reset: UsageData = { count: 0, windowStart: null };
-        saveUsage(reset);
-        setUsage(reset);
-        setTimeLeft("");
-      } else {
-        setTimeLeft(formatTimeLeft(left));
-      }
-    };
-    tick();
-    const interval = setInterval(tick, 1000);
-    return () => clearInterval(interval);
-  }, [usage.windowStart]);
+  // useEffect(() => {
+  //   if (!usage.windowStart) return;
+  //   const tick = () => {
+  //     const expiresAt = usage.windowStart! + COOLDOWN_MS;
+  //     const left = expiresAt - Date.now();
+  //     if (left <= 0) {
+  //       const reset: UsageData = { count: 0, windowStart: null };
+  //       saveUsage(reset);
+  //       setUsage(reset);
+  //       setTimeLeft("");
+  //     } else {
+  //       setTimeLeft(formatTimeLeft(left));
+  //     }
+  //   };
+  //   tick();
+  //   const interval = setInterval(tick, 1000);
+  //   return () => clearInterval(interval);
+  // }, [usage.windowStart]);
 
   const handleBrandKitSelectLocal = useCallback(
     (kitId: string | null) => {
@@ -121,24 +122,25 @@ export function AIPanel({
     [brandKits, category, paperSize, onBrandKitSelect]
   );
 
-  const recordGeneration = useCallback(() => {
-    setUsage((prev) => {
-      const newCount = prev.count + 1;
-      const newUsage: UsageData = {
-        count: newCount,
-        windowStart: prev.windowStart || Date.now(),
-      };
-      saveUsage(newUsage);
-      return newUsage;
-    });
-  }, []);
+  // COLDLOCK DISABLED FOR DEV — uncomment to re-enable
+  // const recordGeneration = useCallback(() => {
+  //   setUsage((prev) => {
+  //     const newCount = prev.count + 1;
+  //     const newUsage: UsageData = {
+  //       count: newCount,
+  //       windowStart: prev.windowStart || Date.now(),
+  //     };
+  //     saveUsage(newUsage);
+  //     return newUsage;
+  //   });
+  // }, []);
 
   // Track layout and assets from prompt generator for API calls
   const [activeLayout, setActiveLayout] = useState<BrandKitLayout | null>(null);
   const [activeAssets, setActiveAssets] = useState<{ kind: string; url: string; label: string }[]>([]);
 
   const handleGenerate = async () => {
-    if (!prompt.trim() || isBlocked) return;
+    if (!prompt.trim()) return; // COLDLOCK: removed || isBlocked
     setGenerating(true);
     setError(null);
     setCurrentStep(0);
@@ -166,7 +168,7 @@ export function AIPanel({
       clearInterval(interval);
 
       if (data.success) {
-        recordGeneration();
+        // recordGeneration(); // COLDLOCK DISABLED FOR DEV
         onLoadTemplate({
           canvasJson: data.canvasJson,
           paperSize: data.paperSize,
@@ -300,10 +302,6 @@ export function AIPanel({
               prompt={prompt}
               onChangePrompt={setPrompt}
               category={category}
-              isBlocked={isBlocked}
-              timeLeft={timeLeft}
-              remaining={remaining}
-              maxFreeGenerations={MAX_FREE_GENERATIONS}
               activeBrandKit={activeBrandKit}
               onRemoveBrandKitConstraint={() => handleBrandKitSelectLocal(null)}
               aiModel={aiModel}
@@ -333,14 +331,12 @@ export function AIPanel({
         )}
         <button
           onClick={handleGenerate}
-          disabled={generating || isBlocked}
+          disabled={generating}
           className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-xs text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 uppercase tracking-wider pointer-events-auto ${
             activeBrandKit
               ? "bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600"
               : "bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600"
-          } ${!prompt.trim() ? "opacity-70 grayscale-[20%]" : "opacity-100"} ${
-            isBlocked ? "opacity-50 pointer-events-none" : ""
-          }`}
+          } ${!prompt.trim() ? "opacity-70 grayscale-[20%]" : "opacity-100"}`}
         >
           <LuSparkles className="w-4 h-4" />
           {activeBrandKit ? "Generate with Brand Kit" : "Generate with AI"}
