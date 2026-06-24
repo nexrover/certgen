@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { LuSparkles, LuRefreshCw, LuZap, LuX } from "react-icons/lu";
+import { LuSparkles, LuRefreshCw, LuX } from "react-icons/lu";
 import type { BrandKit, BrandKitLayout, PaperSize } from "@/lib/types";
 import { generateBrandKitSuggestionPrompt } from "@/lib/services/prompt-orchestrator";
 import type { ColorPalette } from "@/lib/color-converter";
 import type { PromptGeneratorSelections, ModalId } from "../_shared/types";
+import { AI_MODELS } from "../_shared/types";
 import {
   // MAX_FREE_GENERATIONS, // COLDLOCK DISABLED FOR DEV
   // COOLDOWN_MS, // COLDLOCK DISABLED FOR DEV
@@ -16,6 +17,7 @@ import {
   // type UsageData, // COLDLOCK DISABLED FOR DEV
 } from "./types-and-helpers";
 import { PromptSection } from "./prompt-section";
+import type { PastedImage } from "./prompt-section";
 import { PromptGeneratorModal } from "../prompt-generator-modal";
 import { ALL_PAPER_OPTIONS } from "../../toolbar";
 
@@ -69,7 +71,7 @@ export function AIPanel({
     templateSkillSet: category,
   });
 
-  const [aiModel, setAiModel] = useState("Gemini 1.5 Flash");
+  const [aiModel, setAiModel] = useState("gemini-2.5-flash");
 
   // COLDLOCK DISABLED FOR DEV — uncomment to re-enable
   // const [usage, setUsage] = useState<UsageData>({ count: 0, windowStart: null });
@@ -139,6 +141,17 @@ export function AIPanel({
   const [activeLayout, setActiveLayout] = useState<BrandKitLayout | null>(null);
   const [activeAssets, setActiveAssets] = useState<{ kind: string; url: string; label: string }[]>([]);
 
+  // ── Pasted reference images ───────────────────────────
+  const [pastedImages, setPastedImages] = useState<PastedImage[]>([]);
+
+  const handlePasteImage = useCallback((image: PastedImage) => {
+    setPastedImages((prev) => [...prev, image]);
+  }, []);
+
+  const handleRemovePastedImage = useCallback((index: number) => {
+    setPastedImages((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
   const handleGenerate = async () => {
     if (!prompt.trim()) return; // COLDLOCK: removed || isBlocked
     setGenerating(true);
@@ -150,6 +163,9 @@ export function AIPanel({
     }, 1200);
 
     try {
+      const selectedModel = AI_MODELS.find((m) => m.value === aiModel);
+      const provider = selectedModel?.provider ?? "gemini";
+
       const response = await fetch("/api/templates/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -158,9 +174,14 @@ export function AIPanel({
           category: detectCategoryFromPaperSize(paperSize, category),
           paperSize,
           style: "modern",
+          provider,
+          model: aiModel,
           ...(activeBrandKit ? { brandKit: activeBrandKit } : {}),
           ...(activeLayout ? { layout: activeLayout } : {}),
           ...(activeAssets.length > 0 ? { assets: activeAssets } : {}),
+          ...(pastedImages.length > 0
+            ? { referenceImages: pastedImages.map((img) => img.dataUrl) }
+            : {}),
         }),
       });
 
@@ -314,6 +335,9 @@ export function AIPanel({
                   setPromptGeneratorSelections((prev) => ({ ...prev, images: updated }));
                 }
               }}
+              pastedImages={pastedImages}
+              onPasteImage={handlePasteImage}
+              onRemovePastedImage={handleRemovePastedImage}
             />
           </>
         )}
@@ -321,25 +345,13 @@ export function AIPanel({
 
       {/* Execution Button (Fixed to Bottom inside Panel) */}
       <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-transparent pt-8 z-10 pointer-events-none">
-        {activeBrandKit && !generating && (
-          <div className="flex items-center justify-center mb-2 pointer-events-auto">
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-[9px] font-bold text-indigo-600 uppercase tracking-wider">
-              <LuZap className="w-3.5 h-3.5" />
-              Brand Kit Mode
-            </div>
-          </div>
-        )}
         <button
           onClick={handleGenerate}
           disabled={generating}
-          className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-xs text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 uppercase tracking-wider pointer-events-auto ${
-            activeBrandKit
-              ? "bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600"
-              : "bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600"
-          } ${!prompt.trim() ? "opacity-70 grayscale-[20%]" : "opacity-100"}`}
+          className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-xs text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 uppercase tracking-wider pointer-events-auto bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 ${!prompt.trim() ? "opacity-70 grayscale-[20%]" : "opacity-100"}`}
         >
           <LuSparkles className="w-4 h-4" />
-          {activeBrandKit ? "Generate with Brand Kit" : "Generate with AI"}
+          Generate with AI
         </button>
       </div>
 

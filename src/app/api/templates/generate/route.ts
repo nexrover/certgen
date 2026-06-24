@@ -59,6 +59,30 @@ const TYPE_MAP: Record<string, string> = {
   image: "image",
 };
 
+/* ── Compact prompt for smaller Groq models ─────────── */
+function buildCompactSystemInstruction(compiled: {
+  systemInstruction: string;
+  temperature: number;
+}): string {
+  // Keep only essential sections: identity, skill set, canvas, schema rules, user prompt
+  const sections = compiled.systemInstruction.split("/* ── ");
+  const essential = ["CORE_IDENTITY", "SYSTEM_SKILL_SET", "TARGET_CANVAS", "SCHEMA_RULES", "USER_INSTRUCTIONS"];
+  const kept: string[] = [];
+
+  for (const section of sections) {
+    const headerEnd = section.indexOf(" ─");
+    if (headerEnd === -1) continue;
+    const header = section.substring(0, headerEnd).trim();
+    if (essential.some((e) => header.startsWith(e))) {
+      kept.push("/* ── " + section);
+    }
+  }
+
+  const condensed = kept.join("\n\n");
+  // Hard cap at ~3000 chars to stay well within TPM limits
+  return condensed.length > 3000 ? condensed.substring(0, 3000) + "\n\nReturn ONLY valid JSON." : condensed;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -71,20 +95,36 @@ export async function POST(req: Request) {
       brandKit: brandKitPayload,
       layout: layoutPayload,
       assets: assetsPayload,
+      provider = "gemini",
+      model: reqModel,
+      referenceImages,
     } = body;
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 400 });
     }
 
-    let apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { success: false, error: "Gemini API key is not configured" },
-        { status: 500 }
-      );
+    // ── Resolve provider & API key ─────────────────────────
+    const isGroq = provider === "groq";
+
+    let apiKey: string | undefined;
+    if (isGroq) {
+      apiKey = process.env.GROQ_API_KEY?.trim().replace(/;+$/, "");
+      if (!apiKey) {
+        return NextResponse.json(
+          { success: false, error: "Groq API key is not configured" },
+          { status: 500 }
+        );
+      }
+    } else {
+      apiKey = process.env.GEMINI_API_KEY?.trim().replace(/;+$/, "");
+      if (!apiKey) {
+        return NextResponse.json(
+          { success: false, error: "Gemini API key is not configured" },
+          { status: 500 }
+        );
+      }
     }
-    apiKey = apiKey.trim().replace(/;+$/, "");
 
     // ── Determine canvas dimensions ──────────────────────
     let width = 842;
@@ -150,6 +190,16 @@ export async function POST(req: Request) {
         );
     }
 
+    // ── Parse reference images (base64 data URLs) ────────
+    let refImages: string[] = [];
+    if (Array.isArray(referenceImages)) {
+      refImages = referenceImages
+        .filter((img: unknown): img is string =>
+          typeof img === "string" && img.startsWith("data:image/")
+        )
+        .slice(0, 4); // max 4 reference images
+    }
+
     // ── Compile prompt via the Prompt Engine ─────────────
     const compilationInput: PromptCompilationInput = {
       skillSet: category,
@@ -166,87 +216,203 @@ export async function POST(req: Request) {
     const compiled = compilePrompt(compilationInput);
 
     const conditionLabel = brandKit ? "A (Brand Kit)" : layout ? "A' (Layout)" : "B (Default)";
-    console.log(`[AI Generate] Prompt condition: ${conditionLabel} | Blocks: ${compiled.meta.blockOrder.join(", ")}`);
+    console.log(`[AI Generate] Provider: ${provider} | Prompt condition: ${conditionLabel} | Blocks: ${compiled.meta.blockOrder.join(", ")}`);
 
-    const geminiPayload = {
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              text: compiled.userMessage,
-            },
-          ],
-        },
-      ],
-      systemInstruction: {
-        parts: [{ text: compiled.systemInstruction }],
-      },
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: compiled.temperature,
-      },
-    };
-
-    // ── Call Gemini with fallback models ──────────────────
-    const modelsToTry = [
-      "gemini-2.5-flash",
-      "gemini-2.0-flash",
-      "gemini-flash-latest",
-    ];
-
+    // ── Call AI provider ────────────────────────────────
     let candidateText = "";
     let lastErrorMsg = "";
 
-    for (const model of modelsToTry) {
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    if (isGroq) {
+      // ── Groq with fallback chain ──────────────────────
+      // Large models use full prompt, small models use compact prompt
+      const groqModels = [
+        { id: "llama-3.3-70b-versatile", compact: false },
+        { id: "llama3-70b-8192", compact: false },
+        { id: "mixtral-8x7b-32768", compact: true },
+        { id: "llama-3.1-8b-instant", compact: true },
+        { id: "llama3-8b-8192", compact: true },
+        { id: "gemma2-9b-it", compact: true },
+      ];
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      // If user picked a specific model, try it first
+      const requestedModel = groqModels.find((m) => m.id === reqModel);
+      const orderedModels = requestedModel
+        ? [requestedModel, ...groqModels.filter((m) => m.id !== reqModel)]
+        : groqModels;
 
-      try {
-        console.log(`[AI Generate] Trying model: ${model}`);
-        let response: Response | null = null;
-        let retries = 2;
+      for (const { id: groqModel, compact } of orderedModels) {
+        let systemContent = compact
+          ? buildCompactSystemInstruction(compiled)
+          : compiled.systemInstruction;
 
-        while (retries >= 0) {
-          response = await fetch(geminiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(geminiPayload),
-            signal: controller.signal,
-          });
+        const userContent = compiled.userMessage;
 
-          if (response.status !== 503 || retries === 0) break;
-
-          console.warn(`[AI Generate] ${model} → 503, retrying in 1s...`);
-          await new Promise((r) => setTimeout(r, 1000));
-          retries--;
+        // Append reference image instruction (Groq doesn't support vision)
+        if (refImages.length > 0) {
+          systemContent += `\n\nThe user has provided ${refImages.length} reference image(s). Since you cannot see images, use the user's text description to match the design style, layout, colors, and overall aesthetic shown in the reference. Create a template that captures the same look and feel.`;
         }
 
-        clearTimeout(timeoutId);
+        const groqPayload = {
+          model: groqModel,
+          messages: [
+            { role: "system", content: systemContent },
+            { role: "user", content: userContent },
+          ],
+          temperature: compiled.temperature,
+          response_format: { type: "json_object" },
+        };
 
-        if (response && response.ok) {
-          const resultData = await response.json();
-          const text = resultData.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text) {
-            candidateText = text;
-            console.log(`[AI Generate] ✓ Success with ${model}`);
-            break;
+        const groqUrl = "https://api.groq.com/openai/v1/chat/completions";
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+        try {
+          console.log(`[AI Generate] Calling Groq: ${groqModel} (compact: ${compact})`);
+          let response: Response | null = null;
+          let retries = 2;
+
+          while (retries >= 0) {
+            response = await fetch(groqUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${apiKey}`,
+              },
+              body: JSON.stringify(groqPayload),
+              signal: controller.signal,
+            });
+
+            if (response.status !== 429 || retries === 0) break;
+
+            console.warn(`[AI Generate] Groq ${groqModel} → 429, retrying in 2s...`);
+            await new Promise((r) => setTimeout(r, 2000));
+            retries--;
           }
-        } else if (response) {
-          const errBody = await response.json().catch(() => ({}));
-          const errText = errBody.error?.message || response.statusText;
-          console.warn(`[AI Generate] ${model} → ${response.status}: ${errText}`);
-          lastErrorMsg = errText;
-        } else {
-          lastErrorMsg = "No response received";
+
+          clearTimeout(timeoutId);
+
+          if (response && response.ok) {
+            const resultData = await response.json();
+            const text = resultData.choices?.[0]?.message?.content;
+            if (text) {
+              candidateText = text;
+              console.log(`[AI Generate] ✓ Success with Groq ${groqModel}`);
+              break;
+            }
+          } else if (response) {
+            const errBody = await response.json().catch(() => ({}));
+            const errText = errBody.error?.message || response.statusText;
+            console.warn(`[AI Generate] Groq ${groqModel} → ${response.status}: ${errText}`);
+            lastErrorMsg = errText;
+
+            // If "request too large", try next model (will use compact prompt)
+            if (errText.includes("Request too large")) {
+              console.warn(`[AI Generate] ${groqModel} prompt too large, trying next model...`);
+              continue;
+            }
+          } else {
+            lastErrorMsg = "No response from Groq";
+          }
+        } catch (err: unknown) {
+          clearTimeout(timeoutId);
+          const errMsg = err instanceof Error ? err.message : "Network Error";
+          console.warn(`[AI Generate] Groq ${groqModel} network error:`, errMsg);
+          lastErrorMsg = errMsg;
         }
-      } catch (err: unknown) {
-        clearTimeout(timeoutId);
-        const errMsg = err instanceof Error ? err.message : "Network Error";
-        console.warn(`[AI Generate] ${model} network error:`, errMsg);
-        lastErrorMsg = errMsg;
+
+        if (candidateText) break;
+      }
+    } else {
+      // ── Gemini ────────────────────────────────────────
+      // Build multimodal contents with optional reference images
+      const userParts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
+
+      // Add reference images first
+      for (const dataUrl of refImages) {
+        const match = dataUrl.match(/^data:(image\/\w+);base64,(.+)$/);
+        if (match) {
+          userParts.push({
+            inlineData: { mimeType: match[1], data: match[2] },
+          });
+        }
+      }
+
+      // Add the text prompt
+      userParts.push({ text: compiled.userMessage });
+
+      // If we have images, append a note to the system instruction
+      let systemText = compiled.systemInstruction;
+      if (refImages.length > 0) {
+        systemText += `\n\nThe user has provided ${refImages.length} reference image(s). Use them as visual reference for the design style, layout, colors, and overall aesthetic. Match the look and feel of the reference while creating your own unique template.`;
+      }
+
+      const geminiPayload = {
+        contents: [{ role: "user", parts: userParts }],
+        systemInstruction: { parts: [{ text: systemText }] },
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: compiled.temperature,
+        },
+      };
+
+      console.log("[AI Generate] Gemini request body:", JSON.stringify(geminiPayload, null, 2));
+
+      const modelsToTry = reqModel
+        ? [reqModel]
+        : ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"];
+
+      for (const model of modelsToTry) {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+        try {
+          console.log(`[AI Generate] Trying Gemini model: ${model}`);
+          let response: Response | null = null;
+          let retries = 2;
+
+          while (retries >= 0) {
+            response = await fetch(geminiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(geminiPayload),
+              signal: controller.signal,
+            });
+
+            if (response.status !== 503 || retries === 0) break;
+
+            console.warn(`[AI Generate] ${model} → 503, retrying in 1s...`);
+            await new Promise((r) => setTimeout(r, 1000));
+            retries--;
+          }
+
+          clearTimeout(timeoutId);
+
+          if (response && response.ok) {
+            const resultData = await response.json();
+            const text = resultData.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              candidateText = text;
+              console.log(`[AI Generate] ✓ Success with ${model}`);
+              break;
+            }
+          } else if (response) {
+            const errBody = await response.json().catch(() => ({}));
+            const errText = errBody.error?.message || response.statusText;
+            console.warn(`[AI Generate] ${model} → ${response.status}: ${errText}`);
+            lastErrorMsg = errText;
+          } else {
+            lastErrorMsg = "No response received";
+          }
+        } catch (err: unknown) {
+          clearTimeout(timeoutId);
+          const errMsg = err instanceof Error ? err.message : "Network Error";
+          console.warn(`[AI Generate] ${model} network error:`, errMsg);
+          lastErrorMsg = errMsg;
+        }
+
+        if (candidateText) break;
       }
     }
 
