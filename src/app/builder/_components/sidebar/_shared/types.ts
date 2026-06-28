@@ -7,8 +7,8 @@ export interface PromptGeneratorSelections {
   layout: BrandKitLayout | null;
   elements: SelectedElement[];
   images: SelectedImage[];
-  canvasSize: PaperSize;
-  templateSkillSet: string;
+  canvasSize: PaperSize | null;
+  templateSkillSet: string | null;
 }
 
 export interface SelectedElement {
@@ -45,8 +45,9 @@ export interface AIModelOption {
 }
 
 export const AI_MODELS: AIModelOption[] = [
-  { value: "gemini-3.1-pro-preview", label: "Gemini 3.1 Pro", description: "Latest & fastest", provider: "gemini" },
-  { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash", description: "Latest & fastest", provider: "gemini" },
+  { value: "gemini-3.5-flash", label: "Gemini 3.5 Flash", description: "Next-gen speed & quality", provider: "gemini" },
+  { value: "gemini-3.1-pro-preview", label: "Gemini 3.1 Pro", description: "Advanced experimental features", provider: "gemini" },
+  { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash", description: "Latest stable release", provider: "gemini" },
   { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash", description: "Balanced performance", provider: "gemini" },
   { value: "gemini-1.5-flash", label: "Gemini 1.5 Flash", description: "Fast & efficient", provider: "gemini" },
   { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro", description: "Advanced reasoning", provider: "gemini" },

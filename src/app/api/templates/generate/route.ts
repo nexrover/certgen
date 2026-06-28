@@ -8,23 +8,23 @@ const TEXTBOX_KEYS = new Set([
   "type", "text", "left", "top", "width", "fontSize", "fontFamily",
   "fill", "fontWeight", "fontStyle", "textAlign", "charSpacing",
   "lineHeight", "selectable", "originX", "originY", "opacity",
-  "underline", "linethrough", "overline", "angle",
+  "underline", "linethrough", "overline", "angle", "name",
 ]);
 
 const RECT_KEYS = new Set([
   "type", "left", "top", "width", "height", "fill", "stroke",
   "strokeWidth", "rx", "ry", "selectable", "originX", "originY",
-  "opacity", "angle",
+  "opacity", "angle", "name",
 ]);
 
 const LINE_KEYS = new Set([
   "type", "left", "top", "x1", "y1", "x2", "y2", "stroke",
-  "strokeWidth", "selectable", "originX", "originY", "opacity", "angle",
+  "strokeWidth", "selectable", "originX", "originY", "opacity", "angle", "name",
 ]);
 
 const CIRCLE_KEYS = new Set([
   "type", "left", "top", "radius", "fill", "stroke", "strokeWidth",
-  "selectable", "originX", "originY", "opacity", "angle",
+  "selectable", "originX", "originY", "opacity", "angle", "name",
 ]);
 
 const IMAGE_KEYS = new Set([
@@ -83,12 +83,82 @@ function buildCompactSystemInstruction(compiled: {
   return condensed.length > 3000 ? condensed.substring(0, 3000) + "\n\nReturn ONLY valid JSON." : condensed;
 }
 
+function detectCategoryFromPrompt(prompt: string): string {
+  const lower = prompt.toLowerCase();
+  if (lower.includes("certificate") || lower.includes("award") || lower.includes("diploma") || lower.includes("credential")) {
+    return "certificate";
+  }
+  if (lower.includes("youtube") || lower.includes("thumbnail") || lower.includes("ctr") || lower.includes("video")) {
+    return "youtube";
+  }
+  if (lower.includes("invoice") || lower.includes("bill") || lower.includes("billing") || lower.includes("charge")) {
+    return "invoice";
+  }
+  if (lower.includes("receipt") || lower.includes("transaction") || lower.includes("purchase")) {
+    return "receipt";
+  }
+  if (lower.includes("resume") || lower.includes("cv") || lower.includes("job application")) {
+    return "resume";
+  }
+  if (lower.includes("email") || lower.includes("newsletter")) {
+    return "email";
+  }
+  if (lower.includes("product") || lower.includes("store") || lower.includes("ecommerce") || lower.includes("shop")) {
+    return "ecommerce";
+  }
+  if (lower.includes("social") || lower.includes("post") || lower.includes("instagram") || lower.includes("facebook") || lower.includes("twitter") || lower.includes("linkedin")) {
+    return "social-media";
+  }
+  if (lower.includes("christmas") || lower.includes("holiday") || lower.includes("festive") || lower.includes("greetings")) {
+    return "christmas-card";
+  }
+  if (lower.includes("house") || lower.includes("property") || lower.includes("real estate") || lower.includes("home")) {
+    return "real-estate";
+  }
+  if (lower.includes("shipping") || lower.includes("package") || lower.includes("label")) {
+    return "shipping-label";
+  }
+  if (lower.includes("open graph") || lower.includes("og") || lower.includes("seo")) {
+    return "open-graph";
+  }
+
+  // Pick a random category from all supported ones
+  const categories = [
+    "certificate",
+    "youtube",
+    "invoice",
+    "receipt",
+    "resume",
+    "email",
+    "ecommerce",
+    "social-media",
+    "christmas-card",
+    "real-estate",
+    "shipping-label",
+    "open-graph",
+  ];
+  const randomIndex = Math.floor(Math.random() * categories.length);
+  return categories[randomIndex];
+}
+
+function detectDimensionsFromPrompt(prompt: string): { width: number; height: number; paperSize: string } | null {
+  const match = prompt.match(/(\d+)\s*(?:px|pixel|pixels)?\s*[x×]\s*(\d+)\s*(?:px|pixel|pixels)?/i);
+  if (match) {
+    const width = parseInt(match[1], 10);
+    const height = parseInt(match[2], 10);
+    if (width > 0 && height > 0) {
+      return { width, height, paperSize: "CUSTOM" };
+    }
+  }
+  return null;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const {
       prompt,
-      category = "certificate",
+      category,
       orientation = "landscape",
       paperSize: reqPaperSize,
       style = "modern",
@@ -102,6 +172,13 @@ export async function POST(req: Request) {
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json({ success: false, error: "Prompt is required" }, { status: 400 });
+    }
+
+    // ── Resolve category dynamically ───────────────────────
+    let resolvedCategory = category;
+    if (!resolvedCategory) {
+      resolvedCategory = detectCategoryFromPrompt(prompt);
+      console.log(`[AI Generate] Category resolved dynamically: ${resolvedCategory}`);
     }
 
     // ── Resolve provider & API key ─────────────────────────
@@ -131,27 +208,34 @@ export async function POST(req: Request) {
     let height = 595;
     let paperSize = "A4_LANDSCAPE";
 
+    const promptDims = detectDimensionsFromPrompt(prompt);
+
     if (reqPaperSize && PAPER_DIMENSIONS[reqPaperSize as PaperSize]) {
       const dims = PAPER_DIMENSIONS[reqPaperSize as PaperSize];
       width = dims.width;
       height = dims.height;
       paperSize = reqPaperSize;
+    } else if (promptDims) {
+      width = promptDims.width;
+      height = promptDims.height;
+      paperSize = promptDims.paperSize;
+      console.log(`[AI Generate] Canvas size resolved from prompt: ${width}x${height}`);
     } else {
       if (orientation === "square") {
         width = 1080; height = 1080; paperSize = "CUSTOM";
-      } else if (category === "youtube") {
+      } else if (resolvedCategory === "youtube") {
         if (orientation === "portrait") {
           width = 720; height = 1280; paperSize = "CUSTOM";
         } else {
           width = 1280; height = 720; paperSize = "YOUTUBE_THUMBNAIL";
         }
-      } else if (category === "certificate") {
+      } else if (resolvedCategory === "certificate") {
         if (orientation === "portrait") {
           width = 595; height = 842; paperSize = "A4";
         } else {
           width = 842; height = 595; paperSize = "A4_LANDSCAPE";
         }
-      } else if (["invoice", "resume", "receipt"].includes(category)) {
+      } else if (["invoice", "resume", "receipt"].includes(resolvedCategory)) {
         width = 1020; height = 1320; paperSize = "INVOICE";
       } else {
         if (orientation === "portrait") {
@@ -181,28 +265,28 @@ export async function POST(req: Request) {
     let assets: InjectedAsset[] = [];
     if (Array.isArray(assetsPayload)) {
       assets = assetsPayload
-        .filter((a: unknown): a is InjectedAsset =>
-          typeof a === "object" &&
-          a !== null &&
-          "kind" in a &&
-          "url" in a &&
-          "label" in a
-        );
+          .filter((a: unknown): a is InjectedAsset =>
+              typeof a === "object" &&
+              a !== null &&
+              "kind" in a &&
+              "url" in a &&
+              "label" in a
+          );
     }
 
     // ── Parse reference images (base64 data URLs) ────────
     let refImages: string[] = [];
     if (Array.isArray(referenceImages)) {
       refImages = referenceImages
-        .filter((img: unknown): img is string =>
-          typeof img === "string" && img.startsWith("data:image/")
-        )
-        .slice(0, 4); // max 4 reference images
+          .filter((img: unknown): img is string =>
+              typeof img === "string" && img.startsWith("data:image/")
+          )
+          .slice(0, 4); // max 4 reference images
     }
 
     // ── Compile prompt via the Prompt Engine ─────────────
     const compilationInput: PromptCompilationInput = {
-      skillSet: category,
+      skillSet: resolvedCategory,
       width,
       height,
       paperSize,
@@ -357,9 +441,18 @@ export async function POST(req: Request) {
 
       console.log("[AI Generate] Gemini request body:", JSON.stringify(geminiPayload, null, 2));
 
+      const geminiModels = [
+        "gemini-2.5-flash",
+        "gemini-2.5-pro",
+        "gemini-2.0-flash",
+        "gemini-flash-latest",
+        "gemini-3.5-flash",
+        "gemini-3.1-pro-preview",
+      ];
+
       const modelsToTry = reqModel
-        ? [reqModel]
-        : ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"];
+        ? [reqModel, ...geminiModels.filter((m) => m !== reqModel)]
+        : geminiModels;
 
       for (const model of modelsToTry) {
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
@@ -401,15 +494,15 @@ export async function POST(req: Request) {
             const errBody = await response.json().catch(() => ({}));
             const errText = errBody.error?.message || response.statusText;
             console.warn(`[AI Generate] ${model} → ${response.status}: ${errText}`);
-            lastErrorMsg = errText;
+            lastErrorMsg += `[${model}]: ${errText}; `;
           } else {
-            lastErrorMsg = "No response received";
+            lastErrorMsg += `[${model}]: No response; `;
           }
         } catch (err: unknown) {
           clearTimeout(timeoutId);
           const errMsg = err instanceof Error ? err.message : "Network Error";
           console.warn(`[AI Generate] ${model} network error:`, errMsg);
-          lastErrorMsg = errMsg;
+          lastErrorMsg += `[${model}]: ${errMsg}; `;
         }
 
         if (candidateText) break;
@@ -431,6 +524,7 @@ export async function POST(req: Request) {
         cleaned = cleaned.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "");
       }
       parsedTemplate = JSON.parse(cleaned);
+      console.log("=== PRE PROCESSOR JSON ===", JSON.stringify(parsedTemplate, null, 2));
     } catch {
       console.error("[AI Generate] Failed to parse JSON:", candidateText.slice(0, 500));
       return NextResponse.json(
@@ -528,14 +622,21 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({
+    console.log("=== POST PROCESSOR JSON ===", JSON.stringify(canvasJson, null, 2));
+
+    const finalOutput = {
       success: true,
       name: parsedTemplate.name || "AI Generated Template",
       width: parsedTemplate.width || width,
       height: parsedTemplate.height || height,
       paperSize: parsedTemplate.paperSize || paperSize,
+      category: resolvedCategory,
       canvasJson,
-    });
+    };
+
+    console.log("=== FINAL OUTPUT JSON ===", JSON.stringify(finalOutput, null, 2));
+
+    return NextResponse.json(finalOutput);
   } catch (error) {
     console.error("[AI Generate] Unexpected error:", error);
     const message = error instanceof Error ? error.message : "Internal Server Error";

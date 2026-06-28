@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LuX, LuSparkles } from "react-icons/lu";
 import type { BrandKit, BrandKitLayout } from "@/lib/types";
 import type { PromptGeneratorSelections } from "../_shared/types";
@@ -14,6 +14,7 @@ interface PromptGeneratorModalProps {
   brandKits: BrandKit[];
   customLayouts: BrandKitLayout[];
   onProcess: (prompt: string) => void;
+  initialPrompt: string;
 }
 
 export function PromptGeneratorModal({
@@ -24,8 +25,15 @@ export function PromptGeneratorModal({
   brandKits,
   customLayouts,
   onProcess,
+  initialPrompt,
 }: PromptGeneratorModalProps) {
-  const [notePrompt, setNotePrompt] = useState("");
+  const [notePrompt, setNotePrompt] = useState(initialPrompt);
+
+  useEffect(() => {
+    if (isOpen) {
+      setNotePrompt(initialPrompt);
+    }
+  }, [isOpen, initialPrompt]);
 
   if (!isOpen) return null;
 

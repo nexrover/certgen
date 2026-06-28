@@ -67,11 +67,11 @@ export function AIPanel({
     layout: null,
     elements: [],
     images: [],
-    canvasSize: paperSize,
-    templateSkillSet: category,
+    canvasSize: null,
+    templateSkillSet: null,
   });
 
-  const [aiModel, setAiModel] = useState("gemini-2.5-flash");
+  const [aiModel, setAiModel] = useState("gemini-3.5-flash");
 
   // COLDLOCK DISABLED FOR DEV — uncomment to re-enable
   // const [usage, setUsage] = useState<UsageData>({ count: 0, windowStart: null });
@@ -171,8 +171,8 @@ export function AIPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt,
-          category: detectCategoryFromPaperSize(paperSize, category),
-          paperSize,
+          category: promptGeneratorSelections.templateSkillSet,
+          paperSize: promptGeneratorSelections.canvasSize,
           style: "modern",
           provider,
           model: aiModel,
@@ -196,6 +196,13 @@ export function AIPanel({
           width: data.width,
           height: data.height,
         });
+
+        // Also update local PromptGeneratorSelections if they were null
+        setPromptGeneratorSelections((prev) => ({
+          ...prev,
+          canvasSize: data.paperSize || prev.canvasSize,
+          templateSkillSet: data.category || prev.templateSkillSet,
+        }));
       } else {
         setError(data.error || "Failed to generate template. Please try again.");
       }
@@ -214,8 +221,8 @@ export function AIPanel({
     setPromptGeneratorSelections((prev) => ({
       ...prev,
       brandKit: activeBrandKit,
-      canvasSize: paperSize,
-      templateSkillSet: category,
+      canvasSize: prev.canvasSize === null ? null : paperSize,
+      templateSkillSet: prev.templateSkillSet === null ? null : category,
     }));
     setIsPromptGeneratorOpen(true);
   };
@@ -247,7 +254,7 @@ export function AIPanel({
     }
 
     // Apply canvas size
-    if (promptGeneratorSelections.canvasSize !== paperSize) {
+    if (promptGeneratorSelections.canvasSize && promptGeneratorSelections.canvasSize !== paperSize) {
       onPaperSizeChange(promptGeneratorSelections.canvasSize);
     }
 
@@ -366,6 +373,7 @@ export function AIPanel({
         brandKits={brandKits}
         customLayouts={activeBrandKit?.custom_layouts ?? []}
         onProcess={handlePromptGeneratorProcess}
+        initialPrompt={prompt}
       />
     </div>
   );

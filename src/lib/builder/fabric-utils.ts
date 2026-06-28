@@ -411,6 +411,21 @@ function createFabricObject(obj: Record<string, unknown>): FabricObject | null {
       if (typeof pathData === "string") return new Path(pathData, rest);
       return null;
     }
+    case "Image":
+    case "image": {
+      const { src, ...rest } = props;
+      if (typeof window !== "undefined") {
+        const imgEl = document.createElement("img");
+        imgEl.crossOrigin = "anonymous";
+        imgEl.src = (src as string) || "";
+        const fabricImg = new FabricImage(imgEl, rest);
+        imgEl.onload = () => {
+          fabricImg.canvas?.requestRenderAll();
+        };
+        return fabricImg;
+      }
+      return null;
+    }
     default:
       return null;
   }

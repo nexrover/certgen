@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   LuLayoutGrid,
   LuPalette,
@@ -22,6 +22,7 @@ import {
   LuCreditCard,
   LuGift,
   LuBuilding,
+  LuSparkles,
 } from "react-icons/lu";
 import type { BrandKit, BrandKitLayout, PaperSize } from "@/lib/types";
 import type { PromptGeneratorSelections, SelectedElement, SelectedImage } from "../_shared/types";
@@ -35,6 +36,21 @@ import {
 } from "@/lib/builder/decorative-assets";
 import { DEFAULT_LAYOUTS } from "../ai-panel/brand-kit-modal/layouts-data";
 import { RAW_PAPER_OPTIONS } from "../../toolbar";
+
+function cleanFileNameToLabel(fileName: string): string {
+  // Strip extension
+  let base = fileName.substring(0, fileName.lastIndexOf(".")) || fileName;
+  // Strip timestamp prefix if any (e.g. 1775468431-)
+  base = base.replace(/^\d+[-_]/, "");
+  // Replace hyphens and underscores with spaces
+  base = base.replace(/[-_]+/g, " ");
+  // Title case
+  return base
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 
 interface PromptGeneratorRightPanelProps {
   selections: PromptGeneratorSelections;
@@ -68,16 +84,19 @@ const DEFAULT_ASSET_IMAGES = [
 
 type ActiveModal = "brandKit" | "layout" | "elements" | "images" | "canvasSize" | "templateSkill" | null;
 
-function getDisplayDims(sizeValue: string): string {
+function getDisplayDims(sizeValue: string | null): string {
+  if (!sizeValue) return "";
   const found = RAW_PAPER_OPTIONS.find((o) => o.value === sizeValue);
   return found?.displayDims ?? "";
 }
 
-function getSkillsetLabel(value: string): string {
+function getSkillsetLabel(value: string | null): string {
+  if (!value) return "Random / Let AI Decide";
   return TEMPLATE_SKILL_SETS.find((s) => s.value === value)?.label ?? value;
 }
 
-function getSkillsetIcon(value: string) {
+function getSkillsetIcon(value: string | null) {
+  if (!value) return LuSparkles;
   const iconMap: Record<string, typeof LuAward> = {
     certificate: LuAward,
     youtube: LuPlay,
@@ -281,12 +300,12 @@ export function PromptGeneratorRightPanel({
         <button
           type="button"
           onClick={() => setActiveModal("canvasSize")}
-          className="shrink-0 w-60 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-52 border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md cursor-pointer hover:shadow-lg hover:scale-[1.02]"
+          className={`shrink-0 w-60 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-52 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${selections.canvasSize ? "border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md" : "border-gray-200 bg-white hover:border-gray-300"}`}
         >
           <div>
             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Canvas Size</p>
             <p className="text-xs font-bold text-gray-800 truncate">
-              {selections.canvasSize.replace(/_/g, " ")}
+              {selections.canvasSize ? selections.canvasSize.replace(/_/g, " ") : "Random / Let AI Decide"}
             </p>
           </div>
           <div className="bg-gray-50 rounded-lg border border-gray-100 p-3 flex flex-col items-center justify-center">
@@ -303,7 +322,10 @@ export function PromptGeneratorRightPanel({
                 <p className="text-[8px] text-gray-400">pixels</p>
               </>
             ) : (
-              <p className="text-[10px] text-gray-400">Click to change</p>
+              <>
+                <LuRuler className="w-8 h-8 text-gray-300 mb-1.5" />
+                <p className="text-[10px] text-gray-400 font-semibold">Random / Let AI Decide</p>
+              </>
             )}
           </div>
         </button>
@@ -312,7 +334,7 @@ export function PromptGeneratorRightPanel({
         <button
           type="button"
           onClick={() => setActiveModal("templateSkill")}
-          className="shrink-0 w-60 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-52 cursor-pointer hover:shadow-lg hover:scale-[1.02] border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md"
+          className={`shrink-0 w-60 rounded-2xl border-2 p-4 transition-all flex flex-col justify-between h-52 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${selections.templateSkillSet ? "border-indigo-300 bg-gradient-to-br from-indigo-50/40 to-white shadow-md" : "border-gray-200 bg-white hover:border-gray-300"}`}
         >
           <div>
             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Template Type</p>
@@ -404,6 +426,10 @@ export function PromptGeneratorRightPanel({
             onUpdateSelections({ canvasSize: size });
             handleCloseModal();
           }}
+          onClear={() => {
+            onUpdateSelections({ canvasSize: null });
+            handleCloseModal();
+          }}
           onClose={handleCloseModal}
         />
       )}
@@ -413,6 +439,10 @@ export function PromptGeneratorRightPanel({
           selectedValue={selections.templateSkillSet}
           onSelect={(val) => {
             onUpdateSelections({ templateSkillSet: val });
+            handleCloseModal();
+          }}
+          onClear={() => {
+            onUpdateSelections({ templateSkillSet: null });
             handleCloseModal();
           }}
           onClose={handleCloseModal}
@@ -790,6 +820,51 @@ function ElementsSelectionModal({
 }) {
   const [activeTab, setActiveTab] = useState<"default" | "custom">("default");
   const [category, setCategory] = useState("All");
+  const [uploadedElements, setUploadedElements] = useState<SelectedElement[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    const fetchUploads = async () => {
+      try {
+        const res = await fetch("/api/uploads");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          setUploadedElements(data.data.map((item: any) => ({
+            url: item.url,
+            label: cleanFileNameToLabel(item.name),
+          })));
+        }
+      } catch (err) {
+        console.error("Failed to load uploaded elements", err);
+      }
+    };
+    fetchUploads();
+  }, []);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/uploads", { method: "POST", body: form });
+      const data = await res.json();
+      if (data.success && data.data?.url) {
+        const rawLabel = data.data.path?.split("/").pop() || file.name;
+        const label = cleanFileNameToLabel(rawLabel);
+        const newEl = { url: data.data.url, label };
+        setUploadedElements((prev) => [newEl, ...prev]);
+        onToggle(newEl);
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
 
   const categories = ["All", "Shapes", "Icons", "Ribbons", "Bases"];
 
@@ -896,11 +971,47 @@ function ElementsSelectionModal({
               })}
             </div>
           ) : (
-            /* Custom / Uploaded Elements - empty state for now */
-            <div className="text-center py-12">
-              <LuUpload className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm font-semibold text-gray-500">No uploaded elements yet</p>
-              <p className="text-xs text-gray-400 mt-1">Upload custom SVGs or images from the Elements sidebar</p>
+            <div className="space-y-4">
+              <label className="flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-gray-300 p-4 text-sm text-gray-500 transition-colors hover:border-emerald-400 hover:text-emerald-600">
+                <LuUpload className="w-4 h-4 mr-2" />
+                {uploading ? "Uploading..." : "Click to upload custom element (SVG, PNG, JPG)"}
+                <input type="file" accept="image/png,image/jpeg,image/svg+xml" className="hidden" onChange={handleUpload} />
+              </label>
+
+              {uploadedElements.length === 0 ? (
+                <div className="text-center py-12">
+                  <LuShapes className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-gray-500">No uploaded elements yet</p>
+                  <p className="text-xs text-gray-400 mt-1">Upload custom SVGs or images to use them as elements</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-4 gap-2">
+                  {uploadedElements.map((el, idx) => {
+                    const isSelected = selectedElements.some((e) => e.url === el.url);
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => onToggle(el)}
+                        className={`relative p-2 rounded-xl border flex flex-col items-center justify-center aspect-square transition-all ${
+                          isSelected
+                            ? "border-emerald-500 bg-emerald-50/50 shadow-sm"
+                            : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                        }`}
+                        title={el.label}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={el.url} alt={el.label} className="w-8 h-8 object-contain" />
+                        {isSelected && (
+                          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 flex items-center justify-center text-white text-[8px] font-bold shadow-sm">
+                            ✓
+                          </span>
+                        )}
+                        <span className="text-[8px] text-gray-400 mt-1 truncate w-full text-center">{el.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -934,6 +1045,24 @@ function ImagesSelectionModal({
   const [uploadedImages, setUploadedImages] = useState<{ name: string; url: string }[]>([]);
   const [uploading, setUploading] = useState(false);
 
+  useEffect(() => {
+    const fetchUploads = async () => {
+      try {
+        const res = await fetch("/api/uploads");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          setUploadedImages(data.data.map((item: any) => ({
+            url: item.url,
+            name: cleanFileNameToLabel(item.name),
+          })));
+        }
+      } catch (err) {
+        console.error("Failed to load uploaded images", err);
+      }
+    };
+    fetchUploads();
+  }, []);
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -944,8 +1073,11 @@ function ImagesSelectionModal({
       const res = await fetch("/api/uploads", { method: "POST", body: form });
       const data = await res.json();
       if (data.success && data.data?.url) {
-        const name = data.data.path?.split("/").pop() || file.name;
-        setUploadedImages((prev) => [{ url: data.data.url, name }, ...prev]);
+        const rawName = data.data.path?.split("/").pop() || file.name;
+        const name = cleanFileNameToLabel(rawName);
+        const newImg = { url: data.data.url, name };
+        setUploadedImages((prev) => [newImg, ...prev]);
+        onToggle(newImg);
       }
     } catch {
       // silently ignore
@@ -1071,10 +1203,12 @@ function ImagesSelectionModal({
 function CanvasSizeSelectionModal({
   selectedSize,
   onSelect,
+  onClear,
   onClose,
 }: {
-  selectedSize: PaperSize;
+  selectedSize: PaperSize | null;
   onSelect: (size: PaperSize) => void;
+  onClear: () => void;
   onClose: () => void;
 }) {
   const paperOptions = ALL_PAPER_OPTIONS.filter((o) => o.value !== "CUSTOM");
@@ -1096,6 +1230,15 @@ function CanvasSizeSelectionModal({
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+          {selectedSize && (
+            <button
+              type="button"
+              onClick={onClear}
+              className="mb-4 w-full px-4 py-2.5 rounded-xl text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors shadow-sm"
+            >
+              Clear Selection (Let AI Decide Size)
+            </button>
+          )}
           <div className="space-y-2">
             {paperOptions.map((opt) => {
               const isSelected = selectedSize === opt.value;
@@ -1134,10 +1277,12 @@ function CanvasSizeSelectionModal({
 function TemplateSkillSelectionModal({
   selectedValue,
   onSelect,
+  onClear,
   onClose,
 }: {
-  selectedValue: string;
+  selectedValue: string | null;
   onSelect: (value: string) => void;
+  onClear: () => void;
   onClose: () => void;
 }) {
   return (
@@ -1157,6 +1302,15 @@ function TemplateSkillSelectionModal({
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+          {selectedValue && (
+            <button
+              type="button"
+              onClick={onClear}
+              className="mb-4 w-full px-4 py-2.5 rounded-xl text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors shadow-sm"
+            >
+              Clear Selection (Let AI Decide Type)
+            </button>
+          )}
           <div className="space-y-2">
             {TEMPLATE_SKILL_SETS.map((skill) => {
               const isSelected = selectedValue === skill.value;

@@ -40,7 +40,7 @@ Set fill to "#e2e8f0" with stroke "#bae6fd" and strokeWidth 1.5 as a visual indi
   if (elements.length > 0) {
     lines.push(`\nELEMENT ASSETS (${elements.length}):
 ${elements.map((e, i) => `  ${i + 1}. "${e.label}" — Placeholder Name: ${assetPlaceholderName("element", i)}`).join("\n")}
-INSTRUCTION: For each element, create a Rect or Circle with the EXACT placeholder name listed above.
+INSTRUCTION: For each element, create a Rect with the EXACT placeholder name listed above.
 Position them according to the design's visual balance.
 Use opacity 0.1-0.3 for background decorative elements, or full opacity for prominent badge/icon areas.
 Set fill to "#fef3c7" with stroke "#f59e0b" and strokeWidth 1.5 as a visual indicator.`);

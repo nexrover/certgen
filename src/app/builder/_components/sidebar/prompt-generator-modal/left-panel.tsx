@@ -115,10 +115,13 @@ export function PromptGeneratorLeftPanel({
   brandKits,
   customLayouts,
 }: PromptGeneratorLeftPanelProps) {
-  const paperOptions = ALL_PAPER_OPTIONS.filter((o) => o.value !== "CUSTOM").map((o) => ({
-    value: o.value,
-    label: o.label,
-  }));
+  const paperOptions = [
+    { value: "", label: "Random / Let AI Decide" },
+    ...ALL_PAPER_OPTIONS.filter((o) => o.value !== "CUSTOM").map((o) => ({
+      value: o.value,
+      label: o.label,
+    })),
+  ];
 
   const brandKitOptions = [
     { value: "", label: "None" },
@@ -131,10 +134,13 @@ export function PromptGeneratorLeftPanel({
     ...DEFAULT_LAYOUTS.map((l) => ({ value: l.id, label: l.name })),
   ];
 
-  const skillSetOptions = TEMPLATE_SKILL_SETS.map((s) => ({
-    value: s.value,
-    label: s.label,
-  }));
+  const skillSetOptions = [
+    { value: "", label: "Random / Let AI Decide" },
+    ...TEMPLATE_SKILL_SETS.map((s) => ({
+      value: s.value,
+      label: s.label,
+    })),
+  ];
 
   const allElements = [
     ...BUILDER_ELEMENT_SHAPES.slice(0, 8),
@@ -195,14 +201,14 @@ export function PromptGeneratorLeftPanel({
               const isSelected = selections.elements.some((e) => e.url === el.url);
               return (
                 <button
-                  key={idx}
-                  onClick={() => handleToggleElement(el)}
-                  className={`relative p-1.5 rounded-xl border flex items-center justify-center aspect-square transition-all ${
-                    isSelected
-                      ? "border-indigo-500 bg-indigo-50/50 shadow-sm"
-                      : "border-gray-200 bg-white hover:border-gray-300"
-                  }`}
-                  title={el.label}
+                   key={idx}
+                   onClick={() => handleToggleElement(el)}
+                   className={`relative p-1.5 rounded-xl border flex items-center justify-center aspect-square transition-all ${
+                     isSelected
+                       ? "border-indigo-500 bg-indigo-50/50 shadow-sm"
+                       : "border-gray-200 bg-white hover:border-gray-300"
+                   }`}
+                   title={el.label}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={el.url} alt={el.label} className="w-8 h-8 object-contain" />
@@ -250,16 +256,16 @@ export function PromptGeneratorLeftPanel({
 
       <DropdownSelect
         label="Canvas Size"
-        value={selections.canvasSize}
+        value={selections.canvasSize ?? ""}
         options={paperOptions}
-        onChange={(val) => onUpdateSelections({ canvasSize: val as PaperSize })}
+        onChange={(val) => onUpdateSelections({ canvasSize: val ? (val as PaperSize) : null })}
       />
 
       <DropdownSelect
         label="Template Skill Set"
-        value={selections.templateSkillSet}
+        value={selections.templateSkillSet ?? ""}
         options={skillSetOptions}
-        onChange={(val) => onUpdateSelections({ templateSkillSet: val })}
+        onChange={(val) => onUpdateSelections({ templateSkillSet: val ? val : null })}
       />
 
       {/* Selections summary */}
