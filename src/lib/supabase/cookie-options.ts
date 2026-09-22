@@ -10,7 +10,7 @@ export function getSupabaseCookieOptions(rememberMe: boolean = false) {
     path: "/",
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
+    httpOnly: false,
     maxAge: rememberMe ? THIRTY_DAYS_SECONDS : ONE_DAY_SECONDS,
   } as const;
 }

@@ -31,6 +31,33 @@ export async function canvasJsonToPdf(
 
 function buildFabricHtml(canvasJson: Record<string, unknown>, width: number, height: number): string {
   const jsonStr = JSON.stringify(canvasJson).replace(/<\/script>/gi, "<\\/script>");
+  
+  // Extract customFonts from canvasJson
+  const customFonts = (canvasJson.customFonts as any[]) || [];
+  let fontStyles = "";
+  let fontLinks = "";
+
+  customFonts.forEach((font: any) => {
+    if (font.type === "google") {
+      fontLinks += `<link rel="stylesheet" href="${font.url}">\n`;
+    } else if (font.type === "upload") {
+      let format = "truetype";
+      if (font.url.includes("data:font/otf") || font.url.includes("data:application/x-font-opentype")) {
+        format = "opentype";
+      } else if (font.url.includes("data:font/woff2")) {
+        format = "woff2";
+      } else if (font.url.includes("data:font/woff")) {
+        format = "woff";
+      }
+      fontStyles += `
+        @font-face {
+          font-family: '${font.name}';
+          src: url('${font.url}') format('${format}');
+        }
+      `;
+    }
+  });
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -39,7 +66,9 @@ function buildFabricHtml(canvasJson: Record<string, unknown>, width: number, hei
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { width: ${width}px; height: ${height}px; overflow: hidden; }
     canvas { display: block; }
+    ${fontStyles}
   </style>
+  ${fontLinks}
   <script src="https://cdn.jsdelivr.net/npm/fabric@7/dist/index.min.js"></script>
 </head>
 <body>
@@ -50,6 +79,9 @@ function buildFabricHtml(canvasJson: Record<string, unknown>, width: number, hei
         const canvas = new fabric.Canvas('c', { width: ${width}, height: ${height} });
         const json = ${jsonStr};
         await canvas.loadFromJSON(json);
+        if (document.fonts) {
+          await document.fonts.ready;
+        }
         canvas.renderAll();
         window.__fabricReady = true;
       } catch(e) {

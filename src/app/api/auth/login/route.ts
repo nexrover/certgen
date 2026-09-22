@@ -18,7 +18,7 @@ const BodySchema = z.object({
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
-  const rl = checkRateLimit(`login:${ip}`, 10, 15 * 60 * 1000);
+  const rl = checkRateLimit(`login:${ip}`, 10, 15 * 60 * 1000); //10 attempts per 15 minutes
   if (!rl.ok) {
     return NextResponse.json(
       { success: false, error: "Too many sign-in attempts from this network. Try again later." },
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createRouteHandlerClient(body.rememberMe);
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: emailNorm,
     password: body.password,
   });
@@ -62,11 +62,48 @@ export async function POST(request: Request) {
 
   await clearLoginFailures(emailNorm);
 
+  const is2FaEnabled = data?.user?.user_metadata?.is_2fa_enabled;
+
+  if (is2FaEnabled) {
+    // Delete regular session cookies that were just set
+    const res = NextResponse.json({ success: true, require2fa: true });
+
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+
+    // Set temp session cookie with the jwt access token for 2FA verification
+    const tokenPayload = {
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+      user_id: data.user.id,
+      contact: data.user.user_metadata.two_factor_contact || data.user.email,
+      remember_me: body.rememberMe
+    };
+
+    cookieStore.set("2fa_temp_session", JSON.stringify(tokenPayload), {
+      path: "/",
+      maxAge: 15 * 60, // 15 mins
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+
+    // Clear the regular supabase cookies from cookieStore so the user isn't actually logged in yet
+    const allCookies = cookieStore.getAll();
+    for (const cookie of allCookies) {
+      if (cookie.name.startsWith("sb-") && cookie.name.includes("-auth-token")) {
+        cookieStore.delete(cookie.name);
+      }
+    }
+
+    return res;
+  }
+
   const res = NextResponse.json({ success: true });
   if (body.rememberMe) {
     res.cookies.set("remember_me", "1", {
       path: "/",
-      maxAge: 30 * 24 * 60 * 60,
+      maxAge: 30 * 24 * 60 * 60, //one months
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

@@ -71,8 +71,8 @@ export function FloatingContextMenu({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showMore]);
 
-  /* Close dropdown when selection changes */
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowMore(false);
   }, [bounds.left, bounds.top, bounds.width, bounds.height]);
 

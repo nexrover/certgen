@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/svg+xml"];
@@ -45,6 +46,84 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, data: { url: publicUrl, path } }, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Upload failed";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data, error } = await supabase.storage
+      .from("certificates")
+      .list(`uploads/${user.id}`, {
+        limit: 100,
+        offset: 0,
+        sortBy: { column: "created_at", order: "desc" },
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    const images = data
+      .filter((file) => file.name !== ".emptyFolderPlaceholder" && file.id) // ignore placeholders
+      .map((file) => {
+        const path = `uploads/${user.id}/${file.name}`;
+        const { data: { publicUrl } } = supabase.storage.from("certificates").getPublicUrl(path);
+        return {
+          url: publicUrl,
+          name: file.name,
+          created_at: file.created_at,
+          updated_at: file.updated_at,
+          metadata: file.metadata,
+        };
+      });
+
+    return NextResponse.json({ success: true, data: images });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to list uploads";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const name = searchParams.get("name");
+
+    if (!name) {
+      return NextResponse.json({ success: false, error: "File name is required" }, { status: 400 });
+    }
+
+    const path = `uploads/${user.id}/${name}`;
+
+    const adminSupabase = createAdminClient();
+    const { data, error } = await adminSupabase.storage.from("certificates").remove([path]);
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to delete upload";
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

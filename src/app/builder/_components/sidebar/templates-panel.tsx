@@ -15,9 +15,71 @@ interface TemplatesPanelProps {
   }) => void;
   customTemplates?: CustomTemplate[];
   onDeleteCustomTemplate?: (id: string) => void;
+  category?: string;
+  isLoading?: boolean;
 }
 
-type Orientation = "landscape" | "portrait";
+const EMAIL_DEMOS = [
+  { id: "email-newsletter-1", label: "Corporate Newsletter" },
+];
+
+const YOUTUBE_DEMOS = [
+  { id: "yt-social-media", label: "Social Media Growth" },
+  { id: "yt-senior-dev", label: "Senior Dev in 4 Months" },
+  { id: "yt-gaming-ultimate", label: "Ultimate Gaming" },
+  { id: "yt-fitness-core", label: "Core Fitness Challenge" },
+  { id: "yt-sunrise-music", label: "Sunrise Music Mix" },
+];
+
+const ECOMMERCE_DEMOS = [
+  { id: "ecomm-flash-sale", label: "Flash Sale Ecommerce" },
+  { id: "ecomm-flash-sale-2", label: "Flash Sale Ecommerce 2" },
+  { id: "ecomm-super-sale", label: "Super Sale Ecommerce" },
+  { id: "ecomm-product-review", label: "Product Review" },
+];
+
+const REAL_ESTATE_DEMOS = [
+  { id: "re-modern-home", label: "Modern Real Estate Home" },
+  { id: "re-modern-rent", label: "Modern Rent Real Estate" },
+  { id: "re-luxury-listing", label: "Luxury Property Listing" },
+  { id: "re-story-listing", label: "Real Estate Story Listing" },
+];
+
+const SHIPPING_LABEL_DEMOS = [
+  { id: "sl-standard", label: "Standard Shipping Label" },
+  { id: "sl-classic", label: "Classic Shipping Label" },
+  { id: "sl-modern", label: "Modern Shipping Label" },
+];
+
+const RESUME_DEMOS = [
+  { id: "resume-martha-williams", label: "Martha Williams Resume" },
+];
+
+const INVOICE_DEMOS = [
+  { id: "inv-classic", label: "Classic Invoice" },
+  { id: "inv-modern", label: "Modern Invoice" },
+  { id: "inv-minimal", label: "Minimalist Invoice" },
+];
+
+const RECEIPT_DEMOS = [
+  { id: "rec-drugstore", label: "DrugStore Receipt" },
+  { id: "rec-happyshop", label: "Happy Shop Receipt" },
+  { id: "rec-aromacafe", label: "Aroma Cafe Receipt" },
+];
+
+const SOCIAL_MEDIA_DEMOS = [
+  { id: "sm-template-1", label: "Forest Quote Social Post" },
+  { id: "sm-template-2", label: "Sand Dunes Quote Social Post" },
+  { id: "sm-template-3", label: "Cartoon Speech Social Post" },
+];
+
+const CHRISTMAS_CARD_DEMOS = [
+  { id: "cc-christmas-card-1", label: "Ornaments Christmas Card" },
+  { id: "cc-christmas-card-2", label: "Snowflake Christmas Card" },
+  { id: "cc-christmas-card-3", label: "Red Landscape Christmas Card" },
+];
+
+type Orientation = "landscape" | "portrait" | "square";
 type Category = "Course" | "Completion" | "Achievement" | "Training" | "Recognition" | "Participation" | "Webinar" | "Appreciation" | "Employee of the Month";
 type Style = "Classic" | "Modern" | "Minimal" | "Bold";
 type ColorTheme = "Navy" | "Dark" | "Green" | "Red" | "Warm" | "Cool" | "Neutral";
@@ -29,7 +91,7 @@ interface TemplatePreview {
   style: Style;
   colorTheme: ColorTheme;
   orientation: Orientation;
-  thumbnailSrc: string;
+  thumbnail?: string;
 }
 
 const ALL_CATEGORIES: Category[] = ["Course", "Completion", "Achievement", "Training", "Recognition", "Participation", "Webinar", "Appreciation", "Employee of the Month"];
@@ -153,7 +215,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Navy",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Course Completion", style: "Classic", colorTheme: "Navy", orientation: "landscape" }),
   },
   {
     id: "achievement-award",
@@ -162,7 +223,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Dark",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Achievement Award", style: "Bold", colorTheme: "Dark", orientation: "landscape" }),
   },
   {
     id: "professional-cert",
@@ -171,7 +231,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Green",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Professional Certificate", style: "Modern", colorTheme: "Green", orientation: "landscape" }),
   },
   {
     id: "communication-skills",
@@ -180,7 +239,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Red",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Communication Skills", style: "Modern", colorTheme: "Red", orientation: "landscape" }),
   },
   {
     id: "digital-marketing",
@@ -189,7 +247,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Warm",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Digital Marketing", style: "Modern", colorTheme: "Warm", orientation: "landscape" }),
   },
   {
     id: "financial-accounting",
@@ -198,7 +255,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Minimal",
     colorTheme: "Neutral",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Financial Accounting", style: "Minimal", colorTheme: "Neutral", orientation: "landscape" }),
   },
   {
     id: "seo-strategies",
@@ -207,7 +263,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Cool",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "SEO Strategies", style: "Bold", colorTheme: "Cool", orientation: "landscape" }),
   },
   {
     id: "training-course",
@@ -216,7 +271,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Red",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Training Course", style: "Bold", colorTheme: "Red", orientation: "landscape" }),
   },
   {
     id: "webinar-participation",
@@ -225,7 +279,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Cool",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Webinar Participation", style: "Modern", colorTheme: "Cool", orientation: "landscape" }),
   },
   {
     id: "appreciation",
@@ -234,7 +287,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Warm",
     orientation: "landscape",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Appreciation", style: "Classic", colorTheme: "Warm", orientation: "landscape" }),
   },
   // --- Portrait templates ---
   {
@@ -244,7 +296,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Navy",
     orientation: "portrait",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Course Completion", style: "Classic", colorTheme: "Navy", orientation: "portrait" }),
   },
   {
     id: "creative-writing",
@@ -253,7 +304,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Bold",
     colorTheme: "Warm",
     orientation: "portrait",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Creative Writing", style: "Bold", colorTheme: "Warm", orientation: "portrait" }),
   },
   {
     id: "design-academy",
@@ -262,7 +312,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Modern",
     colorTheme: "Cool",
     orientation: "portrait",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Design Academy", style: "Modern", colorTheme: "Cool", orientation: "portrait" }),
   },
   {
     id: "employee-month",
@@ -271,7 +320,6 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Classic",
     colorTheme: "Warm",
     orientation: "portrait",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Employee of the Month", style: "Classic", colorTheme: "Warm", orientation: "portrait" }),
   },
   {
     id: "completion-portrait",
@@ -280,14 +328,26 @@ const TEMPLATES: TemplatePreview[] = [
     style: "Minimal",
     colorTheme: "Neutral",
     orientation: "portrait",
-    thumbnailSrc: createTemplateThumbnailSrc({ label: "Completion Certificate", style: "Minimal", colorTheme: "Neutral", orientation: "portrait" }),
   },
 ];
 
 type FilterType = "category" | "style" | "color";
 
-export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteCustomTemplate }: TemplatesPanelProps) {
+export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteCustomTemplate, category = "certificate", isLoading = false }: TemplatesPanelProps) {
+  const isYoutube = category === "youtube";
+  const isEmail = category === "email";
+  const isEcommerce = category === "ecommerce";
+  const isRealEstate = category === "real-estate";
+  const isShippingLabel = category === "shipping-label";
+  const isResume = category === "resume";
+  const isInvoice = category === "invoice";
+  const isReceipt = category === "receipt";
+  const isSocialMedia = category === "social-media";
+  const isChristmasCard = category === "christmas-card";
+  const isNonCertificate = category !== "certificate";
   const [loading, setLoading] = useState<string | null>(null);
+  const [isHydrating, setIsHydrating] = useState(true);
+  const [hasMounted, setHasMounted] = useState(false);
   const [presetThumbnails, setPresetThumbnails] = useState<Record<string, string>>({});
   const customScrollRef = useRef<HTMLDivElement>(null);
   const filterScrollRef = useRef<HTMLDivElement>(null);
@@ -314,24 +374,46 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
   const [openFilter, setOpenFilter] = useState<FilterType | null>(null);
 
   useEffect(() => {
+    setHasMounted(true);
+    setIsHydrating(true);
     let cancelled = false;
 
     async function hydratePresetThumbnails() {
+      const allTemplatesToRender = [
+        ...TEMPLATES,
+        ...YOUTUBE_DEMOS.map(d => ({ id: d.id, orientation: "landscape" as Orientation })),
+        ...EMAIL_DEMOS.map(d => ({ id: d.id, orientation: "portrait" as Orientation })),
+        ...ECOMMERCE_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation })),
+        ...REAL_ESTATE_DEMOS.map(d => ({ id: d.id, orientation: (d.id === "re-story-listing" ? "portrait" : "square") as Orientation })),
+        ...SHIPPING_LABEL_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation })),
+        ...RESUME_DEMOS.map(d => ({ id: d.id, orientation: "portrait" as Orientation })),
+        ...INVOICE_DEMOS.map(d => ({ id: d.id, orientation: "portrait" as Orientation })),
+        ...RECEIPT_DEMOS.map(d => ({ id: d.id, orientation: "portrait" as Orientation })),
+        ...SOCIAL_MEDIA_DEMOS.map(d => ({ id: d.id, orientation: "square" as Orientation })),
+        ...CHRISTMAS_CARD_DEMOS.map(d => ({ id: d.id, orientation: "landscape" as Orientation }))
+      ];
+
       const results = await Promise.all(
-        TEMPLATES.map(async (template) => {
-          const src = await renderPresetThumbnail(template.id, template.orientation);
+        allTemplatesToRender.map(async (template) => {
+          if ((template as any).thumbnail) {
+            return [template.id, (template as any).thumbnail] as const;
+          }
+          const src = await renderPresetThumbnail(template.id, (template as any).orientation);
           return src ? ([template.id, src] as const) : null;
         }),
       );
       if (cancelled) return;
       setPresetThumbnails(Object.fromEntries(results.filter((entry): entry is readonly [string, string] => entry !== null)));
+      setIsHydrating(false);
     }
 
     void hydratePresetThumbnails();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [category, orientation]);
+
+  const showSkeletons = !hasMounted || isLoading || isHydrating || (isYoutube && !presetThumbnails["yt-social-media"]) || (isEmail && !presetThumbnails["email-newsletter-1"]) || (isEcommerce && !presetThumbnails["ecomm-flash-sale"]) || (isRealEstate && !presetThumbnails["re-modern-home"]) || (isShippingLabel && !presetThumbnails["sl-standard"]) || (isResume && !presetThumbnails["resume-martha-williams"]) || (isInvoice && (!presetThumbnails["inv-classic"] || !presetThumbnails["inv-modern"] || !presetThumbnails["inv-minimal"])) || (isReceipt && (!presetThumbnails["rec-drugstore"] || !presetThumbnails["rec-happyshop"] || !presetThumbnails["rec-aromacafe"])) || (isSocialMedia && (!presetThumbnails["sm-template-1"] || !presetThumbnails["sm-template-2"] || !presetThumbnails["sm-template-3"])) || (isChristmasCard && !presetThumbnails["cc-christmas-card-1"]);
 
   const filtered = TEMPLATES.filter((t) => {
     if (t.orientation !== orientation) return false;
@@ -371,257 +453,177 @@ export function TemplatesPanel({ onLoadTemplate, customTemplates = [], onDeleteC
 
   return (
     <div className="-mx-3 -mt-3 flex flex-col">
-      {/* Orientation tabs */}
-      <div className="flex border-b border-gray-200">
-        <button
-          onClick={() => setOrientation("landscape")}
-          className={`flex-1 py-2.5 text-xs font-medium transition-colors ${orientation === "landscape"
-            ? "border-b-2 border-blue-500 text-blue-600"
-            : "text-gray-500 hover:text-gray-700"
-            }`}
-        >
-          Landscape
-        </button>
-        <button
-          onClick={() => setOrientation("portrait")}
-          className={`flex-1 py-2.5 text-xs font-medium transition-colors ${orientation === "portrait"
-            ? "border-b-2 border-blue-500 text-blue-600"
-            : "text-gray-500 hover:text-gray-700"
-            }`}
-        >
-          Portrait
-        </button>
-      </div>
-
-      {/* Filter chips */}
-      <div className="group relative mb-2 border-b border-gray-100 bg-white">
-        {/* Left Scroll Button */}
-        <button
-          onClick={scrollFilterLeft}
-          className="absolute left-0 top-0 bottom-0 z-20 flex w-8 items-center justify-center bg-gradient-to-r from-white via-white/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
-          title="Scroll left"
-        >
-          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-gray-500 hover:text-blue-600">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </div>
-        </button>
-
-        <div 
-          ref={filterScrollRef}
-          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar px-3 py-2.5"
-          style={{ scrollbarWidth: "none" }}
-        >
-          <FilterChip
-            label="Category"
-            active={selectedCategories.length > 0}
-            isOpen={openFilter === "category"}
-            onToggle={() => setOpenFilter(openFilter === "category" ? null : "category")}
-            onClose={() => setOpenFilter(null)}
-            options={ALL_CATEGORIES}
-            selected={selectedCategories}
-            onSelect={(v) => setSelectedCategories(
-              selectedCategories.includes(v)
-                ? selectedCategories.filter((x) => x !== v)
-                : [...selectedCategories, v]
-            )}
-            onClear={() => setSelectedCategories([])}
-          />
-          <FilterChip
-            label="Style"
-            active={selectedStyles.length > 0}
-            isOpen={openFilter === "style"}
-            onToggle={() => setOpenFilter(openFilter === "style" ? null : "style")}
-            onClose={() => setOpenFilter(null)}
-            options={ALL_STYLES}
-            selected={selectedStyles}
-            onSelect={(v) => setSelectedStyles(
-              selectedStyles.includes(v as Style)
-                ? selectedStyles.filter((x) => x !== v)
-                : [...selectedStyles, v as Style]
-            )}
-            onClear={() => setSelectedStyles([])}
-            align="center"
-          />
-          <FilterChip
-            label="Color"
-            active={selectedColors.length > 0}
-            isOpen={openFilter === "color"}
-            onToggle={() => setOpenFilter(openFilter === "color" ? null : "color")}
-            onClose={() => setOpenFilter(null)}
-            options={ALL_COLORS}
-            selected={selectedColors}
-            onSelect={(v) => setSelectedColors(
-              selectedColors.includes(v as ColorTheme)
-                ? selectedColors.filter((x) => x !== v)
-                : [...selectedColors, v as ColorTheme]
-            )}
-            onClear={() => setSelectedColors([])}
-            align="right"
-          />
-          
+      {/* Orientation tabs - Restore default look */}
+      {!isYoutube && !isEmail && !isChristmasCard && (
+        <div className="flex border-b border-gray-200">
           <button
-            onClick={() => { setSelectedCategories([]); setSelectedStyles([]); setSelectedColors([]); }}
-            className={`shrink-0 flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-semibold transition-all ${
-              hasFilters 
-                ? "border-red-100 bg-red-50 text-red-600 hover:bg-red-100" 
-                : "border-gray-100 bg-gray-50 text-gray-400 opacity-60 cursor-default"
-            }`}
+            onClick={() => setOrientation("landscape")}
+            className={`flex-1 py-2.5 text-xs font-medium transition-colors ${orientation === "landscape"
+              ? "border-b-2 border-blue-500 text-blue-600"
+              : "text-gray-500 hover:text-gray-700"
+              }`}
           >
-            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
-            Clear All
+            Landscape
           </button>
-
-          {/* Extra spacing for the fade mask/button */}
-          <div className="shrink-0 w-6" />
-        </div>
-        
-        {/* Right Scroll Button */}
-        <button
-          onClick={scrollFilterRight}
-          className="absolute right-0 top-0 bottom-0 z-20 flex w-10 items-center justify-center bg-gradient-to-l from-white via-white/90 to-transparent"
-          title="Scroll right"
-        >
-          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-gray-500 hover:text-blue-600">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </div>
-        </button>
-      </div>
-
-      {/* ── Custom Templates — horizontal scroll ────────── */}
-      {customTemplates.length > 0 && (
-        <div className="px-3 pb-6">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-gray-700">Recently Used</span>
-            <div className="flex gap-1">
-              <button
-                onClick={scrollCustomLeft}
-                className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600"
-                title="Scroll left"
-              >
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-              </button>
-              <button
-                onClick={scrollCustomRight}
-                className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600"
-                title="Scroll right"
-              >
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div
-            ref={customScrollRef}
-            className="flex gap-2 overflow-x-auto pb-2 pt-2"
-            style={{ scrollbarWidth: "none" }}
+          <button
+            onClick={() => setOrientation("portrait")}
+            className={`flex-1 py-2.5 text-xs font-medium transition-colors ${orientation === "portrait"
+              ? "border-b-2 border-blue-500 text-blue-600"
+              : "text-gray-500 hover:text-gray-700"
+              }`}
           >
-            {customTemplates.map((ct) => (
-              <div key={ct.id} className="group relative shrink-0 w-[120px]">
-                <button
-                  onClick={() => {
-                    onLoadTemplate({
-                      canvasJson: ct.canvasJson,
-                      paperSize: ct.paperSize,
-                      width: ct.width,
-                      height: ct.height,
-                    });
-                  }}
-                  className="block w-full overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md"
-                  style={{ aspectRatio: `${ct.width} / ${ct.height}` }}
-                  title="Load custom template"
-                >
-                  <img
-                    src={ct.thumbnail}
-                    alt="Custom template"
-                    className="h-full w-full object-contain"
-                    draggable={false}
-                  />
-                </button>
-                {/* Delete button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteCustomTemplate?.(ct.id);
-                  }}
-                  className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md transition-colors hover:bg-red-600 group-hover:flex z-10"
-                  title="Remove"
-                >
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                    <path d="M18 6 6 18M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            ))}
-          </div>
+            Portrait
+          </button>
         </div>
       )}
 
-      {/* ── All Results label ──────────────────────────────── */}
-      <div className="px-3 pb-1.5">
-        <span className="text-[11px] font-semibold text-gray-700">All Results</span>
+      {/* Filter chips - Restore default style with new functionality */}
+      <div className="group relative border-b border-gray-100 bg-white">
+        <button
+          onClick={scrollFilterLeft}
+          className="absolute left-0 top-0 bottom-0 z-20 flex w-8 items-center justify-center bg-gradient-to-r from-white via-white/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+        >
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-gray-500 hover:text-blue-600">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </div>
+        </button>
+        <div ref={filterScrollRef} className="flex items-center gap-1.5 overflow-x-auto no-scrollbar px-3 py-2.5" style={{ scrollbarWidth: "none" }}>
+          <FilterChip label="Category" active={selectedCategories.length > 0} isOpen={openFilter === "category"} onToggle={() => setOpenFilter(openFilter === "category" ? null : "category")} onClose={() => setOpenFilter(null)} options={ALL_CATEGORIES} selected={selectedCategories} onSelect={(v) => setSelectedCategories(selectedCategories.includes(v) ? selectedCategories.filter((x) => x !== v) : [...selectedCategories, v])} onClear={() => setSelectedCategories([])} />
+          <FilterChip label="Style" active={selectedStyles.length > 0} isOpen={openFilter === "style"} onToggle={() => setOpenFilter(openFilter === "style" ? null : "style")} onClose={() => setOpenFilter(null)} options={ALL_STYLES} selected={selectedStyles} onSelect={(v) => setSelectedStyles(selectedStyles.includes(v as Style) ? selectedStyles.filter((x) => x !== v) : [...selectedStyles, v as Style])} onClear={() => setSelectedStyles([])} align="center" />
+          <FilterChip label="Color" active={selectedColors.length > 0} isOpen={openFilter === "color"} onToggle={() => setOpenFilter(openFilter === "color" ? null : "color")} onClose={() => setOpenFilter(null)} options={ALL_COLORS} selected={selectedColors} onSelect={(v) => setSelectedColors(selectedColors.includes(v as ColorTheme) ? selectedColors.filter((x) => x !== v) : [...selectedColors, v as ColorTheme])} onClear={() => setSelectedColors([])} align="right" />
+          {hasFilters && (
+            <button onClick={() => { setSelectedCategories([]); setSelectedStyles([]); setSelectedColors([]); }} className="shrink-0 flex items-center gap-1 rounded-full border border-red-100 bg-red-50 px-3 py-1 text-[10px] font-semibold text-red-600 hover:bg-red-100 transition-all">
+              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M18 6 6 18M6 6l12 12" /></svg>
+              Clear
+            </button>
+          )}
+        </div>
+        <button onClick={scrollFilterRight} className="absolute right-0 top-0 bottom-0 z-20 flex w-10 items-center justify-center bg-gradient-to-l from-white via-white/90 to-transparent">
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-gray-500 hover:text-blue-600">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+          </div>
+        </button>
       </div>
 
-      {/* Templates grid */}
-      <div className="grid grid-cols-2 gap-2 px-3 pb-3">
-        {/* Blank template */}
-        {(() => {
-          const blankDims = orientation === "portrait"
-            ? { width: 595, height: 842 }
-            : { width: 842, height: 595 };
-          return (
+      {/* Results Section */}
+      {showSkeletons ? (
+        <div className="px-3 py-4">
+          <div className="mb-4 h-3 w-20 skeleton rounded" />
+          <div className="grid grid-cols-2 gap-2">
+            <div
+              className="skeleton rounded-lg border border-dashed border-gray-200"
+              style={{
+                aspectRatio: isYoutube ? "16 / 9" : isEmail ? "595 / 842" : orientation === "portrait" ? "595 / 842" : "842 / 595",
+              }}
+            />
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div
+                key={`skeleton-${i}`}
+                className="skeleton rounded-lg border border-gray-100"
+                style={{
+                  aspectRatio: isYoutube ? "16 / 9" : isEmail ? "595 / 842" : orientation === "portrait" ? "595 / 842" : "842 / 595",
+                  animation: "fadeIn 0.8s ease-out forwards",
+                  animationDelay: `${i * 0.05}s`,
+                  opacity: 0,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Recently Used - Integrated into default layout */}
+          {customTemplates.length > 0 && (
+            <div className="px-3 py-4 border-b border-gray-100 bg-white">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-gray-700">Recently Used</span>
+                <div className="flex gap-1">
+                  <button onClick={scrollCustomLeft} className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                  </button>
+                  <button onClick={scrollCustomRight} className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                  </button>
+                </div>
+              </div>
+              <div ref={customScrollRef} className="flex gap-2 overflow-x-auto no-scrollbar pt-2 pb-1 px-1" style={{ scrollbarWidth: "none" }}>
+                {customTemplates.map((ct) => (
+                  <div key={ct.id} className="group relative shrink-0 w-[120px]">
+                    <button
+                      onClick={() => onLoadTemplate({ canvasJson: ct.canvasJson, paperSize: ct.paperSize, width: ct.width, height: ct.height })}
+                      className="block w-full overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md"
+                      style={{ aspectRatio: `${ct.width} / ${ct.height}` }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={ct.thumbnail} alt="Custom template" className="h-full w-full object-contain" draggable={false} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDeleteCustomTemplate?.(ct.id); }}
+                      className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 group-hover:flex z-20"
+                    >
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* All Results - Default look */}
+          <div className="px-3 py-2">
+            <span className="text-[11px] font-semibold text-gray-700">All Results</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 px-3 pb-6">
+            {/* Blank template */}
             <button
               onClick={handleBlank}
               className="group flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-blue-300 hover:bg-blue-50"
-              style={{ aspectRatio: `${blankDims.width} / ${blankDims.height}` }}
+              style={{ aspectRatio: isYoutube ? "16 / 9" : isEmail ? "595 / 842" : (isResume || isInvoice) ? "1020 / 1320" : isReceipt ? "820 / 1360" : (isEcommerce || isRealEstate || isShippingLabel || isSocialMedia) ? "1 / 1" : isChristmasCard ? "1050 / 600" : orientation === "portrait" ? "595 / 842" : "842 / 595" }}
             >
-              <svg className="h-6 w-6 text-gray-300 transition-colors group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="h-6 w-6 text-gray-300 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
             </button>
-          );
-        })()}
 
-        {filtered.map((t) => (
-          (() => {
-            const dims = getTemplateDimensions(t.id, t.orientation);
-            return (
-              <button
-                key={t.id}
-                onClick={() => handleLoad(t.id)}
-                disabled={loading === t.id}
-                className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md disabled:opacity-50"
-                style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
-              >
-                <img
-                  src={presetThumbnails[t.id] ?? t.thumbnailSrc}
-                  alt={`${t.label} preview`}
-                  className="h-full w-full bg-white object-contain"
-                  draggable={false}
-                />
-                {loading === t.id && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white/80">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-                  </div>
-                )}
-              </button>
-            );
-          })()
-        ))}
-      </div>
+            {/* Demo cards / Presets */}
+            {(isYoutube ? YOUTUBE_DEMOS : isEmail ? EMAIL_DEMOS : isEcommerce ? ECOMMERCE_DEMOS : isRealEstate ? REAL_ESTATE_DEMOS : isShippingLabel ? SHIPPING_LABEL_DEMOS : isResume ? RESUME_DEMOS : isInvoice ? INVOICE_DEMOS : isReceipt ? RECEIPT_DEMOS : isSocialMedia ? SOCIAL_MEDIA_DEMOS : isChristmasCard ? CHRISTMAS_CARD_DEMOS : filtered).map((demo) => {
+              const dims = isYoutube ? { width: 1280, height: 720 } : isEmail ? { width: 595, height: 842 } : (isEcommerce || isRealEstate || isShippingLabel) ? { width: 500, height: 500 } : isSocialMedia ? { width: 1200, height: 1200 } : isChristmasCard ? { width: 1050, height: 600 } : (isResume || isInvoice) ? { width: 1020, height: 1320 } : isReceipt ? { width: 820, height: 1360 } : getTemplateDimensions(demo.id, (demo as any).orientation || orientation);
+              const thumb = presetThumbnails[demo.id];
 
-      {filtered.length === 0 && (
-        <div className="px-3 pb-4 text-center text-xs text-gray-400">
-          No templates match your filters.
-        </div>
+              if (!thumb) {
+                return (
+                  <div
+                    key={`placeholder-${demo.id}`}
+                    className="skeleton rounded-lg border border-gray-100"
+                    style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
+                  />
+                );
+              }
+
+              return (
+                <button
+                  key={demo.id}
+                  onClick={() => handleLoad(demo.id)}
+                  className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-blue-300 hover:shadow-md disabled:opacity-50 animate-in fade-in duration-500"
+                  style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
+                  title={demo.label}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={thumb} alt={demo.label} className="h-full w-full object-cover" draggable={false} />
+                  {loading === demo.id && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {filtered.length === 0 && !isYoutube && !isEmail && (
+            <div className="px-3 pb-8 text-center text-xs text-gray-400">No templates match your filters.</div>
+          )}
+        </>
       )}
     </div>
   );
@@ -681,15 +683,15 @@ function FilterChip<T extends string>({
       </button>
 
       {isOpen && coords && createPortal(
-        <div 
+        <div
           ref={dropdownRef}
           className="fixed z-[9999] w-48 rounded-xl border border-gray-200 bg-white py-1 shadow-2xl ring-1 ring-black/[0.05]"
           style={{
             top: `${coords.top + 6}px`,
-            left: align === "right" 
-              ? `${coords.left + coords.width - 192}px` 
-              : align === "center" 
-                ? `${coords.left + coords.width/2 - 96}px` 
+            left: align === "right"
+              ? `${coords.left + coords.width - 192}px`
+              : align === "center"
+                ? `${coords.left + coords.width / 2 - 96}px`
                 : `${coords.left}px`,
             animation: "dropdown-fade 0.15s ease-out",
           }}
@@ -700,7 +702,7 @@ function FilterChip<T extends string>({
               <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M18 6 6 18M6 6l12 12" /></svg>
             </button>
           </div>
-          <div className="max-h-56 overflow-y-auto py-1.5">
+          <div className="max-h-56 overflow-y-auto py-1.5 no-scrollbar">
             {options.map((opt) => (
               <button
                 key={opt}
@@ -718,11 +720,11 @@ function FilterChip<T extends string>({
             ))}
           </div>
           <div className="flex items-center justify-end border-t border-gray-100 px-3 py-2 bg-gray-50/50 rounded-b-xl">
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 onClear();
-              }} 
+              }}
               className="text-[10px] font-semibold text-gray-400 hover:text-red-500 transition-colors uppercase tracking-tight"
             >
               Clear Selection

@@ -18,8 +18,17 @@ function line(opts: Record<string, unknown>) {
   return { type: "Line", selectable: true, ...opts };
 }
 
+function circle(opts: Record<string, unknown>) {
+  return { type: "Circle", selectable: true, ...opts };
+}
+
 const L = { w: 842, h: 595 };
 const P = { w: 595, h: 842 };
+const YT = { w: 1280, h: 720 };
+
+function img(src: string, opts: Record<string, unknown>) {
+  return { type: "image", src, crossOrigin: "anonymous", selectable: true, ...opts };
+}
 
 function cx(canvasW: number, objW: number) {
   return (canvasW - objW) / 2;
@@ -368,4 +377,1850 @@ export const PRESET_TEMPLATES: Record<string, PresetTemplate> = {
       ],
     },
   },
+
+  // ─── YouTube Thumbnail templates (1280×720) ───
+
+  "yt-gaming-ultimate": {
+    name: "Ultimate Gaming Challenge",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE_THUMBNAIL",
+    canvasJson: {
+      version: "7.0.0", background: "#000000",
+      objects: [
+        // Green background section at bottom
+        rect({ left: 0, top: 540, width: YT.w, height: 180, fill: "#22c55e" }),
+
+        // Main Human Image from /Images/s3.png
+        img("/Images/s3.png", {
+          left: -100,
+          top: 50,
+          scaleX: 0.4,
+          scaleY: 0.4,
+          shadow: { color: "#22c55e", blur: 60, offsetX: 0, offsetY: 0 }
+        }),
+
+        // Stars top right
+        tb("\u2605 \u2605 \u2605 \u2605 \u2605", {
+          left: 1050, top: 150, width: 200, fontSize: 32, fill: "#22c55e", textAlign: "right"
+        }),
+
+        // Text Content
+        tb("THE ULTIMATE", {
+          left: 480, top: 200, width: 800, fontSize: 80, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica"
+        }),
+        tb("GAMING", {
+          left: 480, top: 300, width: 800, fontSize: 160, fontWeight: "900", fontStyle: "italic", fill: "#22c55e", textAlign: "left", fontFamily: "Helvetica", charSpacing: -50
+        }),
+        tb("CHALLENGE", {
+          left: 480, top: 500, width: 800, fontSize: 110, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica"
+        }),
+      ],
+    },
+  },
+
+  "yt-senior-dev": {
+    name: "Senior Developer in 4 Months",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE_THUMBNAIL",
+    canvasJson: {
+      version: "7.0.0", background: "#0f172a",
+      objects: [
+        img("/Images/Temp1/8952a815-9c9c-4d1a-b365-a121f6ede0db.jpeg", {
+          left: 0, top: -400, scaleX: 0.32, scaleY: 0.32, selectable: true
+        }),
+        rect({ left: 0, top: 0, width: 1280, height: 720, fill: "#000000", opacity: 0.3, selectable: false }),
+        tb("ZERO", {
+          left: 150, top: 280, width: 200, fontSize: 50, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New"
+        }),
+        img("/Images/Temp1/1830aa2d-a9e8-4de9-955d-132e5f935bf9.svg", {
+          left: 280, top: 180, scaleX: 0.22, scaleY: 0.22, selectable: true
+        }),
+        tb("SENIOR\nDEVELOPER", {
+          left: 450, top: 170, width: 400, fontSize: 60, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New", textAlign: "left", lineHeight: 1.1
+        }),
+        rect({ left: 280, top: 380, width: 240, height: 70, fill: "#27486e", rx: 35, ry: 35, angle: -12 }),
+        tb("in only", {
+          left: 310, top: 385, width: 200, fontSize: 45, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", fontFamily: "Helvetica", angle: -12
+        }),
+        rect({ left: 220, top: 480, width: 380, height: 90, fill: "#2e295e", rx: 45, ry: 45, angle: -12 }),
+        tb("4 MONTHS", {
+          left: 250, top: 485, width: 350, fontSize: 65, fontWeight: "bold", fontStyle: "italic", fill: "#ffffff", fontFamily: "Helvetica", angle: -12
+        }),
+        img("/Images/Temp1/a979a5a0-ce84-4e99-9c45-6318f40e9cac.png", {
+          left: 650, top: 150, scaleX: 0.36, scaleY: 0.36, selectable: true
+        }),
+        rect({ left: 0, top: 620, width: 1280, height: 100, fill: "#27486e" }),
+        tb("EPISODE #2", {
+          left: 120, top: 645, width: 300, fontSize: 35, fontWeight: "bold", fill: "#ffffff", fontFamily: "Courier New", charSpacing: 150
+        }),
+      ],
+    },
+  },
+
+  "yt-social-media": {
+    name: "Social Media Growth",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE_THUMBNAIL",
+    canvasJson: {
+      version: "7.0.0", background: "#000000",
+      objects: [
+        tb("ep #28", {
+          left: -20, top: -50, width: 800, fontSize: 350, fontWeight: "bold", fill: "#1f1f1f", fontFamily: "Helvetica"
+        }),
+        img("/Images/Temp2/s2.png", {
+          left: 530, top: 10, scaleX: 1.4, scaleY: 1.4, selectable: true
+        }),
+        img("/Images/Temp2/s.png", {
+          left: 0, top: 0, scaleX: 1.6, scaleY: 1.6, selectable: true
+        }),
+        tb("How to grow", {
+          left: 100, top: 250, width: 600, fontSize: 75, fontWeight: "500", fill: "#ffffff", fontFamily: "Helvetica"
+        }),
+        tb("your", {
+          left: 100, top: 340, width: 200, fontSize: 75, fontWeight: "500", fill: "#ffffff", fontFamily: "Helvetica"
+        }),
+        tb("social media.", {
+          left: 270, top: 340, width: 500, fontSize: 75, fontWeight: "bold", fill: "#84cc16", fontFamily: "Helvetica"
+        }),
+        { type: "Circle", left: 100, top: 495, radius: 4, fill: "#84cc16", selectable: true },
+        tb("Olivia Wilson", {
+          left: 125, top: 485, width: 300, fontSize: 24, fill: "#cccccc", fontFamily: "Helvetica", charSpacing: 200
+        }),
+      ],
+    },
+  },
+  "yt-fitness-core": {
+    name: "Core Fitness Challenge",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE_THUMBNAIL",
+    canvasJson: {
+      version: "7.0.0", background: "#000000",
+      objects: [
+        // 1. Photo Background
+        img("/Images/Temp3/bg.jpeg", {
+          left: 0, top: 0, scaleX: 0.2, scaleY: 0.2, selectable: true
+        }),
+        // 2. Dark Overlay
+        rect({ left: 0, top: 0, width: 1280, height: 720, fill: "rgba(0,0,0,0.4)", selectable: false }),
+
+        // 3. Bottom-Left Red Shape (L-shape)
+        rect({ left: 80, top: 540, width: 140, height: 45, fill: "#c23333" }),
+        rect({ left: 80, top: 540, width: 45, height: 120, fill: "#c23333" }),
+
+        // 4. Shape-Title-1 (COR background)
+        rect({ left: 240, top: 350, width: 215, height: 110, fill: "#c23333" }),
+        // 5. Title-1 (COR)
+        tb("COR", {
+          left: 255, top: 355, width: 200, fontSize: 95, fontWeight: "900", fill: "#ffffff", fontFamily: "Impact"
+        }),
+
+        // 6. Shape-Title-2 (EXERCISES background)
+        rect({ left: 240, top: 460, width: 500, height: 110, fill: "#c23333" }),
+        // 7. Title-2 (EXERCISES)
+        tb("EXERCISES", {
+          left: 255, top: 465, width: 500, fontSize: 95, fontWeight: "900", fill: "#ffffff", fontFamily: "Impact"
+        }),
+
+        // 8. Subtitle
+        tb("You should do everyday", {
+          left: 250, top: 585, width: 800, fontSize: 45, fill: "#ffffff", fontFamily: "Helvetica"
+        }),
+
+        // 9. Logo (Top Right)
+        img("/Images/Temp3/logo.png", {
+          left: 1100, top: 50, scaleX: 0.2, scaleY: 0.2, selectable: true
+        }),
+      ],
+    },
+  },
+  "yt-sunrise-music": {
+    name: "Sunrise Music Mix",
+    width: YT.w, height: YT.h, paperSize: "YOUTUBE_THUMBNAIL",
+    canvasJson: {
+      version: "7.0.0", background: "#000000",
+      objects: [
+        // 1. Background
+        img("/Images/Temp4/bg.jpg", {
+          left: 0, top: -66, scaleX: 1.6, scaleY: 1.6, selectable: true
+        }),
+        // 2. Left Spark
+        img("/Images/Temp4/spark.svg", {
+          left: 256, top: 360, scaleX: 0.9, scaleY: 0.9, angle: -40, selectable: true
+        }),
+        // 3. Right Spark
+        img("/Images/Temp4/spark.svg", {
+          left: 1100, top: 300, scaleX: 1.4, scaleY: 1.4, angle: 140, selectable: true
+        }),
+        // 4. Sunrise Text
+        tb("sunrise", {
+          left: 340, top: 180, width: 600, fontSize: 220, fill: "#ffffff", fontFamily: "Georgia", fontStyle: "italic", textAlign: "center", selectable: true
+        }),
+        // 5. Music Mix
+        tb("MUSIC MIX", {
+          left: 440, top: 460, width: 400, fontSize: 36, fill: "#ffffff", fontWeight: "300", fontFamily: "Helvetica", textAlign: "center", charSpacing: 500, selectable: true
+        }),
+      ],
+    },
+  },
+
+  "ecomm-flash-sale": {
+    name: "Flash Sale Ecommerce",
+    width: 500, height: 500, paperSize: "SQUARE_500",
+    canvasJson: {
+      version: "7.0.0", background: "#a21caf",
+      objects: [
+        // Background Gradient
+        {
+          type: "Rect", left: 0, top: 0, width: 500, height: 500,
+          fill: {
+            type: 'linear',
+            coords: { x1: 0, y1: 0, x2: 500, y2: 500 },
+            colorStops: [
+              { offset: 0, color: '#a21caf' },
+              { offset: 1, color: '#ec4899' }
+            ]
+          },
+          selectable: false, evented: false
+        },
+        // Logo Icon Background
+        {
+          type: "Circle", left: cx(500, 40), top: 45, radius: 20, fill: "rgba(255,255,255,0.2)"
+        },
+        // Heart Icon
+        tb("\u2764", { left: cx(430, 30), top: 52, width: 50, fontSize: 30, fill: "#ffffff", textAlign: "center" }),
+        // Logo Text
+        tb("YOU BRAND\nNAME HERE", { left: cx(500, 200), top: 85, width: 200, fontSize: 11, fontWeight: "bold", fill: "#ffffff", textAlign: "center", lineHeight: 1.1 }),
+        // Promo Text
+        tb("15% OFF ALL BRANDS", { left: cx(500, 400), top: 155, width: 400, fontSize: 16, fontWeight: "800", fill: "#ffffff", textAlign: "center", charSpacing: 50 }),
+        // FLASH
+        tb("FLASH", { left: cx(500, 500), top: 180, width: 500, fontSize: 115, fontWeight: "900", fill: "#ffffff", textAlign: "center", fontFamily: "Impact" }),
+        // SALE
+        tb("SALE", { left: cx(500, 500), top: 280, width: 500, fontSize: 115, fontWeight: "900", fill: "#ffffff", textAlign: "center", fontFamily: "Impact" }),
+        // Button
+        rect({ left: cx(500, 160), top: 410, width: 160, height: 40, fill: "#ffffff", rx: 2, ry: 2 }),
+        tb("SHOP NOW", { left: cx(500, 150), top: 420, width: 150, fontSize: 18, fontWeight: "900", fill: "#ec4899", textAlign: "center" }),
+      ],
+    },
+  },
+
+  "ecomm-flash-sale-2": {
+    name: "Flash Sale Ecommerce 2",
+    width: 500, height: 500, paperSize: "SQUARE_500",
+    canvasJson: {
+      version: "7.0.0", background: "#ff33cc",
+      objects: [
+        // Decorative Shapes
+        { type: "Circle", left: -25, top: -25, radius: 45, fill: "#ffff00", selectable: true },
+        { type: "Circle", left: -30, top: 235, radius: 25, fill: "#0000ff", selectable: true },
+        { type: "Rect", left: 455, top: -15, width: 70, height: 70, fill: "#ff0000", angle: 45, selectable: true },
+
+        // Header Text
+        tb("FLASH SALE", { left: cx(500, 480), top: 45, width: 480, fontSize: 58, fontWeight: "900", fill: "#ffffff", textAlign: "center", fontFamily: "Impact" }),
+        tb("15% OFF ALL BRANDS", { left: cx(500, 400), top: 102, width: 400, fontSize: 16, fontWeight: "bold", fill: "#ffffff", textAlign: "center" }),
+
+        // Center Image (Full width 500px, fit & center)
+        {
+          ...img("/Images/ectemp2/2572972.jpeg", {
+            left: 50,
+            top: 150,
+            width: 1280,
+            height: 853,
+            scaleX: 0.31,
+            scaleY: 0.31,
+            selectable: true,
+          }),
+          clipPath: {
+            type: "Rect",
+            left: 0,
+            top: 0,
+            width: 1280,
+            height: 853,
+            rx: 60,
+            ry: 60,
+            originX: "center",
+            originY: "center"
+          }
+        },
+        { type: "Circle", left: 400, top: 375, radius: 45, fill: "#ffff00", selectable: true },
+
+        // Button
+        rect({ left: cx(500, 200), top: 390, width: 200, height: 50, fill: "#ffffff", rx: 0, ry: 0 }),
+        tb("SHOP NOW", { left: cx(500, 180), top: 402, width: 180, fontSize: 22, fontWeight: "900", fill: "#ff33cc", textAlign: "center" }),
+      ],
+    },
+  },
+
+  "ecomm-super-sale": {
+    name: "Super Sale Ecommerce",
+    width: 500, height: 500, paperSize: "SQUARE_500",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Background Pattern
+        img("/Images/ectemp3/bg.png", {
+          left: 0, top: 0, width: 500, height: 500,
+          scaleX: 1, scaleY: 1,
+          selectable: false, evented: false
+        }),
+
+        // Central Black Circle
+        { type: "Circle", left: cx(500, 420), top: 40, radius: 210, fill: "#000000", selectable: true },
+
+        // SUPER SALE Text
+        tb("SUPER", { left: cx(500, 400), top: 125, width: 400, fontSize: 80, fontWeight: "900", fill: "#ffff00", textAlign: "center", fontFamily: "Impact" }),
+        tb("SALE", { left: cx(500, 400), top: 210, width: 400, fontSize: 80, fontWeight: "900", fill: "#ffff00", textAlign: "center", fontFamily: "Impact" }),
+
+        // Promo Subtitle
+        tb("15% off on all items", { left: cx(500, 400), top: 320, width: 400, fontSize: 18, fontWeight: "600", fill: "#ffffff", textAlign: "center" }),
+
+        // Button
+        rect({ left: cx(500, 130), top: 375, width: 130, height: 35, fill: "#ffffff", rx: 17, ry: 17 }),
+        tb("VISIT US", { left: cx(500, 120), top: 382, width: 120, fontSize: 14, fontWeight: "bold", fill: "#000000", textAlign: "center" }),
+      ],
+    },
+  },
+
+  "ecomm-product-review": {
+    name: "Product Review",
+    width: 500, height: 500, paperSize: "SQUARE_500",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Split Background
+        rect({ left: 0, top: 0, width: 250, height: 500, fill: "#b9c1c4" }),
+        {
+          ...img("/Images/ectemp4/bg.jpeg", {
+            left: 250, top: 0,
+            width: 640,
+            height: 1280,
+            scaleX: 0.39, scaleY: 0.39, // 1280 * 0.39 = 500
+            selectable: false, evented: false
+          }),
+          clipPath: {
+            type: "Rect", left: 0, top: 0, width: 640, height: 1280, originX: "center", originY: "center"
+          }
+        },
+
+        // Logo Area
+        { type: "Circle", left: 35, top: 70, radius: 20, stroke: "#ffffff", strokeWidth: 1, fill: "transparent" },
+        tb("YOUR LOGO", { left: 82, top: 83, width: 80, fontSize: 14, fill: "#ffffff", fontWeight: "bold" }),
+
+        // Title
+        tb("Product\nReview", { left: 35, top: 120, width: 200, fontSize: 36, fill: "#ffffff", fontWeight: "bold", fontFamily: "Georgia" }),
+
+        // Review Card
+        rect({ left: 30, top: 230, width: 360, height: 210, fill: "#ffffff", rx: 15, ry: 15 }),
+        // Avatar
+        {
+          ...img("/Images/ectemp4/human.jpeg", {
+            left: 55, top: 250,
+            scaleX: 0.06, scaleY: 0.06, // 1280 * 0.06 = 76.8
+            selectable: true
+          }),
+          clipPath: { type: "Circle", radius: 640, left: 0, top: 0, originX: "center", originY: "center" }
+        },
+        // Reviewer Name & Rating
+        tb("Michelly Leary", { left: 145, top: 262, width: 200, fontSize: 18, fill: "#333333", fontWeight: "900" }),
+        img("/Images/ectemp4/star.png", { left: 145, top: 290, scaleX: 0.06, scaleY: 0.06 }),
+
+        // Review Content
+        tb("This facial cleansing is very safe to use and a very satisfying product, i want to try this product for my son since its very mild to use.", {
+          left: 55, top: 345, width: 310, fontSize: 14, fill: "#666666", lineHeight: 1.2
+        }),
+        tb("Reviewed on July 23, 2022", { left: 55, top: 410, width: 310, fontSize: 9, fill: "#999999" }),
+      ],
+    },
+  },
+  "re-modern-home": {
+    name: "Modern Real Estate Home",
+    width: 1024, height: 1024, paperSize: "SQUARE_1024",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Background Image
+        img("/Images/REtemp1/bg.jpeg", {
+          left: -255, top: 0,
+          scaleX: 0.291, scaleY: 0.291, // Proportional scaling to fit height (1024/3517)
+          selectable: true
+        }),
+        // 2. Shape-Title (Red banner)
+        rect({
+          left: 0, top: 220, width: 1024, height: 280,
+          fill: "rgba(205, 92, 92, 0.8)",
+          selectable: true
+        }),
+        // 3. Title
+        tb("YOUR NEXT HOME", {
+          left: 0, top: 270, width: 1024, fontSize: 90, fontWeight: "900",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica"
+        }),
+        // 4. Subtitle
+        tb("STARTS RIGHT HERE", {
+          left: 0, top: 380, width: 1024, fontSize: 38, fontWeight: "800",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica", charSpacing: 100
+        }),
+        // 5. Button (Red rounded rect)
+        rect({
+          left: cx(1024, 340), top: 800, width: 340, height: 85,
+          fill: "#cd5c5c", rx: 42, ry: 42,
+          selectable: true,
+          stroke: "#ffffff", strokeWidth: 3
+        }),
+        // 6. Button Text
+        tb("book a visit", {
+          left: cx(1024, 300), top: 822, width: 300, fontSize: 32, fontWeight: "600",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica"
+        }),
+      ],
+    },
+  },
+  "re-modern-rent": {
+    name: "Modern Rent Real Estate",
+    width: 1024, height: 1024, paperSize: "SQUARE_1024",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Background Image
+        img("/Images/REtemp2/bd.png", {
+          left: 0, top: 0, scaleX: 1024 / 1080, scaleY: 1024 / 1080,
+          selectable: true
+        }),
+        // 2. Shape-BG (Left overlay)
+        rect({
+          left: 40, top: 0, width: 370, height: 1024,
+          fill: "rgba(35, 55, 45, 0.7)",
+          selectable: true
+        }),
+        // 3. Title
+        tb("RENT A\nMODERN\nHOUSE", {
+          left: 60, top: 120, width: 300, fontSize: 72, fontWeight: "900",
+          fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica", lineHeight: 1
+        }),
+        // 4. Divider Line (shape-1)
+        rect({
+          left: 60, top: 450, width: 230, height: 15,
+          fill: "#ffffff",
+          selectable: true
+        }),
+        // 5. Bottom White Shape (shape-2)
+        rect({
+          left: 80, top: 940, width: 200, height: 40,
+          fill: "#ffffff",
+          selectable: true
+        }),
+        // 6. Information Title
+        tb("INFORMATION ON", {
+          left: 70, top: 780, width: 300, fontSize: 18, fontWeight: "bold",
+          fill: "#aaaaaa", textAlign: "left", fontFamily: "Helvetica", charSpacing: 100
+        }),
+        // 7. Infos
+        tb("+123-456-7890\nwww.modernhouses.com", {
+          left: 70, top: 820, width: 300, fontSize: 24, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "left", fontFamily: "Helvetica", lineHeight: 1.4
+        }),
+        // 8. Button (button-cta)
+        rect({
+          left: 680, top: 850, width: 240, height: 75,
+          fill: "#1a2e23", rx: 37, ry: 37,
+          selectable: true
+        }),
+        // 9. Button Text
+        tb("BOOK NOW", {
+          left: 680, top: 872, width: 240, fontSize: 24, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica"
+        }),
+      ],
+    },
+  },
+  "re-luxury-listing": {
+    name: "Luxury Property Listing",
+    width: 1024, height: 1024, paperSize: "SQUARE_1024",
+    canvasJson: {
+      version: "7.0.0", background: "#1a1a2e",
+      objects: [
+        // 1. Top Header Bar
+        rect({
+          left: 0, top: 0, width: 1024, height: 80,
+          fill: "#1a1a2e", selectable: false
+        }),
+        // 2. Header Text
+        tb("THE PROPERTY.COM  \u2022  +67 998 9027 89", {
+          left: 0, top: 32, width: 1024, fontSize: 16, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica", charSpacing: 150
+        }),
+        // 3. Main Property Image
+        img("/Images/REtemp3/bg.jpeg", {
+          left: 0, top: 80,
+          scaleX: 0.8, scaleY: 0.8, // 1280 * 0.8 = 1024
+          selectable: true
+        }),
+        // 4. Dark Overlay for bottom text area (Reduced Height)
+        rect({
+          left: 0, top: 680, width: 1024, height: 344,
+          fill: "#1a1a2e", selectable: false
+        }),
+        // 5. Title Layout (Aligned to reference)
+        tb("Modern", {
+          left: 60, top: 720, width: 250, fontSize: 52, fontWeight: "bold",
+          fill: "#c9a84c", textAlign: "left", fontFamily: "Georgia"
+        }),
+        tb("Home", {
+          left: 245, top: 720, width: 200, fontSize: 52, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "left", fontFamily: "Georgia"
+        }),
+        tb("For Sale", {
+          left: 60, top: 775, width: 300, fontSize: 52, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "left", fontFamily: "Georgia"
+        }),
+        // 6. Description
+        tb("Stunning 2 story home in highly desired\nStone Creek neighborhood!", {
+          left: 60, top: 855, width: 450, fontSize: 14,
+          fill: "#bbbbbb", textAlign: "left", fontFamily: "Helvetica", lineHeight: 1.4
+        }),
+        // 7. White Price Box
+        rect({
+          left: 630, top: 540, width: 330, height: 430,
+          fill: "#ffffff", rx: 4, ry: 4,
+          selectable: true,
+          shadow: { color: "rgba(0,0,0,0.3)", blur: 25, offsetX: 0, offsetY: 10 }
+        }),
+        // 8. Box Accent Line (Gold)
+        rect({
+          left: 630, top: 540, width: 330, height: 12,
+          fill: "#c9a84c", rx: 4, ry: 4, selectable: false
+        }),
+        // 9. Price Text
+        tb("$550,000", {
+          left: 630, top: 585, width: 330, fontSize: 44, fontWeight: "900",
+          fill: "#1a1a2e", textAlign: "center", fontFamily: "Helvetica"
+        }),
+        // 10. Features Label
+        tb("Features", {
+          left: 670, top: 655, width: 200, fontSize: 16, fontWeight: "bold",
+          fill: "#c9a84c", textAlign: "left", fontFamily: "Helvetica"
+        }),
+        // 11. Features List
+        tb("\u2022 Single family residence\n\u2022 5 bedrooms\n\u2022 4 bathrooms\n\u2022 Built in 2023\n\u2022 Forced air, natural gas", {
+          left: 670, top: 695, width: 280, fontSize: 14, fontWeight: "600",
+          fill: "#333333", textAlign: "left", fontFamily: "Helvetica", lineHeight: 1.9
+        }),
+      ],
+    },
+  },
+  "re-story-listing": {
+    name: "Real Estate Story Listing",
+    width: 1080, height: 1920, paperSize: "SOCIAL_STORY",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Top Image (Covering the top half)
+        img("/Images/REtemp4/c1.jpeg", {
+          left: -212, top: 0,
+          scaleX: 0.25, scaleY: 0.25, // Proportional scaling to cover ~1000px height
+          selectable: true
+        }),
+        // 2. Website text (Top overlay)
+        tb("www.housesforyou.com", {
+          left: 0, top: 80, width: 1080, fontSize: 32, fontWeight: "500",
+          fill: "#555555", textAlign: "center", fontFamily: "Helvetica"
+        }),
+        // 3. Main Box (shape-1)
+        rect({
+          left: 190, top: 880, width: 700, height: 280,
+          fill: "#b69d7c", rx: 40, ry: 40,
+          selectable: true,
+          shadow: { color: "rgba(0,0,0,0.15)", blur: 30, offsetX: 0, offsetY: 10 }
+        }),
+        // 4. Box Content
+        tb("THE BEST HOME", {
+          left: 190, top: 930, width: 700, fontSize: 38, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica"
+        }),
+        tb("FOR SALE", {
+          left: 190, top: 990, width: 700, fontSize: 86, fontWeight: "900",
+          fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica"
+        }),
+        // 5. Button (button-cta)
+        rect({
+          left: 415, top: 1120, width: 250, height: 80,
+          fill: "#967a5b", rx: 40, ry: 40,
+          selectable: true
+        }),
+        tb("I WANT", {
+          left: 415, top: 1145, width: 250, fontSize: 26, fontWeight: "bold",
+          fill: "#ffffff", textAlign: "center"
+        }),
+        // 6. Three small photos with brown stroke
+        // Photo 1
+        {
+          ...img("/Images/REtemp4/c2.jpeg", {
+            left: -15, top: 1350,
+            scaleX: 0.0868, scaleY: 0.0868,
+            originX: "left", originY: "top",
+            selectable: true
+          }),
+          clipPath: {
+            type: "Rect", left: 0, top: 0, width: 3456, height: 3456, rx: 345, ry: 345,
+            originX: "center", originY: "center"
+          }
+        },
+        rect({ left: 60, top: 1350, width: 300, height: 300, fill: "transparent", stroke: "#b69d7c", strokeWidth: 10, rx: 30, ry: 30, selectable: true }),
+
+        // Photo 2
+        {
+          ...img("/Images/REtemp4/c3.jpeg", {
+            left: 315, top: 1350,
+            scaleX: 0.0747, scaleY: 0.0747,
+            originX: "left", originY: "top",
+            selectable: true
+          }),
+          clipPath: {
+            type: "Rect", left: 0, top: 0, width: 4016, height: 4016, rx: 401, ry: 401,
+            originX: "center", originY: "center"
+          }
+        },
+        rect({ left: 390, top: 1350, width: 300, height: 300, fill: "transparent", stroke: "#b69d7c", strokeWidth: 10, rx: 30, ry: 30, selectable: false }),
+
+        // Photo 3
+        {
+          ...img("/Images/REtemp4/c4.jpeg", {
+            left: 645, top: 1350,
+            scaleX: 0.0976, scaleY: 0.0976,
+            originX: "left", originY: "top",
+            selectable: true
+          }),
+          clipPath: {
+            type: "Rect", left: 0, top: 0, width: 3072, height: 3072, rx: 307, ry: 307,
+            originX: "center", originY: "center"
+          }
+        },
+        rect({ left: 720, top: 1350, width: 300, height: 300, fill: "transparent", stroke: "#b69d7c", strokeWidth: 10, rx: 30, ry: 30, selectable: false }),
+        // 7. Bottom Info
+        tb("For more info, contact us", {
+          left: 0, top: 1800, width: 1080, fontSize: 24, fontWeight: "500",
+          fill: "#888888", textAlign: "center", fontFamily: "Helvetica"
+        }),
+      ],
+    },
+  },
+
+  "sl-standard": {
+    name: "Standard Shipping Label",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Main Border
+        rect({ left: 40, top: 40, width: 1120, height: 1120, fill: "transparent", stroke: "#222222", strokeWidth: 4, rx: 15, ry: 15 }),
+
+        // Horizontal Lines
+        line({ x1: 0, y1: 0, x2: 1120, y2: 0, left: 40, top: 300, stroke: "#222222", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 1120, y2: 0, left: 40, top: 520, stroke: "#222222", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 1120, y2: 0, left: 40, top: 850, stroke: "#222222", strokeWidth: 4 }),
+
+        // Vertical Lines
+        line({ x1: 0, y1: 0, x2: 0, y2: 260, left: 300, top: 40, stroke: "#222222", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 0, y2: 330, left: 580, top: 520, stroke: "#222222", strokeWidth: 4 }),
+
+        // Logo Box
+        tb("LO\nGO", { left: 40, top: 90, width: 260, fontSize: 80, fontWeight: "900", fontStyle: "italic", textAlign: "center", fill: "#111111", lineHeight: 1.1 }),
+
+        // Ship To Box
+        tb("SHIP TO:", { left: 330, top: 80, width: 150, fontSize: 24, fontWeight: "900", fill: "#111111" }),
+        tb("Company Name\n987 Av. Main One, Los Angeles,\n001002 - USA", { left: 480, top: 80, width: 600, fontSize: 24, fill: "#222222", lineHeight: 1.4 }),
+
+        // From Box
+        tb("FROM:", { left: 80, top: 350, width: 120, fontSize: 22, fontWeight: "900", fill: "#111111" }),
+        tb("Ethan Stuart\n123 Principal Street, Apt 45A,\nNew York, 999, USA", { left: 200, top: 350, width: 800, fontSize: 22, fill: "#222222", lineHeight: 1.4 }),
+
+        // Barcode Box (Bottom Left)
+        ...[6,3,5,9,3,7,2,3,5,11,3,7,5,3,9,3,7,4,5,7,3,9,3,3,5,7,3,11,3,6,4,8,3].map((w, i, arr) => 
+          rect({ left: 100 + arr.slice(0, i).reduce((a, b) => a + b + 6, 0), top: 570, width: w, height: 180, fill: "#111111" })
+        ),
+        tb("TRACK CODE 123456789", { left: 100, top: 780, width: 440, fontSize: 18, fontWeight: "bold", fill: "#111111", textAlign: "center", charSpacing: 250 }),
+
+        // Order Details (Bottom Right)
+        tb("ORDER ID:", { left: 620, top: 560, width: 160, fontSize: 20, fontWeight: "900", fill: "#111111" }),
+        tb("#1020304050", { left: 780, top: 560, width: 300, fontSize: 22, fill: "#222222" }),
+
+        tb("WEIGHT:", { left: 620, top: 620, width: 160, fontSize: 20, fontWeight: "900", fill: "#111111" }),
+        tb("4.5 KG", { left: 780, top: 620, width: 300, fontSize: 22, fill: "#222222" }),
+
+        tb("DIMENSIONS:", { left: 620, top: 680, width: 160, fontSize: 20, fontWeight: "900", fill: "#111111" }),
+        tb("10cmx10cmx10cm", { left: 780, top: 680, width: 300, fontSize: 22, fill: "#222222" }),
+
+        tb("SHIPPING\nDATE:", { left: 620, top: 740, width: 160, fontSize: 20, fontWeight: "900", fill: "#111111", lineHeight: 1.2 }),
+        tb("2025-01-20", { left: 780, top: 750, width: 300, fontSize: 22, fill: "#222222" }),
+
+        // Icons Area (Very Bottom)
+        // Box 1
+        rect({ left: 120, top: 910, width: 160, height: 160, fill: "transparent", stroke: "#333333", strokeWidth: 10, rx: 20, ry: 20 }),
+        tb("🍷", { left: 120, top: 940, width: 160, fontSize: 80, textAlign: "center" }),
+
+        // Box 2
+        rect({ left: 370, top: 910, width: 160, height: 160, fill: "transparent", stroke: "#333333", strokeWidth: 10, rx: 20, ry: 20 }),
+        tb("📦", { left: 370, top: 940, width: 160, fontSize: 80, textAlign: "center" }),
+
+        // Box 3
+        rect({ left: 620, top: 910, width: 160, height: 160, fill: "transparent", stroke: "#333333", strokeWidth: 10, rx: 20, ry: 20 }),
+        tb("↑↑", { left: 620, top: 940, width: 160, fontSize: 80, fontWeight: "bold", fill: "#333333", textAlign: "center" }),
+
+        // Box 4
+        rect({ left: 870, top: 910, width: 160, height: 160, fill: "transparent", stroke: "#333333", strokeWidth: 10, rx: 20, ry: 20 }),
+        tb("☂", { left: 870, top: 935, width: 160, fontSize: 90, fill: "#333333", textAlign: "center" }),
+      ],
+    },
+  },
+
+  "sl-classic": {
+    name: "Classic Shipping Label",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Main Border
+        rect({ left: 150, top: 80, width: 900, height: 1040, fill: "transparent", stroke: "#111111", strokeWidth: 4, rx: 15, ry: 15 }),
+
+        // Horizontal Lines
+        line({ x1: 0, y1: 0, x2: 900, y2: 0, left: 150, top: 340, stroke: "#111111", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 900, y2: 0, left: 150, top: 600, stroke: "#111111", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 900, y2: 0, left: 150, top: 860, stroke: "#111111", strokeWidth: 4 }),
+
+        // Section 1: SHIP TO
+        // Black Pill Box
+        rect({ left: 180, top: 125, width: 160, height: 50, fill: "#111111", rx: 10, ry: 10 }),
+        tb("SHIP TO", { left: 180, top: 137, width: 160, fontSize: 22, fontWeight: "900", fill: "#ffffff", textAlign: "center", fontFamily: "Helvetica", charSpacing: 100 }),
+        
+        // Recipient Name
+        tb("Ethan Stuart", { left: 390, top: 120, width: 600, fontSize: 26, fontWeight: "bold", fill: "#111111", fontFamily: "Helvetica" }),
+        
+        // Recipient Address
+        tb("23 Principal Street, Apt 45A, New York, 999, USA", { left: 390, top: 160, width: 600, fontSize: 22, fill: "#333333", fontFamily: "Helvetica", lineHeight: 1.3 }),
+
+        // Section 2: FROM
+        // Bold label FROM
+        tb("FROM", { left: 180, top: 385, width: 160, fontSize: 24, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 100 }),
+        
+        // Sender Name
+        tb("ABCD Enterprise", { left: 390, top: 385, width: 600, fontSize: 24, fontWeight: "bold", fill: "#111111", fontFamily: "Helvetica" }),
+        
+        // Sender Address
+        tb("987 Av. Main One, Los Angeles, 66, USA", { left: 390, top: 425, width: 600, fontSize: 22, fill: "#333333", fontFamily: "Helvetica", lineHeight: 1.3 }),
+
+        // Section 3: DETAILS
+        // Row 1
+        tb("ORDER ID", { left: 190, top: 640, width: 180, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("#1020304050", { left: 380, top: 640, width: 200, fontSize: 20, fill: "#333333", fontFamily: "Helvetica" }),
+        
+        tb("DIMENSION\nS", { left: 610, top: 640, width: 180, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50, lineHeight: 1.1 }),
+        tb("10cmx10cmx10cm", { left: 800, top: 640, width: 210, fontSize: 20, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Row 2
+        tb("WEIGHT", { left: 190, top: 710, width: 180, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("4.5 KG", { left: 380, top: 710, width: 200, fontSize: 20, fill: "#333333", fontFamily: "Helvetica" }),
+        
+        tb("SHIPPING\nDATE", { left: 610, top: 710, width: 180, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50, lineHeight: 1.1 }),
+        tb("2025-01-20", { left: 800, top: 710, width: 210, fontSize: 20, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Row 3
+        tb("REMARKS", { left: 190, top: 780, width: 180, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("No remark", { left: 380, top: 780, width: 200, fontSize: 20, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Section 4: BARCODE
+        // Dynamic vector barcode
+        ...[6,3,5,9,3,7,2,3,5,11,3,7,5,3,9,3,7,4,5,7,3,9,3,3,5,7,3,11,3,6,4,8,3].map((w, i, arr) => 
+          rect({
+            left: 298 + arr.slice(0, i).reduce((a, b) => a + (b * 1.6) + 10, 0),
+            top: 895,
+            width: w * 1.6,
+            height: 140,
+            fill: "#111111"
+          })
+        ),
+        // Tracking number underneath
+        tb("112233445566778899", { left: 150, top: 1055, width: 900, fontSize: 22, fontWeight: "bold", fill: "#111111", textAlign: "center", fontFamily: "Helvetica", charSpacing: 200 }),
+      ],
+    },
+  },
+
+  "sl-modern": {
+    name: "Modern Shipping Label",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Main Border
+        rect({ left: 150, top: 80, width: 900, height: 1040, fill: "transparent", stroke: "#111111", strokeWidth: 4, rx: 15, ry: 15 }),
+
+        // Horizontal Lines
+        line({ x1: 0, y1: 0, x2: 900, y2: 0, left: 150, top: 520, stroke: "#111111", strokeWidth: 4 }),
+        line({ x1: 0, y1: 0, x2: 900, y2: 0, left: 150, top: 740, stroke: "#111111", strokeWidth: 4 }),
+
+        // Vertical divider separating SHIP TO/FROM and Left/Right details
+        line({ x1: 0, y1: 0, x2: 0, y2: 660, left: 600, top: 80, stroke: "#111111", strokeWidth: 4 }),
+
+        // Section 1: SHIP TO (Top Left)
+        tb("SHIP TO", { left: 180, top: 120, width: 390, fontSize: 32, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 100 }),
+        tb("Ethan Stuart", { left: 180, top: 180, width: 390, fontSize: 24, fontWeight: "bold", fill: "#111111", fontFamily: "Helvetica" }),
+        tb("123 Principal Street Apt 45A,\nNew York, 999, USA", { left: 180, top: 225, width: 390, fontSize: 20, fill: "#333333", fontFamily: "Helvetica", lineHeight: 1.3 }),
+
+        // Section 2: FROM (Top Right)
+        tb("FROM", { left: 630, top: 120, width: 390, fontSize: 20, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 100 }),
+        tb("ABCD Enterprise", { left: 630, top: 180, width: 390, fontSize: 24, fontWeight: "bold", fill: "#111111", fontFamily: "Helvetica" }),
+        tb("987 Av. Main One, Los Angeles,\n66, USA", { left: 630, top: 225, width: 390, fontSize: 20, fill: "#333333", fontFamily: "Helvetica", lineHeight: 1.3 }),
+
+        // Section 3: DETAILS (Middle)
+        // Column 1, Row 1: ORDER ID
+        tb("ORDER ID", { left: 180, top: 550, width: 190, fontSize: 18, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("#1020304050", { left: 180, top: 580, width: 190, fontSize: 18, fill: "#333333", fontFamily: "Helvetica" }),
+        
+        // Column 2, Row 1: DIMENSION
+        tb("DIMENSION", { left: 390, top: 550, width: 190, fontSize: 18, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("10cmx10cmx10cm", { left: 390, top: 580, width: 190, fontSize: 18, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Column 1, Row 2: WEIGHT
+        tb("WEIGHT", { left: 180, top: 640, width: 190, fontSize: 18, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("4.5 KG", { left: 180, top: 670, width: 190, fontSize: 18, fill: "#333333", fontFamily: "Helvetica" }),
+        
+        // Column 2, Row 2: SHIPPING DATE
+        tb("SHIPPING", { left: 390, top: 640, width: 190, fontSize: 18, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("2025-01-20", { left: 390, top: 670, width: 190, fontSize: 18, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Column 3: REMARKS (Middle Right)
+        tb("REMARKS", { left: 630, top: 550, width: 390, fontSize: 18, fontWeight: "900", fill: "#111111", fontFamily: "Helvetica", charSpacing: 50 }),
+        tb("No remark", { left: 630, top: 580, width: 390, fontSize: 18, fill: "#333333", fontFamily: "Helvetica" }),
+
+        // Section 4: BARCODE
+        // Dynamic vector barcode
+        ...[6,3,5,9,3,7,2,3,5,11,3,7,5,3,9,3,7,4,5,7,3,9,3,3,5,7,3,11,3,6,4,8,3].map((w, i, arr) => 
+          rect({
+            left: 298 + arr.slice(0, i).reduce((a, b) => a + (b * 1.6) + 10, 0),
+            top: 840,
+            width: w * 1.6,
+            height: 160,
+            fill: "#111111"
+          })
+        ),
+        // Tracking number underneath
+        tb("112233445566778899", { left: 150, top: 1025, width: 900, fontSize: 22, fontWeight: "bold", fill: "#111111", textAlign: "center", fontFamily: "Helvetica", charSpacing: 200 }),
+      ],
+    },
+  },
+
+  "resume-martha-williams": {
+    name: "Martha Williams Resume",
+    width: 1020, height: 1320, paperSize: "RESUME",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Name and Subtitle
+        tb("MARTHA\nWILLIAMS", {
+          left: 80, top: 90, width: 450, fontSize: 50, fontWeight: "900", fontFamily: "Helvetica", fill: "#1a1a1a", lineHeight: 1.0, charSpacing: -20
+        }),
+        tb("Product Manager", {
+          left: 80, top: 200, width: 450, fontSize: 20, fontWeight: "500", fontFamily: "Helvetica", fill: "#718096"
+        }),
+        // Contact details
+        tb("+123 456 7890\nmartha-will@email.com\n@williamsmartha", {
+          left: 590, top: 100, width: 350, fontSize: 16, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right", lineHeight: 1.5
+        }),
+
+        // --- WORK EXPERIENCE ---
+        tb("WORK EXPERIENCE", {
+          left: 80, top: 290, width: 860, fontSize: 16, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", charSpacing: 100
+        }),
+        rect({
+          left: 80, top: 315, width: 860, height: 2, fill: "#1a1a1a"
+        }),
+
+        // Work Exp 1
+        tb("Company Name\n2022 - Present", {
+          left: 80, top: 345, width: 200, fontSize: 13, fontFamily: "Helvetica", fill: "#a0aec0", lineHeight: 1.4
+        }),
+        tb("Group Product Manager", {
+          left: 280, top: 345, width: 660, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a"
+        }),
+        tb("Lorem ipsum dolor sit amet. Sed nisi tempore est perspiciatis galisum ut eligendi vel odit atque. Non laboriosam distinctio et nisi molestiae qui mollitia consequuntur. Id voluptatibus culpa qui architecto provident quo minima illo et sunt saepe qui aliquid cupiditate.", {
+          left: 280, top: 370, width: 660, fontSize: 13, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.4
+        }),
+
+        // Work Exp 2
+        tb("Company Name\n2019 - 2022", {
+          left: 80, top: 510, width: 200, fontSize: 13, fontFamily: "Helvetica", fill: "#a0aec0", lineHeight: 1.4
+        }),
+        tb("Senior Product Manager", {
+          left: 280, top: 510, width: 660, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a"
+        }),
+        tb("Lorem ipsum dolor sit amet. Sed nisi tempore est perspiciatis galisum ut eligendi vel odit atque. Non laboriosam distinctio et nisi molestiae qui mollitia consequuntur. Id voluptatibus culpa qui architecto provident quo minima illo et sunt saepe qui aliquid cupiditate.", {
+          left: 280, top: 535, width: 660, fontSize: 13, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.4
+        }),
+
+        // Work Exp 3
+        tb("Company Name\n2017 - 2018", {
+          left: 80, top: 675, width: 200, fontSize: 13, fontFamily: "Helvetica", fill: "#a0aec0", lineHeight: 1.4
+        }),
+        tb("Product Manager", {
+          left: 280, top: 675, width: 660, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a"
+        }),
+        tb("Lorem ipsum dolor sit amet. Sed nisi tempore est perspiciatis galisum ut eligendi vel odit atque. Non laboriosam distinctio et nisi molestiae qui mollitia consequuntur. Id voluptatibus culpa qui architecto provident quo minima illo et sunt saepe qui aliquid cupiditate.", {
+          left: 280, top: 700, width: 660, fontSize: 13, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.4
+        }),
+
+        // --- EDUCATION & SKILLS ---
+        // Education (Left)
+        tb("EDUCATION", {
+          left: 80, top: 865, width: 390, fontSize: 16, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", charSpacing: 100
+        }),
+        rect({
+          left: 80, top: 890, width: 390, height: 2, fill: "#1a1a1a"
+        }),
+
+        tb("Bachelor in Managment      2012 -\n2016", {
+          left: 80, top: 915, width: 390, fontSize: 13, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", lineHeight: 1.3
+        }),
+        tb("Lorem ipsum dolor sit amet. Sed nisi tempore est perspiciatis galisum ut eligendi vel odit atque.", {
+          left: 80, top: 960, width: 390, fontSize: 13, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.4
+        }),
+
+        tb("Product Managment Course      2018 -\n2019", {
+          left: 80, top: 1040, width: 390, fontSize: 13, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", lineHeight: 1.3
+        }),
+        tb("Lorem ipsum dolor sit amet. Sed nisi tempore est perspiciatis galisum ut eligendi vel odit atque.", {
+          left: 80, top: 1085, width: 390, fontSize: 13, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.4
+        }),
+
+        // Skills (Right)
+        tb("SKILLS", {
+          left: 550, top: 865, width: 390, fontSize: 16, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", charSpacing: 100
+        }),
+        rect({
+          left: 550, top: 890, width: 390, height: 2, fill: "#1a1a1a"
+        }),
+        tb("• Lorem ipsum\n• Lorem ipsum\n• Lorem ipsum\n• Lorem ipsum\n• Lorem ipsum\n• Lorem ipsum", {
+          left: 550, top: 915, width: 390, fontSize: 14, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.8
+        })
+      ]
+    }
+  },
+
+  "inv-classic": {
+    name: "Classic Invoice",
+    width: 1020, height: 1320, paperSize: "INVOICE",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Top-left vertical blue bar
+        rect({ left: 0, top: 0, width: 35, height: 160, fill: "#4676a4", selectable: false }),
+
+        // Top-left INVOICE heading
+        tb("INVOICE", { left: 75, top: 80, width: 400, fontSize: 44, fontWeight: "900", fontFamily: "Helvetica", fill: "#4676a4" }),
+
+        // Top-right Logo
+        tb("YOUR\nLOGO", { left: 800, top: 80, width: 140, fontSize: 20, fontWeight: "900", fontStyle: "italic", fontFamily: "Helvetica", fill: "#4676a4", textAlign: "right", lineHeight: 1.1 }),
+
+        // Client Details
+        tb("Peter Fields\nCreative Lab Company\n123 Anywhere St., Any City\n+123 456 7890", { left: 75, top: 200, width: 400, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.5 }),
+
+        // Table Header & Line 1
+        rect({ left: 75, top: 340, width: 865, height: 2, fill: "#cbd5e1", selectable: false }),
+        tb("Item", { left: 75, top: 355, width: 300, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a" }),
+        tb("Quantity", { left: 550, top: 355, width: 120, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "center" }),
+        tb("Price", { left: 690, top: 355, width: 100, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "center" }),
+        tb("Total", { left: 810, top: 355, width: 130, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+        rect({ left: 75, top: 385, width: 865, height: 1, fill: "#cbd5e1", selectable: false }),
+
+        // Row 1
+        tb("Item 1", { left: 75, top: 415, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 415, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 415, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 415, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 2
+        tb("Item 2", { left: 75, top: 485, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 485, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 485, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 485, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 3
+        tb("Item 3", { left: 75, top: 555, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 555, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 555, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 555, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 4
+        tb("Item 4", { left: 75, top: 625, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 625, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 625, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 625, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+        rect({ left: 75, top: 675, width: 865, height: 1, fill: "#cbd5e1", selectable: false }),
+
+        // Total
+        tb("TOTA\nL", { left: 75, top: 705, width: 150, fontSize: 24, fontWeight: "900", fontFamily: "Helvetica", fill: "#1a1a1a", lineHeight: 1.1 }),
+        tb("$400", { left: 700, top: 705, width: 240, fontSize: 24, fontWeight: "900", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+
+        // Bottom Left Signature
+        rect({ left: 75, top: 935, width: 250, height: 2, fill: "#1a1a1a", selectable: false }),
+        tb("Signature", { left: 75, top: 945, width: 250, fontSize: 14, fontFamily: "Helvetica", fill: "#cbd5e1", textAlign: "center" }),
+
+        // Bottom Right Metadata Box
+        rect({ left: 580, top: 885, width: 360, height: 110, fill: "#4676a4", rx: 4, ry: 4, selectable: true }),
+        tb("Invoice No. 12345\n10 June 2024", { left: 610, top: 915, width: 300, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#ffffff", lineHeight: 1.4 })
+      ]
+    }
+  },
+
+  "inv-modern": {
+    name: "Modern Invoice",
+    width: 1020, height: 1320, paperSize: "INVOICE",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Top-right background overlapping curves
+        circle({ left: 280, top: -450, radius: 550, fill: "#f1eee0", selectable: false }),
+        circle({ left: 450, top: -350, radius: 500, fill: "#e7e2c9", selectable: false }),
+
+        // Top-left Logo
+        tb("YOUR LOGO\nCreative Lab Company", { left: 75, top: 110, width: 400, fontSize: 28, fontWeight: "900", fontStyle: "italic", fontFamily: "Helvetica", fill: "#1a1a1a", lineHeight: 1.2 }),
+
+        // Top-right INVOICE heading with overlaps
+        tb("INVOIC\nE", { left: 700, top: 120, width: 220, fontSize: 44, fontWeight: "900", fontFamily: "Helvetica", fill: "#c8bc82", lineHeight: 1.1, charSpacing: 100 }),
+        tb("No. 12345", { left: 780, top: 160, width: 140, fontSize: 14, fontWeight: "bold", fontFamily: "Helvetica", fill: "#c8bc82", textAlign: "right" }),
+
+        // Client Details
+        tb("Peter Fields\n123 Anywhere St., Any City\n+123 456 7890", { left: 75, top: 240, width: 400, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.5 }),
+
+        // Table Header Solid Background block
+        rect({ left: 75, top: 380, width: 870, height: 48, fill: "#d8d2ab", rx: 8, ry: 8, selectable: true }),
+        
+        // Table Header Labels
+        tb("Item", { left: 95, top: 394, width: 300, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#4a4e3b" }),
+        tb("Qnt.", { left: 550, top: 394, width: 120, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#4a4e3b", textAlign: "center" }),
+        tb("Price", { left: 690, top: 394, width: 100, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#4a4e3b", textAlign: "center" }),
+        tb("Total", { left: 810, top: 394, width: 130, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#4a4e3b", textAlign: "right" }),
+
+        // Row 1
+        tb("Item 1", { left: 95, top: 455, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 455, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 455, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 455, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 2
+        tb("Item 2", { left: 95, top: 515, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 515, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 515, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 515, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 3
+        tb("Item 3", { left: 95, top: 575, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 575, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 575, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 575, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Total
+        tb("Total: $400", { left: 700, top: 630, width: 245, fontSize: 16, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+
+        // Signature Line & Label
+        rect({ left: 90, top: 950, width: 200, height: 2, fill: "#1a1a1a", selectable: false }),
+        tb("Signature", { left: 90, top: 960, width: 200, fontSize: 14, fontFamily: "Helvetica", fill: "#cbd5e1", textAlign: "center" }),
+
+        // Bottom Right Date
+        tb("10 June 2024", { left: 700, top: 945, width: 245, fontSize: 14, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" })
+      ]
+    }
+  },
+
+  "inv-minimal": {
+    name: "Minimalist Invoice",
+    width: 1020, height: 1320, paperSize: "INVOICE",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Bottom-left charcoal overlay shape
+        circle({ left: -250, top: 920, radius: 350, fill: "#1a1a1a", selectable: false }),
+
+        // Top-left grey logo badge
+        circle({ left: 75, top: 80, radius: 45, fill: "#e2e8f0", selectable: false }),
+        tb("LOGO", { left: 75, top: 112, width: 90, fontSize: 18, fontWeight: "900", fontStyle: "italic", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "center" }),
+
+        // Top-right INVOICE heading
+        tb("INVOICE", { left: 600, top: 100, width: 325, fontSize: 32, fontFamily: "Georgia", fill: "#1a1a1a", textAlign: "right", charSpacing: 100 }),
+
+        // Billing detail headings & content
+        tb("Invoice to:", { left: 75, top: 210, width: 300, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a" }),
+        tb("Josh Boyd\nCreative Lab Company\n123 Anywhere St., Any City\n+123 456 7890", { left: 75, top: 245, width: 400, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", lineHeight: 1.5 }),
+
+        // Invoice number & date metadata (right side)
+        tb("Invoice No. 12345\n10 June 2024", { left: 600, top: 245, width: 325, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right", lineHeight: 1.5 }),
+
+        // Table Header Solid Background block
+        rect({ left: 75, top: 385, width: 870, height: 45, fill: "#e2e8f0", selectable: true }),
+        tb("Item", { left: 95, top: 398, width: 300, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a" }),
+        tb("Qty", { left: 550, top: 398, width: 120, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "center" }),
+        tb("Price", { left: 690, top: 398, width: 100, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "center" }),
+        tb("Total", { left: 810, top: 398, width: 130, fontSize: 15, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+
+        // Row 1
+        tb("Item 1", { left: 95, top: 455, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 455, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 455, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 455, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 2
+        tb("Item 2", { left: 95, top: 510, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 510, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 510, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 510, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+
+        // Row 3
+        tb("Item 3", { left: 95, top: 565, width: 300, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568" }),
+        tb("1", { left: 550, top: 565, width: 120, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 690, top: 565, width: 100, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "center" }),
+        tb("$100", { left: 810, top: 565, width: 130, fontSize: 15, fontFamily: "Helvetica", fill: "#4a5568", textAlign: "right" }),
+        
+        // Horizontal Total Divider Line
+        rect({ left: 75, top: 615, width: 870, height: 2, fill: "#1a1a1a", selectable: false }),
+
+        // Total
+        tb("TOTAL", { left: 550, top: 635, width: 200, fontSize: 20, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+        tb("$300", { left: 780, top: 635, width: 145, fontSize: 20, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1a1a1a", textAlign: "right" }),
+
+        // Signature Line & Label (bottom right of details, left of bottom oval)
+        rect({ left: 550, top: 950, width: 250, height: 2, fill: "#94a3b8", selectable: false }),
+        tb("Signature", { left: 550, top: 960, width: 250, fontSize: 14, fontFamily: "Helvetica", fill: "#94a3b8", textAlign: "center" })
+      ]
+    }
+  },
+
+  "rec-drugstore": {
+    name: "DrugStore Receipt",
+    width: 820, height: 1360, paperSize: "RECEIPT",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Top medical badge logo (centered at X=410)
+        circle({ left: 360, top: 100, radius: 50, fill: "#1a1a1a", selectable: false }),
+        rect({ left: 404, top: 118, width: 12, height: 64, fill: "#ffffff", selectable: false }),
+        rect({ left: 378, top: 144, width: 64, height: 12, fill: "#ffffff", selectable: false }),
+
+        // Brand logo text next to badge (centered under emblem)
+        tb("DrugStore\ntagline here", { left: 110, top: 220, width: 600, fontSize: 44, fontWeight: "900", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center", lineHeight: 1.0 }),
+
+        // Store Address & Details (centered)
+        tb("DRUG STORE\n730 Oakridge Avenue\nMeadowville TX 75422", { left: 110, top: 380, width: 600, fontSize: 24, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center", lineHeight: 1.4 }),
+
+        // Date & Time (centered)
+        tb("12/07/2025   08:26 PM", { left: 110, top: 520, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" }),
+
+        // Items Purchased Heading (centered)
+        tb("ITEMS PURCHASED", { left: 110, top: 620, width: 600, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" }),
+
+        // Monospaced Items List (centered container block)
+        tb("1x Ibuprofen 200mg (50 tabs)\n1x Vitamin C 1000mg (60 caps)\n1x Hand Sanitizer (250ml)\n1x Toothpaste Whitening (6oz)\n1x Cotton Swabs (200 ct)\n1x Cough Syrup (4 fl oz)", { left: 110, top: 700, width: 450, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8 }),
+        tb("$6.49\n$9.99\n$3.79\n$2.89\n$1.99\n$5.49", { left: 560, top: 700, width: 150, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+
+        // Dashed lines and subtotal block (centered container)
+        tb("--------------------------------------------------", { left: 110, top: 1020, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" }),
+        tb("Subtotal\nTax\nTotal", { left: 360, top: 1060, width: 200, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+        tb("$8.17\n$0.53\n$8.70", { left: 560, top: 1060, width: 150, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+        tb("--------------------------------------------------", { left: 110, top: 1200, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" }),
+
+        // Bottom tagline (centered)
+        tb("STAY HEALTHY AND VISIT US AGAIN!", { left: 110, top: 1250, width: 600, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" })
+      ]
+    }
+  },
+
+  "rec-happyshop": {
+    name: "Happy Shop Receipt",
+    width: 820, height: 1360, paperSize: "RECEIPT",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Shopping bag body
+        rect({ left: 360, top: 120, width: 70, height: 75, fill: "transparent", stroke: "#1a1a1a", strokeWidth: 5, rx: 6, ry: 6, selectable: false }),
+        
+        // Shopping bag handle (semi-circle arch)
+        circle({ left: 375, top: 85, radius: 20, fill: "transparent", stroke: "#1a1a1a", strokeWidth: 5, selectable: false }),
+        // Covering rect to hide bottom half of handle circle
+        rect({ left: 360, top: 110, width: 70, height: 12, fill: "#ffffff", selectable: false }),
+
+        // Cute smiling face eyes & smile
+        circle({ left: 382, top: 145, radius: 4, fill: "#1a1a1a", selectable: false }),
+        circle({ left: 404, top: 145, radius: 4, fill: "#1a1a1a", selectable: false }),
+        circle({ left: 390, top: 148, radius: 5, fill: "transparent", stroke: "#1a1a1a", strokeWidth: 3, selectable: false }),
+        // Cover rect to make the smile look like an arc
+        rect({ left: 388, top: 145, width: 14, height: 7, fill: "#ffffff", selectable: false }),
+
+        // Brand logo text next to bag
+        tb("Happy\nShop", { left: 445, top: 120, width: 150, fontSize: 24, fontWeight: "900", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.0 }),
+
+        // Store Name (left aligned)
+        tb("HAPPY SHOP", { left: 110, top: 250, width: 600, fontSize: 32, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a" }),
+
+        // Store Address (left aligned)
+        tb("2457 Maplewood Lane", { left: 110, top: 300, width: 600, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a" }),
+
+        // Sub-header details line (left aligned city/state/date/time)
+        tb("Brooksville        OH 43101    12/07/2025 08:26 PM", { left: 110, top: 340, width: 600, fontSize: 18, fontFamily: "Courier New", fill: "#1a1a1a" }),
+
+        // Horizontal separator line
+        rect({ left: 110, top: 380, width: 600, height: 3, fill: "#1a1a1a", selectable: false }),
+
+        // Monospaced Items List
+        tb("1x Organic Bananas (1.2 lb)\n1x Whole Wheat Bread\n1x Almond Milk (1L)\n1x Free-Range Eggs (12ct)\n1x Pasta Fusilli (500g)\n1x Tomato Sauce (24 oz)", { left: 110, top: 430, width: 450, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8 }),
+        tb("$1.44\n$2.99\n$3.49\n$4.29\n$1.79\n$2.59", { left: 560, top: 430, width: 150, fontSize: 20, fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+
+        // Subtotal, tax and total block
+        tb("Subtotal\nTax\nTotal", { left: 360, top: 760, width: 200, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+        tb("$8.17\n$0.53\n$8.70", { left: 560, top: 760, width: 150, fontSize: 22, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+
+        // Bottom horizontal line
+        rect({ left: 110, top: 1120, width: 600, height: 2, fill: "#1a1a1a", selectable: false }),
+
+        // Bottom tagline (centered)
+        tb("Come back soon!", { left: 110, top: 1160, width: 600, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", textAlign: "center" })
+      ]
+    }
+  },
+
+  "rec-aromacafe": {
+    name: "Aroma Cafe Receipt",
+    width: 820, height: 1360, paperSize: "RECEIPT",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // Coffee Bean Logo Emblem (centered at X=410)
+        circle({ left: 360, top: 100, radius: 50, fill: "transparent", stroke: "#4a3728", strokeWidth: 5, selectable: false }),
+        // Coffee bean brown oval body
+        circle({ left: 375, top: 115, radius: 35, fill: "#4a3728", selectable: false }),
+        // Coffee bean crease (white wavy line)
+        circle({ left: 395, top: 115, radius: 25, fill: "transparent", stroke: "#ffffff", strokeWidth: 5, startAngle: 30, endAngle: 150, selectable: false }),
+
+        // Brand Name (centered)
+        tb("AROMA CAFE", { left: 110, top: 220, width: 600, fontSize: 36, fontWeight: "bold", fontFamily: "Courier New", fill: "#4a3728", textAlign: "center" }),
+
+        // Brand Address & Details (centered)
+        tb("1211 Green Street\nNew York NY 10005", { left: 110, top: 280, width: 600, fontSize: 24, fontFamily: "Courier New", fill: "#4a3728", textAlign: "center", lineHeight: 1.3 }),
+
+        // Date & Time (centered)
+        tb("12/07/2025 08:26 PM", { left: 110, top: 370, width: 600, fontSize: 18, fontFamily: "Courier New", fill: "#4a3728", textAlign: "center" }),
+
+        // Header Row above items
+        tb("QTY | DESC | AMT", { left: 110, top: 430, width: 600, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#4a3728" }),
+        rect({ left: 110, top: 460, width: 600, height: 3, fill: "#4a3728", selectable: false }),
+
+        // Monospaced Items List (left and right columns perfectly aligned)
+        tb("1 Americano\n1 Almond Scone\n1 Bottel Water", { left: 110, top: 490, width: 450, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8 }),
+        tb("$8.17\n$2.17\n$2.99", { left: 560, top: 490, width: 150, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+
+        // Subtotal, tax and total block
+        tb("Subtotal\nTax\nTotal", { left: 360, top: 650, width: 200, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+        tb("$8.17\n$0.53\n$8.70", { left: 560, top: 650, width: 150, fontSize: 20, fontWeight: "bold", fontFamily: "Courier New", fill: "#1a1a1a", lineHeight: 1.8, textAlign: "right" }),
+
+        // Bottom tagline (centered)
+        tb("Thank you for your visit! Come back soon for more cozy\nmoments and great coffee.", { left: 110, top: 1100, width: 600, fontSize: 18, fontFamily: "Courier New", fill: "#4a3728", textAlign: "center", lineHeight: 1.4 })
+      ]
+    }
+  },
+
+  "sm-template-1": {
+    name: "Forest Quote Social Post",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Background image (1280x720, scaled to cover 1200x1200px)
+        img("/Images/SMtemp1/bg.jpeg", {
+          left: -466.67, top: 0,
+          scaleX: 1.6667, scaleY: 1.6667,
+          selectable: true
+        }),
+
+        // 2. shape-2: Offset Black shadow rectangle behind green card (Centered)
+        rect({
+          left: 195, top: 160,
+          width: 850, height: 920,
+          fill: "#000000",
+          selectable: true
+        }),
+
+        // 3. shape-1: Muted forest green card with black border (Centered)
+        rect({
+          left: 175, top: 140,
+          width: 850, height: 920,
+          fill: "#3f4e35",
+          stroke: "#000000",
+          strokeWidth: 10,
+          selectable: true
+        }),
+
+        // 4. photo: Circular avatar image frame (Centered)
+        {
+          ...img("/Images/SMtemp1/avatar.png", {
+            left: 265, top: 230,
+            scaleX: 0.125, scaleY: 0.125,
+            selectable: true
+          }),
+          clipPath: {
+            type: "Circle",
+            radius: 640,
+            left: 0, top: 0,
+            originX: "center",
+            originY: "center"
+          }
+        },
+
+        // 5. name: User Name heading (Centered)
+        tb("User Name", {
+          left: 460, top: 260,
+          width: 500,
+          fontSize: 44,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 6. handle: Handle detail text (Centered)
+        tb("@handle", {
+          left: 460, top: 320,
+          width: 400,
+          fontSize: 26,
+          fill: "#b3c4b0",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 7. text: Main quote text (Centered)
+        tb("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget ligula eu lectus lobortis condimentum. Aliquam nonummy auctor massa.", {
+          left: 265,
+          top: 460,
+          width: 670,
+          fontSize: 48,
+          lineHeight: 1.5,
+          fill: "#ffffff",
+          fontFamily: "Georgia",
+          selectable: true
+        })
+      ]
+    }
+  },
+
+  "sm-template-2": {
+    name: "Sand Dunes Quote Social Post",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Background image (1280x857, scaled by 1.4 to cover 1200x1200px canvas)
+        img("/Images/SMtemp2/bg.jpeg", {
+          left: -296, top: 0,
+          scaleX: 1.4, scaleY: 1.4,
+          selectable: true
+        }),
+
+        // 2. shape-1: Rounded White Card
+        rect({
+          left: 260, top: 230,
+          width: 680, height: 740,
+          fill: "#ffffff",
+          rx: 35, ry: 35,
+          selectable: true
+        }),
+
+        // 3. photo: Circular avatar image frame (1280x1280, scaled to 110x110px)
+        {
+          ...img("/Images/SMtemp2/avatar.png", {
+            left: 320, top: 290,
+            scaleX: 0.086, scaleY: 0.086,
+            selectable: true
+          }),
+          clipPath: {
+            type: "Circle",
+            radius: 640,
+            left: 0, top: 0,
+            originX: "center",
+            originY: "center"
+          }
+        },
+
+        // 4. name: Name heading
+        tb("Name", {
+          left: 460, top: 310,
+          width: 400,
+          fontSize: 32,
+          fontWeight: "bold",
+          fill: "#1a1a1a",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 5. handle: Handle text
+        tb("@username", {
+          left: 460, top: 355,
+          width: 400,
+          fontSize: 20,
+          fill: "#777777",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 6. text: Main quote text
+        tb("Lorem ipsum dolor sit amet, consectetur adipiscing elit.", {
+          left: 320,
+          top: 450,
+          width: 560,
+          fontSize: 38,
+          lineHeight: 1.4,
+          fill: "#1a1a1a",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 7. text: Footer line info
+        tb("Line for a date or other info.", {
+          left: 320,
+          top: 870,
+          width: 560,
+          fontSize: 18,
+          fill: "#a0a0a0",
+          fontFamily: "Helvetica",
+          selectable: true
+        })
+      ]
+    }
+  },
+
+  "sm-template-3": {
+    name: "Cartoon Speech Social Post",
+    width: 1200, height: 1200, paperSize: "SQUARE_1200",
+    canvasJson: {
+      version: "7.0.0", background: "#fcd116",
+      objects: [
+        // 1. shape-2: Cartoon Speech Bubble Image (1280x1120, scaled by 0.586)
+        img("/Images/SMtemp3/bubble.png", {
+          left: 225, top: 150,
+          scaleX: 0.586, scaleY: 0.586,
+          selectable: true
+        }),
+
+        // 2. text-1: Quote Text inside Speech Bubble
+        tb("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla blandit, mauris commodo cursus pharetra.", {
+          left: 285, top: 220,
+          width: 580,
+          fontSize: 34,
+          fontWeight: "bold",
+          fill: "#000000",
+          fontFamily: "Helvetica",
+          textAlign: "center",
+          lineHeight: 1.4,
+          selectable: true
+        }),
+
+        // 3. photo: Circular avatar image frame (1280x1280, scaled to 160x160px)
+        {
+          ...img("/Images/SMtemp3/avatar.png", {
+            left: 520, top: 800,
+            scaleX: 0.125, scaleY: 0.125,
+            selectable: true
+          }),
+          clipPath: {
+            type: "Circle",
+            radius: 640,
+            left: 0, top: 0,
+            originX: "center",
+            originY: "center"
+          }
+        },
+
+        // 4. name: Name heading
+        tb("Namey Namerson", {
+          left: 300, top: 985,
+          width: 600,
+          fontSize: 34,
+          fontWeight: "bold",
+          fill: "#000000",
+          fontFamily: "Helvetica",
+          textAlign: "center",
+          selectable: true
+        }),
+
+        // 5. handle: Handle text
+        tb("@somehandle", {
+          left: 300, top: 1035,
+          width: 600,
+          fontSize: 22,
+          fill: "#555555",
+          fontFamily: "Helvetica",
+          textAlign: "center",
+          selectable: true
+        })
+      ]
+    }
+  },
+
+  "cc-christmas-card-1": {
+    name: "Ornaments Christmas Card",
+    width: 1050, height: 600, paperSize: "CHRISTMAS_CARD",
+    canvasJson: {
+      version: "7.0.0", background: "#ffffff",
+      objects: [
+        // 1. Background image (non-selectable, at the bottom)
+        {
+          ...img("/Images/CCtemp1/bg.png", {
+            left: 0, top: 0, width: 1050, height: 600,
+            scaleX: 1, scaleY: 1,
+            selectable: false, evented: false,
+            __isBackground: true
+          })
+        },
+
+        // 2. Hanging ornaments (illustration)
+        {
+          ...img("/Images/CCtemp1/style.svg", {
+            name: "illustration",
+            left: 550, top: 0, width: 440, height: 512,
+            scaleX: 1.15, scaleY: 1.15,
+            selectable: true
+          })
+        },
+
+        // 3. Subtitle "& H A P P Y   N E W   Y E A R"
+        tb("& H A P P Y   N E W   Y E A R", {
+          name: "subtitle",
+          left: 120, top: 290,
+          width: 450,
+          fontSize: 15,
+          fill: "#ffffff",
+          fontFamily: "Cinzel",
+          charSpacing: 300,
+          selectable: true
+        }),
+
+        // 4. Cursive Script "Christmas"
+        tb("Christmas", {
+          name: "title-christmas",
+          left: 90, top: 170,
+          width: 500,
+          fontSize: 110,
+          fill: "#ffffff",
+          fontFamily: "Great Vibes",
+          selectable: true
+        }),
+
+        // 5. Serif Header "M E R R Y"
+        tb("M E R R Y", {
+          name: "title-merry",
+          left: 120, top: 150,
+          width: 300,
+          fontSize: 18,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Cinzel",
+          charSpacing: 350,
+          selectable: true
+        }),
+
+        // 6. Label To:
+        tb("To:", {
+          name: "label-to",
+          left: 120, top: 410,
+          width: 50,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 7. Label From:
+        tb("From:", {
+          name: "label-from",
+          left: 120, top: 470,
+          width: 70,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 8. Line below To field
+        rect({
+          name: "to-line",
+          left: 120, top: 435,
+          width: 250, height: 1,
+          fill: "#ffffff",
+          opacity: 0.5,
+          selectable: true
+        }),
+
+        // 9. Line below From field
+        rect({
+          name: "from-line",
+          left: 120, top: 495,
+          width: 250, height: 1,
+          fill: "#ffffff",
+          opacity: 0.5,
+          selectable: true
+        }),
+
+        // 10. To (Editable field)
+        tb("Dear Smith Family", {
+          name: "to",
+          left: 155, top: 410,
+          width: 250,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 11. From (Editable field)
+        tb("The Johnson Family", {
+          name: "from",
+          left: 175, top: 470,
+          width: 250,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        })
+      ]
+    }
+  },
+
+  "cc-christmas-card-2": {
+    name: "Snowflake Christmas Card",
+    width: 1050, height: 600, paperSize: "CHRISTMAS_CARD",
+    canvasJson: {
+      version: "7.0.0", background: "#21365C",
+      objects: [
+        // 1. bg-snow (Snowflake style image covering the entire canvas)
+        {
+          ...img("/Images/CCtemp2/style.png", {
+            name: "bg-snow",
+            left: 0, top: 0, width: 1254, height: 1200,
+            scaleX: 1050 / 1254, scaleY: 600 / 1200,
+            selectable: true
+          })
+        },
+
+        // 2. Label From:
+        tb("From:", {
+          name: "label-from",
+          left: 80, top: 510,
+          width: 70,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 3. Line below From field
+        rect({
+          name: "line-from",
+          left: 80, top: 535,
+          width: 250, height: 1,
+          fill: "#ffffff",
+          opacity: 0.5,
+          selectable: true
+        }),
+
+        // 4. Label To:
+        tb("To:", {
+          name: "label-to",
+          left: 80, top: 450,
+          width: 50,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 5. Line below To field
+        rect({
+          name: "line-to",
+          left: 80, top: 475,
+          width: 250, height: 1,
+          fill: "#ffffff",
+          opacity: 0.5,
+          selectable: true
+        }),
+
+        // 6. Title text: "Merry Christmas!"
+        tb("Merry Christmas!", {
+          name: "title",
+          left: 80, top: 150,
+          width: 600,
+          fontSize: 85,
+          fill: "#ffffff",
+          fontFamily: "Great Vibes",
+          selectable: true
+        }),
+
+        // 7. Subtitle text: "and Happy New Year"
+        tb("and Happy New Year", {
+          name: "subtitle",
+          left: 170, top: 250,
+          width: 400,
+          fontSize: 26,
+          fill: "#ffffff",
+          fontFamily: "Great Vibes",
+          selectable: true
+        }),
+
+        // 8. To field: "Dear Smith Family"
+        tb("Dear Smith Family", {
+          name: "to",
+          left: 115, top: 450,
+          width: 250,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 9. From field: "The Johnson Family"
+        tb("The Johnson Family", {
+          name: "from",
+          left: 135, top: 510,
+          width: 250,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        })
+      ]
+    }
+  },
+
+  "cc-christmas-card-3": {
+    name: "Red Landscape Christmas Card",
+    width: 1050, height: 600, paperSize: "CHRISTMAS_CARD",
+    canvasJson: {
+      version: "7.0.0", background: "#9D1A1A",
+      objects: [
+        // 1. bg-snow (Winter landscape overlay style image)
+        {
+          ...img("/Images/CCtmep3/style.png", {
+            name: "bg-snow",
+            left: 0, top: 0, width: 2100, height: 1200,
+            scaleX: 0.5, scaleY: 0.5,
+            selectable: true
+          })
+        },
+
+        // 2. Title text: "Merry Christmas"
+        tb("Merry Christmas", {
+          name: "title",
+          left: 110, top: 200,
+          width: 600,
+          fontSize: 70,
+          fill: "#ffffff",
+          fontFamily: "Georgia",
+          selectable: true
+        }),
+
+        // 3. Subtitle text: "May peace, love, and prosperity be with you always."
+        tb("May peace, love, and prosperity be with you always.", {
+          name: "subtitle",
+          left: 110, top: 285,
+          width: 800,
+          fontSize: 18,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 4. Label To:
+        tb("To:", {
+          name: "label-to",
+          left: 110, top: 350,
+          width: 50,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 5. Label From:
+        tb("From:", {
+          name: "label-from",
+          left: 110, top: 400,
+          width: 70,
+          fontSize: 16,
+          fontWeight: "bold",
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 6. To field: "Dear Smith Family"
+        tb("Dear Smith Family", {
+          name: "to",
+          left: 145, top: 350,
+          width: 300,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        }),
+
+        // 7. From field: "The Johnson Family"
+        tb("The Johnson Family", {
+          name: "from",
+          left: 165, top: 400,
+          width: 300,
+          fontSize: 16,
+          fill: "#ffffff",
+          fontFamily: "Helvetica",
+          selectable: true
+        })
+      ]
+    }
+  },
+
+  "email-newsletter-1": {
+    name: "Corporate Newsletter",
+    width: P.w, height: P.h, paperSize: "A4",
+    canvasJson: {
+      version: "7.0.0", background: "#f4f4f5",
+      objects: [
+        // Email Body Container
+        rect({ left: cx(P.w, 500), top: 40, width: 500, height: 760, fill: "#ffffff", rx: 8, ry: 8, selectable: false }),
+        
+        // Header Logo
+        tb("YOUR LOGO", { left: cx(P.w, 300), top: 75, width: 300, fontSize: 24, fontWeight: "900", fontFamily: "Helvetica", fill: "#1e3a8a", textAlign: "center", charSpacing: 100 }),
+        
+        // Hero Section Background
+        rect({ left: cx(P.w, 500), top: 130, width: 500, height: 200, fill: "#2563eb", selectable: true }),
+        
+        // Hero Text
+        tb("MONTHLY\nUPDATE", { left: cx(P.w, 400), top: 170, width: 400, fontSize: 36, fontWeight: "900", fontFamily: "Helvetica", fill: "#ffffff", textAlign: "center", lineHeight: 1.1, charSpacing: 50 }),
+        tb("Discover our latest news and insights.", { left: cx(P.w, 300), top: 260, width: 300, fontSize: 14, fontFamily: "Helvetica", fill: "#bfdbfe", textAlign: "center" }),
+        
+        // Main Headline
+        tb("A Month of Innovation", { left: cx(P.w, 400), top: 370, width: 400, fontSize: 22, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1f2937", textAlign: "center" }),
+        
+        // Body Paragraph
+        tb("We are thrilled to share the milestones achieved this month. Our team has been working tirelessly to bring you the best features and improvements. Read on to explore what's new and how it can empower your daily workflow and business growth.", { left: cx(P.w, 420), top: 415, width: 420, fontSize: 14, fontFamily: "Helvetica", fill: "#4b5563", textAlign: "center", lineHeight: 1.6 }),
+        
+        // Divider
+        rect({ left: cx(P.w, 420), top: 515, width: 420, height: 1, fill: "#e5e7eb", selectable: true }),
+        
+        // Secondary Section
+        tb("New Dashboard 2.0", { left: cx(P.w, 400), top: 545, width: 400, fontSize: 18, fontWeight: "bold", fontFamily: "Helvetica", fill: "#1f2937", textAlign: "center" }),
+        tb("Experience a faster, cleaner, and more intuitive interface designed specifically for your advanced data needs.", { left: cx(P.w, 400), top: 580, width: 400, fontSize: 13, fontFamily: "Helvetica", fill: "#6b7280", textAlign: "center", lineHeight: 1.5 }),
+        
+        // CTA Button
+        rect({ left: cx(P.w, 200), top: 645, width: 200, height: 45, fill: "#2563eb", rx: 4, ry: 4 }),
+        tb("READ FULL UPDATE", { left: cx(P.w, 180), top: 658, width: 180, fontSize: 14, fontWeight: "bold", fontFamily: "Helvetica", fill: "#ffffff", textAlign: "center", charSpacing: 100 }),
+        
+        // Footer
+        tb("© 2026 Your Company Inc. All rights reserved.", { left: cx(P.w, 400), top: 740, width: 400, fontSize: 10, fontFamily: "Helvetica", fill: "#9ca3af", textAlign: "center" }),
+        tb("Unsubscribe | Manage Preferences", { left: cx(P.w, 200), top: 760, width: 200, fontSize: 10, fontFamily: "Helvetica", fill: "#9ca3af", textAlign: "center", underline: true })
+      ]
+    }
+  }
 };
+
